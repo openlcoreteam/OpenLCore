@@ -745,7 +745,7 @@ class TC_GAME_API PlayerScript : public UnitScript
         virtual void OnTextEmote(Player* /*player*/, uint32 /*textEmote*/, uint32 /*emoteNum*/, ObjectGuid /*guid*/) { }
 
         // Called in Spell::Cast.
-        virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/) { }
+        virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/, bool SkipOtherCode) { }
 
         // Called in Spell::Cast after spell is actually casted
         virtual void OnSuccessfulSpellCast(Player* /*player*/, Spell* /*spell*/) { }
@@ -1257,7 +1257,7 @@ class TC_GAME_API ScriptMgr
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel);
         void OnPlayerClearEmote(Player* player);
         void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emoteNum, ObjectGuid guid);
-        void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
+        void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck, bool SkipOtherCode);
         void OnPlayerSuccessfulSpellCast(Player* player, Spell* spell);
         void OnPlayerLogin(Player* player, bool firstLogin);
         void OnPlayerUpdate(Player* player, uint32 diff);

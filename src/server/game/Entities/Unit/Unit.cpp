@@ -10827,7 +10827,22 @@ void Unit::UpdateReactives(uint32 p_time)
         }
     }
 }
+std::list<Unit*> Unit::SelectNearbyTargetList(Unit* exclude , float dist ) const
+{
+    std::list<Unit*> targets;
+    Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, dist);
+    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
+    Cell::VisitAllObjects(this, searcher, dist);
 
+    // remove current target
+    if (GetVictim())
+        targets.remove(GetVictim());
+
+    if (exclude)
+        targets.remove(exclude);
+
+    return targets;
+}
 Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
 {
     std::list<Unit*> targets;

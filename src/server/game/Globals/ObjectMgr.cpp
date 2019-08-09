@@ -10385,7 +10385,7 @@ void ObjectMgr::LoadRaceAndClassExpansionRequirements()
                 continue;
             }
 
-            if (expansion >= MAX_EXPANSIONS)
+            if (expansion >= MAX_ACCOUNT_EXPANSIONS)
             {
                 TC_LOG_ERROR("sql.sql", "Class %u defined in `class_expansion_requirement` has incorrect expansion %u, skipped.", classID, expansion);
                 continue;

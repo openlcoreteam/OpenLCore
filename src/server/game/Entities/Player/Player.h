@@ -1168,7 +1168,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetXP(uint32 xp);
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);
-
+        uint32 GetXP() { return GetUInt32Value(PLAYER_XP); }
         void InitStatsForLevel(bool reapplyMods = false);
 
         // .cheat command related
@@ -1215,6 +1215,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = nullptr) const;
         uint32 GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipItem = nullptr) const;
         Item* GetItemByGuid(ObjectGuid guid) const;
+        Item* GetItemByGuidCounter(uint32 guidlow) const;
         Item* GetItemByEntry(uint32 entry) const;
         std::vector<Item*> GetItemListByEntry(uint32 entry, bool inBankAlso = false) const;
         Item* GetItemByPos(uint16 pos) const;

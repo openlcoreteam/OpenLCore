@@ -10132,7 +10132,45 @@ Item* Player::GetItemByGuid(ObjectGuid guid) const
 
     return nullptr;
 }
+Item* Player::GetItemByGuidCounter(uint32 guidlow) const
+{
+    uint8 inventoryEnd = INVENTORY_SLOT_ITEM_START + GetInventorySlotCount();
+    for (uint8 i = EQUIPMENT_SLOT_START; i < inventoryEnd; ++i)
+        if (Item * pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUID().GetCounter() == guidlow)
+                return pItem;
 
+    for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
+        if (Item * pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUID().GetCounter() == guidlow)
+                return pItem;
+
+    for (uint8 i = REAGENT_SLOT_START; i < REAGENT_SLOT_END; ++i)
+        if (Item * pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUID().GetCounter() == guidlow)
+                return pItem;
+
+    for (uint8 i = CHILD_EQUIPMENT_SLOT_START; i < CHILD_EQUIPMENT_SLOT_END; ++i)
+        if (Item * pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUID().GetCounter() == guidlow)
+                return pItem;
+
+    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        if (Bag * pBag = GetBagByPos(i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                if (Item * pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetGUID().GetCounter() == guidlow)
+                        return pItem;
+
+    for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+        if (Bag * pBag = GetBagByPos(i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                if (Item * pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetGUID().GetCounter() == guidlow)
+                        return pItem;
+
+    return nullptr;
+}
 Item* Player::GetItemByPos(uint16 pos) const
 {
     uint8 bag = pos >> 8;

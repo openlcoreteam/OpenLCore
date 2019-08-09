@@ -1548,7 +1548,16 @@ class TC_GAME_API ObjectMgr
 
             return &iter->second;
         }
-
+        bool IsVendorItem(uint32 item)
+        {
+            for (CacheVendorItemContainer::const_iterator iter = _cacheVendorItemStore.begin(); iter != _cacheVendorItemStore.end(); iter++)
+            {
+                for (std::vector<VendorItem>::const_iterator i = iter->second.m_items.begin(); i != iter->second.m_items.end(); ++i)
+                    if ((i)->item == item)
+                        return true;
+            }
+            return false;
+        }
         void AddVendorItem(uint32 entry, VendorItem const& vItem, bool persist = true); // for event
         bool RemoveVendorItem(uint32 entry, uint32 item, uint8 type, bool persist = true); // for event
         bool IsVendorItemValid(uint32 vendor_entry, VendorItem const& vItem, Player* player = nullptr, std::set<uint32>* skip_vendors = nullptr, uint32 ORnpcflag = 0) const;
