@@ -34,7 +34,9 @@
 #include "MapManager.h"
 #include "Player.h"
 #include "Util.h"
-
+#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
+#include <windows.h>
+#endif
 #if TRINITY_PLATFORM != TRINITY_PLATFORM_WINDOWS
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -96,8 +98,9 @@ void utf8print(void* /*arg*/, const char* str)
     size_t wtemp_len = 6000-1;
     if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
         return;
-
-    wprintf(L"%s", wtemp_buf);
+    char temp_buf[6000];
+    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len + 1);
+    printf(temp_buf);//wprintf(L"%s", wtemp_buf);
 #else
 {
     printf("%s", str);
