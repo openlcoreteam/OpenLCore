@@ -77,8 +77,8 @@ namespace fs = boost::filesystem;
 #ifdef _WIN32
 #include "ServiceWin32.h"
 char serviceName[] = "worldserver";
-char serviceLongName[] = "MagicStormTeam world service";
-char serviceDescription[] = "MagicStormTeam World of Warcraft emulator world service";
+char serviceLongName[] = "OpenLCore world service";
+char serviceDescription[] = "OpenLCore World of Warcraft emulator world service";
 /*
  * -1 - not in service mode
  *  0 - stopped

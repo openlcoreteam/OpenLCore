@@ -9,10 +9,10 @@
  #define _SOURCE_DIRECTORY          R"(@CMAKE_SOURCE_DIR@)"
  #define _BUILD_DIRECTORY           R"(@BUILDDIR@)"
  #define _MYSQL_EXECUTABLE          R"(@MYSQL_EXECUTABLE@)"
- #define _FULL_DATABASE             "MST_world_735.00.sql"
- #define _HOTFIXES_DATABASE         "MST_hotfixes_735.00.sql"
- #define VER_COMPANYNAME_STR        "MagicStormTeam Developers"
- #define VER_LEGALCOPYRIGHT_STR     "(c)2008-2019 MagicStormTeam"
+ #define _FULL_DATABASE             "OCT_world_735.00.sql"
+ #define _HOTFIXES_DATABASE         "OCT_hotfixes_735.00.sql"
+ #define VER_COMPANYNAME_STR        "OpenLCoreTeam Developers"
+ #define VER_LEGALCOPYRIGHT_STR     "(c)2008-2019 OpenLCoreTeam"
  #define VER_FILEVERSION            0,0,0
  #define VER_FILEVERSION_STR        "@rev_hash@ @rev_date@ (@rev_branch@ branch)"
  #define VER_PRODUCTVERSION         VER_FILEVERSION

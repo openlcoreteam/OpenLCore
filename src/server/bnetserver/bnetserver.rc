@@ -76,12 +76,12 @@ BEGIN
         BLOCK "080004b0"
         BEGIN
             VALUE "CompanyName",        VER_COMPANYNAME_STR
-            VALUE "FileDescription",    "MagicStormCore Battle.net Server Daemon"
+            VALUE "FileDescription",    "OpenLCore Battle.net Server Daemon"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "bnetserver"
             VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
             VALUE "OriginalFilename",   "bnetserver.exe"
-            VALUE "ProductName",        "MagicStormCore Battle.net Server"
+            VALUE "ProductName",        "OpenLCore Battle.net Server"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

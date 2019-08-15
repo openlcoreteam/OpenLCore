@@ -22,18 +22,16 @@
 void Trinity::Banner::Show(char const* applicationName, void(*log)(char const* text), void(*logExtraInfo)())
 {
 	log(" ");
-log("                                                            ");
-log("                                                            ");
-log("?                                                           ");
-log("?                                                    ?      ");
-log("??                                                  ???    ?");
-log(" ??                                         ? ?? ?  ??? ?? ?");
-log(" ? ?  ?   ?   ?? ?  ?? ? ??? ?? ??       ? ?  ?  ?    ? ?  ?");
-log(" ? ?  ?   ?   ?     ??   ? ? ?? ?        ? ??           ?   ");
-log("   ?          ?  ?   ?     ?  ?          ?  ? ?         ?  ?");
-log(" https://gitee.com/ctslots/flegion.git        ");
-log(" Magic is based on AshamaneCore        ");
-log(" https://gitee.com/ctslots/flegion.git        ");
+    log("  _____                    _       ______                 ");
+    log(" / ___ \\                  | |     / _____)                ");
+    log("| |   | |____   ____ ____ | |    | /      ___   ____ ____ ");
+    log("| |   | |  _ \\ / _  )  _ \\| |    | |     / _ \\ / ___) _  )");
+    log("| |___| | | | ( (/ /| | | | |____| \____| |_| | |  ( (/ / ");
+    log(" \\_____/| ||_/ \\____)_| |_|_______)______)___/|_|   \____)");
+    log("        |_|      ");
+log(" https://github.com/openlcoreteam/OpenLCore        ");
+log(" OpenLCore is based on MagicStorm/AshamaneCore/TrinityCore        ");
+log(" https://github.com/openlcoreteam/OpenLCore.git        ");
 	log(" ");
 
     if (logExtraInfo)
