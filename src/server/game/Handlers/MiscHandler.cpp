@@ -271,8 +271,10 @@ void WorldSession::HandleWhoOpcode(WorldPackets::Who::WhoRequestPkt& whoRequest)
         if (response.Response.Entries.size() >= sWorld->getIntConfig(CONFIG_MAX_WHO))
             break;
     }
-
-    SendPacket(response.Write());
+    bool Skip = false;
+    sScriptMgr->OnHandleWhoOpcode(this, whoRequest, _player, Skip);
+    if (!Skip)
+        SendPacket(response.Write());
 }
 
 void WorldSession::HandleLogoutRequestOpcode(WorldPackets::Character::LogoutRequest& /*logoutRequest*/)

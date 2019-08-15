@@ -2199,7 +2199,7 @@ void Player::RegenerateHealth()
         }
         else if (HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
             ApplyPct(addValue, GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT));
-
+        sScriptMgr->OnHealthRestore(this, addValue, HealthIncreaseRate);
         if (!IsStandState())
             addValue *= 1.5f;
     }
@@ -2711,6 +2711,9 @@ void Player::GiveLevel(uint8 level)
 
 void Player::InitTalentForLevel()
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnInitTalentForLevel(this,SkipOtherCode);
+    if (SkipOtherCode) return;
     uint8 level = getLevel();
     // talents base at level diff (talents = level - 9 but some can be used already)
     if (level < MIN_SPECIALIZATION_LEVEL)
@@ -4416,6 +4419,8 @@ void Player::BuildPlayerRepop()
 
     // set and clear other
     SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+
+    sScriptMgr->OnPlayerReleasedGhost(this);
 }
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
@@ -4647,6 +4652,9 @@ void Player::DurabilityLossAll(double percent, bool inventory)
 
 void Player::DurabilityLoss(Item* item, double percent)
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnDurabilityLoss(this, item, percent, SkipOtherCode);
+    if (SkipOtherCode) return;
     if (!item)
         return;
 
@@ -5445,7 +5453,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
         GetName().c_str(), GetGUID().ToString().c_str(), spellid);
 
     SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellid);
-
+    bool result = false;
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
         if (_spell_idx->second->SkillLine)
@@ -5462,14 +5470,16 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 
             uint32 craft_skill_gain = _spell_idx->second->NumSkillUps * sWorld->getIntConfig(CONFIG_SKILL_GAIN_CRAFTING);
 
-            return UpdateSkillPro(_spell_idx->second->SkillLine, SkillGainChance(SkillValue,
+            result = UpdateSkillPro(_spell_idx->second->SkillLine, SkillGainChance(SkillValue,
                 _spell_idx->second->TrivialSkillLineRankHigh,
                 (_spell_idx->second->TrivialSkillLineRankHigh + _spell_idx->second->TrivialSkillLineRankLow)/2,
                 _spell_idx->second->TrivialSkillLineRankLow),
                 craft_skill_gain);
+            sScriptMgr->OnUpdateCraftSkill(this, _spell_idx->second->MinSkillLineRank, _spell_idx->second->SkillLine, craft_skill_gain, result);
         }
     }
-    return false;
+    
+    return result;
 }
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
@@ -12035,6 +12045,9 @@ InventoryResult Player::CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec &dest
 
 InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
 {
+    InventoryResult result = EQUIP_ERR_ITEM_NOT_FOUND; bool SkipOtherCode = false;
+    sScriptMgr->OnCanUseItem(this, pItem, not_loading, result, SkipOtherCode);
+    if (SkipOtherCode) return result;
     if (pItem)
     {
         TC_LOG_DEBUG("entities.player.items", "Player::CanUseItem: Player '%s' (%s),  Item: %u",
@@ -12147,70 +12160,71 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
 
 InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObject const* lootedObject) const
 {
+    InventoryResult result = EQUIP_ERR_ORIGIN;
     if (!GetGroup() || !GetGroup()->isLFGGroup())
-        return EQUIP_ERR_OK;    // not in LFG group
+        result = EQUIP_ERR_OK;    // not in LFG group
 
     // check if looted object is inside the lfg dungeon
     Map const* map = lootedObject->GetMap();
-    if (!sLFGMgr->inLfgDungeonMap(GetGroup()->GetGUID(), map->GetId(), map->GetDifficultyID()))
-        return EQUIP_ERR_OK;
+    if (result == EQUIP_ERR_ORIGIN && !sLFGMgr->inLfgDungeonMap(GetGroup()->GetGUID(), map->GetId(), map->GetDifficultyID()))
+        result = EQUIP_ERR_OK;
 
-    if (!proto)
-        return EQUIP_ERR_ITEM_NOT_FOUND;
+    if (result == EQUIP_ERR_ORIGIN && !proto)
+        result = EQUIP_ERR_ITEM_NOT_FOUND;
 
    // Used by group, function GroupLoot, to know if a prototype can be used by a player
-    if ((proto->GetAllowableClass() & getClassMask()) == 0 || (proto->GetAllowableRace() & getRaceMask()) == 0)
-        return EQUIP_ERR_CANT_EQUIP_EVER;
+    if (result == EQUIP_ERR_ORIGIN && (proto->GetAllowableClass() & getClassMask()) == 0 || (proto->GetAllowableRace() & getRaceMask()) == 0)
+        result = EQUIP_ERR_CANT_EQUIP_EVER;
 
-    if (proto->GetRequiredSpell() != 0 && !HasSpell(proto->GetRequiredSpell()))
-        return EQUIP_ERR_PROFICIENCY_NEEDED;
+    if (result == EQUIP_ERR_ORIGIN && proto->GetRequiredSpell() != 0 && !HasSpell(proto->GetRequiredSpell()))
+        result = EQUIP_ERR_PROFICIENCY_NEEDED;
 
-    if (proto->GetRequiredSkill() != 0)
+    if (result == EQUIP_ERR_ORIGIN && proto->GetRequiredSkill() != 0)
     {
         if (!GetSkillValue(proto->GetRequiredSkill()))
-            return EQUIP_ERR_PROFICIENCY_NEEDED;
+            result = EQUIP_ERR_PROFICIENCY_NEEDED;
         else if (GetSkillValue(proto->GetRequiredSkill()) < proto->GetRequiredSkillRank())
-            return EQUIP_ERR_CANT_EQUIP_SKILL;
+            result = EQUIP_ERR_CANT_EQUIP_SKILL;
     }
 
     uint8 _class = getClass();
 
-    if (proto->GetClass() == ITEM_CLASS_WEAPON && GetSkillValue(proto->GetSkill()) == 0)
-        return EQUIP_ERR_PROFICIENCY_NEEDED;
+    if (result == EQUIP_ERR_ORIGIN && proto->GetClass() == ITEM_CLASS_WEAPON && GetSkillValue(proto->GetSkill()) == 0)
+        result = EQUIP_ERR_PROFICIENCY_NEEDED;
 
-    if (proto->GetClass() == ITEM_CLASS_ARMOR && proto->GetSubClass() > ITEM_SUBCLASS_ARMOR_MISCELLANEOUS && proto->GetSubClass() < ITEM_SUBCLASS_ARMOR_COSMETIC && proto->GetInventoryType() != INVTYPE_CLOAK)
+    if (result == EQUIP_ERR_ORIGIN && proto->GetClass() == ITEM_CLASS_ARMOR && proto->GetSubClass() > ITEM_SUBCLASS_ARMOR_MISCELLANEOUS && proto->GetSubClass() < ITEM_SUBCLASS_ARMOR_COSMETIC && proto->GetInventoryType() != INVTYPE_CLOAK)
     {
         if (_class == CLASS_WARRIOR || _class == CLASS_PALADIN || _class == CLASS_DEATH_KNIGHT)
         {
             if (getLevel() < 40)
             {
                 if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_MAIL)
-                    return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                    result = EQUIP_ERR_CLIENT_LOCKED_OUT;
             }
             else if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_PLATE)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                result = EQUIP_ERR_CLIENT_LOCKED_OUT;
         }
         else if (_class == CLASS_HUNTER || _class == CLASS_SHAMAN)
         {
             if (getLevel() < 40)
             {
                 if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_LEATHER)
-                    return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                    result = EQUIP_ERR_CLIENT_LOCKED_OUT;
             }
             else if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_MAIL)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                result = EQUIP_ERR_CLIENT_LOCKED_OUT;
         }
 
         if (_class == CLASS_ROGUE || _class == CLASS_DRUID)
             if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_LEATHER)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                result = EQUIP_ERR_CLIENT_LOCKED_OUT;
 
         if (_class == CLASS_MAGE || _class == CLASS_PRIEST || _class == CLASS_WARLOCK)
             if (proto->GetSubClass() != ITEM_SUBCLASS_ARMOR_CLOTH)
-                return EQUIP_ERR_CLIENT_LOCKED_OUT;
+                result = EQUIP_ERR_CLIENT_LOCKED_OUT;
     }
-
-    return EQUIP_ERR_OK;
+    sScriptMgr->OnCanRollForItemInLFG(this, result, proto);
+    return result == EQUIP_ERR_ORIGIN? EQUIP_ERR_OK :result;
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
@@ -23830,6 +23844,9 @@ void Player::UpdatePvP(bool state, bool _override)
 
 void Player::UpdatePotionCooldown(Spell* spell)
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->UpdatePotionCooldown(this, spell, m_lastPotionId, SkipOtherCode);
+    if (SkipOtherCode) return;
     // no potion used i combat or still in combat
     if (!m_lastPotionId || IsInCombat())
         return;
@@ -29278,12 +29295,14 @@ uint32 Player::CalculateTalentsTiers() const
             rowLevels = DefaultTalentRowLevels;
             break;
     }
-
+    uint32 result = 0;
     for (uint32 i = MAX_TALENT_TIERS; i; --i)
         if (getLevel() >= rowLevels[i - 1])
-            return i;
-
-    return 0;
+        {
+            if (!result)result = i;
+        }
+    sScriptMgr->OnTalentCalculation(this, result, 0);
+    return result;
 }
 
 Difficulty Player::GetDifficultyID(MapEntry const* mapEntry) const

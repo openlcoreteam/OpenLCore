@@ -2562,7 +2562,11 @@ void Guild::BroadcastToGuild(WorldSession* session, bool officerOnly, std::strin
             if (Player* player = itr->second->FindConnectedPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
                     !player->GetSocial()->HasIgnore(session->GetPlayer()->GetGUID()))
-                    player->GetSession()->SendPacket(data);
+                {
+                    bool Skip = false;
+                    sScriptMgr->OnBoradcastToGuild(this, session, officerOnly, msg, language,player, Skip);
+                    if(!Skip)player->GetSession()->SendPacket(data);
+                }
     }
 }
 
@@ -2586,15 +2590,23 @@ void Guild::BroadcastPacketToRank(WorldPacket const* packet, uint8 rankId) const
 {
     for (auto itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->second->IsRank(rankId))
-            if (Player* player = itr->second->FindConnectedPlayer())
-                player->GetSession()->SendPacket(packet);
+            if (Player * player = itr->second->FindConnectedPlayer())
+            {
+                bool Skip = false;
+                sScriptMgr->OnBroadcastPacketToRank(this, packet, rankId, player, Skip);
+                if(!Skip)player->GetSession()->SendPacket(packet);
+            }
 }
 
 void Guild::BroadcastPacket(WorldPacket const* packet) const
 {
     for (auto itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (Player* player = itr->second->FindPlayer())
-            player->GetSession()->SendPacket(packet);
+        if (Player * player = itr->second->FindPlayer())
+        {
+            bool Skip = false;
+            sScriptMgr->OnBroadcastPacket(this, packet, player, Skip);
+            if(!Skip)player->GetSession()->SendPacket(packet);
+        }
 }
 
 void Guild::BroadcastPacketIfTrackingAchievement(WorldPacket const* packet, uint32 criteriaId) const

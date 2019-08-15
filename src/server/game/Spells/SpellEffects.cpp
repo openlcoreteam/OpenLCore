@@ -1465,6 +1465,10 @@ void Spell::DoCreateItem(uint32 /*i*/, uint32 itemtype, uint8 context /*= 0*/, s
         // send info to the client
         player->SendNewItem(pItem, num_to_add, true, bgType == 0);
 
+        bool success = true;
+        sScriptMgr->OnCreateItem(player, pItem, num_to_add, success);
+
+        if (success)
         if (pItem->GetQuality() > ITEM_QUALITY_EPIC || (pItem->GetQuality() == ITEM_QUALITY_EPIC && pItem->GetItemLevel(player) >= MinNewsItemLevel))
             if (Guild* guild = player->GetGuild())
                 guild->AddGuildNews(GUILD_NEWS_ITEM_CRAFTED, player->GetGUID(), 0, pProto->GetId());

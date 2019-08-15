@@ -4001,6 +4001,7 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
                 info->stats[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
         }
     }
+    sScriptMgr->OnBuildPlayerLevelInfo(race, _class, level, info);
 }
 
 void ObjectMgr::LoadQuests()

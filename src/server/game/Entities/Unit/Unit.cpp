@@ -1435,6 +1435,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     damageInfo->damage      -= resilienceReduction;
     damageInfo->cleanDamage += resilienceReduction;
 
+    sScriptMgr->OnCalculateMeleeDamage(this, victim, damage, attackType, damageInfo);
     // Calculate absorb resist
     if (int32(damageInfo->damage) > 0)
     {
@@ -1530,7 +1531,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
         if (Probability > 40.0f)
             Probability = 40.0f;
-
+        sScriptMgr->OnCreatureDazePlayer( damageInfo,  this,  victim, Probability);
         if (roll_chance_f(Probability))
             CastSpell(victim, 1604, true);
     }
@@ -1674,6 +1675,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* attacker, Unit* victim, const uint32 d
 
         // Cap armor penetration to this number
         maxArmorPen = std::min((armor + maxArmorPen) / 3.f, armor);
+        sScriptMgr->OnArmorLevelPenaltyCalculation( attacker,  victim,  spellInfo, victim->GetLevelForTarget(attacker),  armor, maxArmorPen);
         // Figure out how much armor do we ignore
         armor -= CalculatePct(maxArmorPen, arpPct);
     }
@@ -1733,7 +1735,7 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
     }
 
     if (victimResistance <= 0)
-        return 0;
+        victimResistance = 0;
 
     float averageResist = float(victimResistance) / float(victimResistance + resistanceConstant);
 
@@ -1758,7 +1760,7 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
 
     while (r >= probabilitySum && resistance < 10)
         probabilitySum += discreteResistProbability[++resistance];
-
+    sScriptMgr->OnResistChanceCalculation(this,  victim, schoolMask, spellInfo,resistance);
     return resistance * 10;
 }
 
@@ -2122,6 +2124,9 @@ void Unit::HandleProcExtraAttackFor(Unit* victim)
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackType attType) const
 {
+    bool SkipOtherCode = false; MeleeHitOutcome result = MELEE_HIT_NORMAL;
+    sScriptMgr->OnRollMeleeOutcomeAgainst(SkipOtherCode,this, victim, attType, result);
+    if (SkipOtherCode) return result;
     if (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsEvadingAttacks())
         return MELEE_HIT_EVADE;
 
@@ -2376,6 +2381,9 @@ bool Unit::CanUseAttackType(uint8 attacktype) const
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spellInfo) const
 {
+    bool SkipOtherCode = false; SpellMissInfo result = SPELL_MISS_NONE;
+    sScriptMgr->OnMeleeSpellHitResult(SkipOtherCode, this, victim, spellInfo, result);
+    if (SkipOtherCode)return result;
     if (victim->isInFront(this) && victim->HasAuraType(SPELL_AURA_DEFLECT_FRONT_SPELLS))
         return SPELL_MISS_DEFLECT;
 
@@ -2532,7 +2540,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
         thisLevel = std::max<int32>(thisLevel, spellInfo->SpellLevel);
     int32 leveldif = int32(victim->GetLevelForTarget(this)) - thisLevel;
     int32 levelBasedHitDiff = leveldif;
-
+    
     // Base hit chance from attacker and victim levels
     int32 modHitChance = 100;
     if (levelBasedHitDiff >= 0)
@@ -2552,7 +2560,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
     }
     else
         modHitChance = 97 - levelBasedHitDiff;
-
+    sScriptMgr->OnMagicSpellHitLevelCalculate(this, victim, spellInfo, modHitChance);
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
@@ -6929,7 +6937,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
             DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)));  // spellpower from intellect
-
+        sScriptMgr->OnSpellBaseDamageBonusDone(this->ToPlayer(), DoneAdvertisedBenefit);
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
         for (AuraEffect const* aurEff : mDamageDoneOfStatPercent)
@@ -7356,9 +7364,12 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask) const
 {
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        int32 result = 0;
         float overrideSP = GetFloatValue(PLAYER_FIELD_OVERRIDE_SPELL_POWER_BY_AP_PCT);
         if (overrideSP > 0.0f)
-            return int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), overrideSP) + 0.5f);
+            result = int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), overrideSP) + 0.5f);
+        sScriptMgr->OnSpellBaseHealingBonusDone(this->ToPlayer(),result);
+        if (result > 0) return result;
     }
 
     int32 advertisedBenefit = GetTotalAuraModifier(SPELL_AURA_MOD_HEALING_DONE, [schoolMask](AuraEffect const* aurEff) -> bool
@@ -12480,6 +12491,7 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, u
         return 0.0f;
     if (missChance > 77.0f)
         return 77.0f;
+    sScriptMgr->OnMeleeSpellMissChance(this, victim, attType, spellId, missChance);
     return missChance;
 }
 

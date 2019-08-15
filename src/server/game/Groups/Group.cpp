@@ -1747,6 +1747,9 @@ void Group::BroadcastAddonMessagePacket(WorldPacket const* packet, const std::st
 
 void Group::BroadcastPacket(WorldPacket const* packet, bool ignorePlayersInBGRaid, int group, ObjectGuid ignoredPlayer)
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnGroupBroadcastPacket(this, packet, ignorePlayersInBGRaid, group, ignoredPlayer, SkipOtherCode);
+    if (SkipOtherCode) return;
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* player = itr->GetSource();

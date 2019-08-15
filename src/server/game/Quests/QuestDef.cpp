@@ -257,37 +257,39 @@ void Quest::LoadQuestObjectiveVisualEffect(Field* fields)
 
 uint32 Quest::XPValue(uint32 playerLevel) const
 {
+    bool failure = false; uint32 xp = 0;
     if (playerLevel)
     {
         uint32 questLevel = uint32(Level == -1 ? std::min(playerLevel, uint32(GetQuestMaxScalingLevel())) : Level);
         QuestXPEntry const* questXp = sQuestXPStore.LookupEntry(questLevel);
         if (!questXp || RewardXPDifficulty >= 10)
-            return 0;
+            failure = true;
+        if(!failure)
+        {
+            float multiplier = 1.0f;
+            if (questLevel != playerLevel)
+                multiplier = sXpGameTable.GetRow(std::min(playerLevel, questLevel))->Divisor / sXpGameTable.GetRow(playerLevel)->Divisor;
 
-        float multiplier = 1.0f;
-        if (questLevel != playerLevel)
-            multiplier = sXpGameTable.GetRow(std::min(playerLevel, questLevel))->Divisor / sXpGameTable.GetRow(playerLevel)->Divisor;
+            int32 diffFactor = 2 * (questLevel - playerLevel) + 20;
+            if (diffFactor < 1)
+                diffFactor = 1;
+            else if (diffFactor > 10)
+                diffFactor = 10;
 
-        int32 diffFactor = 2 * (questLevel - playerLevel) + 20;
-        if (diffFactor < 1)
-            diffFactor = 1;
-        else if (diffFactor > 10)
-            diffFactor = 10;
-
-        uint32 xp = diffFactor * questXp->Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10 * multiplier;
-        if (xp <= 100)
-            xp = 5 * ((xp + 2) / 5);
-        else if (xp <= 500)
-            xp = 10 * ((xp + 5) / 10);
-        else if (xp <= 1000)
-            xp = 25 * ((xp + 12) / 25);
-        else
-            xp = 50 * ((xp + 25) / 50);
-
-        return xp;
+            xp = diffFactor * questXp->Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10 * multiplier;
+            if (xp <= 100)
+                xp = 5 * ((xp + 2) / 5);
+            else if (xp <= 500)
+                xp = 10 * ((xp + 5) / 10);
+            else if (xp <= 1000)
+                xp = 25 * ((xp + 12) / 25);
+            else
+                xp = 50 * ((xp + 25) / 50);
+        }
     }
-
-    return 0;
+    sScriptMgr->OnQuestXPValue(playerLevel, xp, Level, RewardXPMultiplier, RewardXPDifficulty, uint32(GetQuestMaxScalingLevel()));
+    if (failure)return 0;
+    else return xp;
 }
 
 uint32 Quest::MoneyValue(uint8 playerLevel) const

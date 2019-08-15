@@ -139,8 +139,10 @@ void PlayerSocial::SendSocialList(Player* player, uint32 flags)
         if (contactList.Contacts.size() >= (((flags & SOCIAL_FLAG_FRIEND) != 0) ? SOCIALMGR_FRIEND_LIMIT : SOCIALMGR_IGNORE_LIMIT))
             break;
     }
-
-    player->SendDirectMessage(contactList.Write());
+    bool Skip = false;
+    sScriptMgr->OnSendSocialList(this, player, flags, Skip);
+    if (!Skip)
+        player->SendDirectMessage(contactList.Write());
 }
 
 bool PlayerSocial::_HasContact(ObjectGuid const& guid, SocialFlag flags)

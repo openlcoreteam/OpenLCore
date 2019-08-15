@@ -2244,6 +2244,9 @@ void Creature::SendAIReaction(AiReaction reactionType)
 
 void Creature::CallAssistance()
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnCallAssistance(this, m_AlreadyCallAssistance, m_Events, SkipOtherCode);
+    if (SkipOtherCode) return;
     if (!m_AlreadyCallAssistance && GetVictim() && !IsPet() && !IsCharmed())
     {
         SetNoCallAssistance(true);
@@ -2876,7 +2879,7 @@ float Creature::GetAggroRange(Unit const* target) const
 {
     // Determines the aggro range for creatures (usually pets), used mainly for aggressive pet target selection.
     // Based on data from wowwiki due to lack of 3.3.5a data
-
+    float aggroRadius = 0.0f;
     if (target && this->IsPet())
     {
         uint32 targetLevel = 0;
@@ -2894,7 +2897,7 @@ float Creature::GetAggroRange(Unit const* target) const
             levelDiff = -25;
 
         // The base aggro radius for mob of same level
-        float aggroRadius = 20;
+        aggroRadius = 20;
 
         // Aggro Radius varies with level difference at a rate of roughly 1 yard/level
         aggroRadius -= (float)levelDiff;
@@ -2914,10 +2917,10 @@ float Creature::GetAggroRange(Unit const* target) const
         if (aggroRadius < 10)
             aggroRadius = 10;
 
-        return (aggroRadius);
     }
-
+    sScriptMgr->OnAgroRange(this, target, aggroRadius);
     // Default
+    if (aggroRadius > 0) return aggroRadius;
     return 0.0f;
 }
 

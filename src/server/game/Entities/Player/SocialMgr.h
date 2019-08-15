@@ -100,7 +100,6 @@ enum FriendsResult : uint8
 
 #define SOCIALMGR_FRIEND_LIMIT  50u
 #define SOCIALMGR_IGNORE_LIMIT  50u
-
 class TC_GAME_API PlayerSocial
 {
     friend class SocialMgr;
@@ -123,10 +122,13 @@ class TC_GAME_API PlayerSocial
 
         uint32 GetNumberOfSocialsWithFlag(SocialFlag flag);
 
+        typedef std::map<ObjectGuid, FriendInfo> PlayerSocialMap;
+
+
     private:
         bool _HasContact(ObjectGuid const& guid, SocialFlag flags);
 
-        typedef std::map<ObjectGuid, FriendInfo> PlayerSocialMap;
+        
         PlayerSocialMap _playerSocialMap;
 
         ObjectGuid _playerGUID;
@@ -153,8 +155,9 @@ class SocialMgr
         // Loading
         PlayerSocial* LoadFromDB(PreparedQueryResult result, ObjectGuid const& guid);
 
-    private:
         typedef std::map<ObjectGuid, PlayerSocial> SocialMap;
+    private:
+        
         SocialMap _socialMap;
 };
 

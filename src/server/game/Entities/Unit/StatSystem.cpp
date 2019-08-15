@@ -32,6 +32,7 @@
 #include <G3D/g3dmath.h>
 #include "ObjectMgr.h"
 #include <numeric>
+#include "ScriptMgr.h"
 
 inline bool _ModifyUInt32(bool apply, uint32& baseValue, int32& amount)
 {
@@ -248,6 +249,7 @@ void Player::UpdateResistances(uint32 school)
     if (school > SPELL_SCHOOL_NORMAL)
     {
         float value  = GetTotalAuraModValue(UnitMods(UNIT_MOD_RESISTANCE_START + school));
+        sScriptMgr->OnUpdateResistance(this, school, value);
         SetResistance(SpellSchools(school), int32(value));
 
         if (Pet* pet = GetPet())
@@ -277,7 +279,7 @@ void Player::UpdateArmor()
     }
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);
-
+    sScriptMgr->OnUpdateArmor( this,  value);
     SetArmor(int32(value));
 
     if (Pet* pet = GetPet())
@@ -374,6 +376,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         }
         else
             val2 = (std::max(GetStat(STAT_AGILITY), 0.0f)) * entry->RangedAttackPowerPerAgility;
+        sScriptMgr->OnStatToAttackPowerCalculation(this, this->getLevel(), val2, ranged);
     }
     else
     {
@@ -433,6 +436,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
 
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& minDamage, float& maxDamage)
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnCalculateMinMaxDamage(this, attType, normalized, addTotalPct, minDamage, maxDamage, SkipOtherCode);
+    if (SkipOtherCode) return;
     UnitMods unitMod;
 
     switch (attType)
@@ -730,7 +736,7 @@ void Player::UpdateSpellCritChance()
     crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
     // Increase crit from spell crit ratings
     crit += GetRatingBonusValue(CR_CRIT_SPELL);
-
+    sScriptMgr->OnUpdateSpellCritChance(this,crit);
     // Store crit value
     SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, crit);
 }
@@ -809,7 +815,7 @@ void Player::UpdateManaRegen()
     uint32 basemana = 0;
     sObjectMgr->GetPlayerClassLevelInfo(getClass(), getLevel(), basemana);
     float base_regen = basemana / 100.f;
-
+    sScriptMgr->OnManaRestore(this, base_regen);
     base_regen += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA);
 
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT

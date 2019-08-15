@@ -2345,12 +2345,15 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj, bool checkAlert) co
         // There may be spells for this and the starting points too, but
         // not in the DBCs of the client.
         detectionValue += int32(GetLevelForTarget(obj) - 1) * 5;
-
+        sScriptMgr->OnStealthDetectLevelCalculate( this, obj, detectionValue, false);
         // Apply modifiers
         detectionValue += m_stealthDetect.GetValue(StealthType(i));
         if (go)
-            if (Unit* owner = go->GetOwner())
+            if (Unit * owner = go->GetOwner())
+            {
                 detectionValue -= int32(owner->GetLevelForTarget(this) - 1) * 5;
+                sScriptMgr->OnStealthDetectLevelCalculate(this, obj, detectionValue, true);
+            }
 
         detectionValue -= obj->m_stealth.GetValue(StealthType(i));
 

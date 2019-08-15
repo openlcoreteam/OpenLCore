@@ -1029,12 +1029,18 @@ void Channel::SendToAllInChannel(std::string senderName, std::string message, bo
 template <class Builder>
 void Channel::SendToAll(Builder& builder, ObjectGuid const& guid /*= ObjectGuid::Empty*/) const
 {
+    
     Trinity::LocalizedPacketDo<Builder> localizer(builder);
 
     for (PlayerContainer::value_type const& i : _playersStore)
         if (Player* player = ObjectAccessor::FindConnectedPlayer(i.first))
             if (guid.IsEmpty() || !player->GetSocial()->HasIgnore(guid))
+            {
+                bool Skip = false;
+                sScriptMgr->OnSendToAll(this,player, guid, Skip);
+                if (Skip)continue;
                 localizer(player);
+            }
 }
 
 template <class Builder>
@@ -1044,8 +1050,13 @@ void Channel::SendToAllButOne(Builder& builder, ObjectGuid const& who) const
 
     for (PlayerContainer::value_type const& i : _playersStore)
         if (i.first != who)
-            if (Player* player = ObjectAccessor::FindConnectedPlayer(i.first))
+            if (Player * player = ObjectAccessor::FindConnectedPlayer(i.first))
+            {
+                bool Skip = false;
+                sScriptMgr->OnSendToAllButOne(this, player, who, Skip);
+                if (Skip)continue;
                 localizer(player);
+            }
 }
 
 template <class Builder>
@@ -1053,8 +1064,12 @@ void Channel::SendToOne(Builder& builder, ObjectGuid const& who) const
 {
     Trinity::LocalizedPacketDo<Builder> localizer(builder);
 
-    if (Player* player = ObjectAccessor::FindConnectedPlayer(who))
-        localizer(player);
+    if (Player * player = ObjectAccessor::FindConnectedPlayer(who))
+    {
+        bool Skip = false;
+        sScriptMgr->OnSendToAllButOne(this, player, who, Skip);
+        if (!Skip)localizer(player);
+    }
 }
 
 template <class Builder>

@@ -23,7 +23,15 @@
 #include "ObjectGuid.h"
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
-
+#include "MovementInfo.h"
+#include "ItemDefines.h"
+//#include "Unit.h"
+#include "ObjectMgr.h"
+#include "PlayerTaxi.h"
+#include "EventProcessor.h"
+#include "SocialMgr.h"
+#include "World.h"
+#include "WorldSession.h"
 class AccountMgr;
 class Area;
 class AreaTrigger;
@@ -81,6 +89,9 @@ struct MapEntry;
 struct OutdoorPvPData;
 struct QuestObjective;
 struct SceneTemplate;
+struct CalcDamageInfo;
+struct PlayerLevelInfo;
+struct SkillLineEntry;
 
 enum BattlegroundTypeId : uint32;
 enum Difficulty : uint8;
@@ -94,6 +105,9 @@ enum SpellEffIndex : uint8;
 enum SpellSchoolMask : uint16;
 enum WeatherState : uint32;
 enum XPColorChar : uint8;
+enum MeleeHitOutcome : uint8;
+enum WeaponAttackType : uint8;
+enum SpellMissInfo : uint8;
 
 #define VISIBLE_RANGE       166.0f                          //MAX visible range (size of grid)
 
@@ -283,6 +297,9 @@ class TC_GAME_API WorldScript : public ScriptObject
 
         // Called when the world is actually shut down.
         virtual void OnShutdown() { }
+
+        // Called when before creating character
+        virtual void OnBeforeCreateCharacter(WorldSession* /*me*/, bool& /*failed*/) { }
 };
 
 class TC_GAME_API FormulaScript : public ScriptObject
@@ -313,6 +330,76 @@ class TC_GAME_API FormulaScript : public ScriptObject
 
         // Called when calculating the experience rate for group experience.
         virtual void OnGroupRateCalculation(float& /*rate*/, uint32 /*count*/, bool /*isRaid*/) { }
+
+        // Called when calculating the talent points
+        virtual void OnTalentCalculation( Player const* /*player*/, uint32& /*result*/, uint32 /*m_questRewardTalentCount*/) { }
+
+        // Called when calculating player's  attack power
+        virtual void OnStatToAttackPowerCalculation(Player const* /*player*/, float /*level*/, float& /*val2*/, bool /*ranged*/) { }
+
+        // Called when calculating player's  spell power
+        virtual void OnSpellBaseDamageBonusDone(Player const* /*player*/, int32& /*DoneAdvertisedBenefit*/) { }
+
+        // Called when calculating player's  healing power
+        virtual void OnSpellBaseHealingBonusDone(Player const* /*player*/, int32& /*DoneAdvertisedBenefit*/) { }
+
+        // Called when updating player's resistance
+        virtual void OnUpdateResistance(Player const* /*player*/, uint32 /*school*/, float& /*value*/) { }
+
+        // Called when updating player's armor
+        virtual void OnUpdateArmor(Player const* /*player*/, float& /*value*/) { }
+
+        // Called when calculating mana restore
+        virtual void OnManaRestore(Player* /*player*/, float& /*addvalue*/) { }
+
+        // Called when calculating Health Restore
+        virtual void OnHealthRestore(Player* /*player*/, float& /*addvalue*/, uint32 /*HealthIncreaseRate*/) { }
+
+        virtual void OnCanRollForItemInLFG(Player const* /*player*/, InventoryResult& /*RETURN_CODE*/, ItemTemplate const* /*proto*/) { }
+
+        virtual void OnQuestXPValue(uint32 /*playerlevel*/, uint32& /*xp*/, int32 /*Level*/, uint32 /*RewardXPMultiplier*/, uint32 /*RewardXPDifficulty*/, uint32 /*GetQuestMaxScalingLevel*/) { }
+
+        virtual void OnCreatureDazePlayer(CalcDamageInfo* /*damageInfo*/, Unit* /*attacker*/, Unit* /*victim*/, float& /*Probability*/) { }
+
+        virtual void OnArmorLevelPenaltyCalculation(Unit const* /*attacker*/, Unit const* /*victim*/, SpellInfo const* /*spellInfo*/, uint8 /*attackerLevel*/, float& /*armor*/, float& /*tmpvalue*/) { }
+
+        virtual void OnResistChanceCalculation(Unit const* /*me*/, Unit* /*victim*/, SpellSchoolMask /*schoolMask*/, SpellInfo const* /*spellInfo*/, uint32& /*resistance*/) { }
+
+        virtual void OnRollMeleeOutcomeAgainst(bool& /*SkipOtherCode*/, Unit const* /*me*/, Unit const* /*victim*/, WeaponAttackType /*attType*/, MeleeHitOutcome& /*result*/) { }
+
+        virtual void OnMeleeSpellMissChance(Unit const* /*me*/, const Unit* /*victim*/, WeaponAttackType /*attType*/, uint32 /*spellId*/, float& /*missChance*/) { }
+
+        virtual void OnMeleeSpellHitResult(bool& /*SkipOtherCode*/, Unit const* /*me*/, Unit* /*victim*/, SpellInfo const* /*spellInfo*/, SpellMissInfo& /*result*/) { }
+
+        virtual void OnAgroRange(Creature const* /*me*/, Unit const* /*target*/, float& /*aggroRadius*/) { }
+
+        virtual void OnStealthDetectLevelCalculate(WorldObject const* /*me*/, WorldObject const* /*obj*/, int32& /*detectionValue*/, bool /*owner*/) { }
+
+        virtual void OnCalculateMeleeDamage(Unit* /*me*/, Unit* /*victim*/, uint32 /*damage*/, WeaponAttackType /*attackType*/, CalcDamageInfo* /*damageInfo*/) { }
+
+        virtual void OnUpdateCraftSkill(Player* /*me*/, uint32 /*spelllevel*/, uint32 /*SkillId*/, uint32 /*craft_skill_gain*/, bool& /*result*/) { }
+
+        virtual void OnMagicSpellHitLevelCalculate(Unit const* /*me*/, Unit* /*victim*/, SpellInfo const* /*spell*/, int32& /*modHitChance*/) { }
+
+        virtual void OnUpdateSpellCritChance(Player* /*me*/, float& /*crit*/) { }
+
+        virtual void OnBuildPlayerLevelInfo(uint8 /*race*/, uint8 /*_class*/, uint8 /*level*/, PlayerLevelInfo* /*info*/) { }
+
+        virtual void UpdatePotionCooldown(Player* /*me*/, Spell* /*spell*/, uint32& /*m_lastPotionId*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnInitTalentForLevel(Player* /*me*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnInitTaxiNodesForLevel(uint32 /*race*/, uint32 /*chrClass*/, uint8 /*level*/, PlayerTaxi* /*me*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnCalculateMinMaxDamage(Player* /*me*/, WeaponAttackType /*attType*/, bool /*normalized*/, bool /*addTotalPct*/, float& /*minDamage*/, float& /*maxDamage*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnCanUseItem(Player const* /*me*/, Item* /*pItem*/, bool /*not_loading*/, InventoryResult& /*RETURN_CODE*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnCallAssistance(Creature* /*me*/, bool /*m_AlreadyCallAssistance*/, EventProcessor& /*m_Events*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnDurabilityLoss(Player* /*me*/, Item* /*item*/, double /*percent*/, bool& /*SkipOtherCode*/) { }
+
+        virtual void OnIsPrimaryProfessionSkill(SkillLineEntry const* /*pSkill*/, uint32 /*SkillId*/, bool& /*result*/) { }
 };
 
 template<class TMap>
@@ -837,6 +924,12 @@ class TC_GAME_API PlayerScript : public UnitScript
         // Called when a charge recovery cooldown start for that player
         virtual void OnChargeRecoveryTimeStart(Player* /*player*/, uint32 /*chargeCategoryId*/, int32& /*chargeRecoveryTime*/) { }
 
+        // Called when a item is created by player
+        virtual void OnCreateItem(Player* /*player*/, Item* /*pItem*/, uint32 /*num_to_add*/, bool& /*success*/) { }
+
+        // Called when a player released ghost
+        virtual void OnPlayerReleasedGhost(Player* /*player*/){ }
+
         virtual void OnCompleteQuestChoice(Player* /*player*/, uint32 /*choiceId*/, uint32 /*responseId*/) { }
 
 	// Called when a player UnsummonPetTemporary
@@ -929,6 +1022,10 @@ class TC_GAME_API GuildScript : public ScriptObject
         virtual void OnEvent(Guild* /*guild*/, uint8 /*eventType*/, ObjectGuid::LowType /*playerGuid1*/, ObjectGuid::LowType /*playerGuid2*/, uint8 /*newRank*/) { }
 
         virtual void OnBankEvent(Guild* /*guild*/, uint8 /*eventType*/, uint8 /*tabId*/, ObjectGuid::LowType /*playerGuid*/, uint64 /*itemOrMoney*/, uint16 /*itemStackCount*/, uint8 /*destTabId*/) { }
+
+        virtual void OnBoradcastToGuild(Guild const* /*me*/, WorldSession* /*session*/, bool /*officerOnly*/, std::string const& /*msg*/, uint32 /*language*/,Player* /*player*/, bool& /*Skip*/) {}
+        virtual void OnBroadcastPacketToRank(Guild const* /*me*/, WorldPacket const* /*packet*/, uint8 /*rankId*/, Player* /*player*/, bool& /*Skip*/) {}
+        virtual void OnBroadcastPacket(Guild const* /*me*/, WorldPacket const* /*packet*/, Player* /*player*/, bool& /*Skip*/) {}
 };
 
 class TC_GAME_API GroupScript : public ScriptObject
@@ -953,6 +1050,8 @@ class TC_GAME_API GroupScript : public ScriptObject
 
         // Called when a group is disbanded.
         virtual void OnDisband(Group* /*group*/) { }
+
+        virtual void OnGroupBroadcastPacket(Group* /*me*/, WorldPacket const*  /*packet*/, bool /*ignorePlayersInBGRaid*/, int /*group*/, ObjectGuid /*ignoredPlayer*/,bool& /*SkipOtherCode*/) { }
 };
 
 class TC_GAME_API AreaTriggerEntityScript : public ScriptObject
@@ -1027,6 +1126,57 @@ class TC_GAME_API QuestScript : public ScriptObject
         virtual void OnQuestObjectiveChange(Player* /*player*/, Quest const* /*quest*/, QuestObjective const& /*objective*/, int32 /*oldAmount*/, int32 /*newAmount*/) { }
 };
 
+class TC_GAME_API MovementHandlerScript : public ScriptObject
+{
+protected:
+
+    MovementHandlerScript(const char* name);
+
+public:
+
+    //Called whenever a player moves
+    virtual void OnPlayerMove(Player* /*player*/, MovementInfo /*movementInfo*/, uint32 /*opcode*/) { }
+};
+
+class TC_GAME_API AllCreatureScript : public ScriptObject
+{
+protected:
+
+    AllCreatureScript(const char* name);
+
+public:
+
+    // Called from End of Creature Update.
+    virtual void OnAllCreatureUpdate(Creature* /*creature*/, uint32 /*diff*/) { }
+
+};
+
+class TC_GAME_API ChannelScript : public ScriptObject
+{
+
+protected:
+    ChannelScript(const char* name);
+public:
+
+    virtual void OnSendToAll(Channel const* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+    virtual void OnSendToAllButOne(Channel const* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+    virtual void OnSendToOne(Channel const* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+    virtual void OnSendToAllWatching(Channel* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+    virtual void OnHandleJoinChannel(Channel* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+};
+
+class TC_GAME_API SocialScript : public ScriptObject
+{
+
+protected:
+    SocialScript(const char* name);
+public:
+
+    virtual void OnHandleContactListOpcode(bool& SkipCoreCode, WorldSession* /*me*/, WorldPacket& /*recv_data*/, Player* /*player*/) {}
+    virtual void OnHandleWhoOpcode(WorldSession* /*me*/, WorldPackets::Who::WhoRequestPkt& /*whoRequest*/, Player* /*player*/, bool& /*Skip*/) {}
+    virtual void OnBroadcastToFriendListers(bool& SkipCoreCode, SocialMgr* /*me*/, Player* /*player*/, WorldPacket* /*packet*/, SocialMgr::SocialMap& /*m_socialMap*/) {}
+    virtual void OnSendSocialList(PlayerSocial* /*me*/, Player* /*player*/, uint32 /*flags*/, bool& /*SkipCoreCode*/) {}
+};
 // Manages registration, loading, and execution of scripts.
 class TC_GAME_API ScriptMgr
 {
@@ -1111,6 +1261,7 @@ class TC_GAME_API ScriptMgr
         void OnWorldUpdate(uint32 diff);
         void OnStartup();
         void OnShutdown();
+        void OnBeforeCreateCharacter(WorldSession* me, bool& failed);
 
     public: /* FormulaScript */
 
@@ -1121,6 +1272,37 @@ class TC_GAME_API ScriptMgr
         void OnBaseGainCalculation(uint32& gain, uint8 playerLevel, uint8 mobLevel);
         void OnGainCalculation(uint32& gain, Player* player, Unit* unit);
         void OnGroupRateCalculation(float& rate, uint32 count, bool isRaid);
+        void OnTalentCalculation(Player const* player, uint32& result, uint32 m_questRewardTalentCount);
+        void OnStatToAttackPowerCalculation(Player const* player, float level, float& val2, bool ranged);
+        void OnSpellBaseDamageBonusDone(Player const* player, int32& DoneAdvertisedBenefit);
+        void OnSpellBaseHealingBonusDone(Player const* player, int32& DoneAdvertisedBenefit);
+        void OnUpdateResistance(Player const* player, uint32 school, float& value);
+        void OnUpdateArmor(Player const* player, float& value);
+        void OnManaRestore(Player* player, float& addvalue);
+        void OnHealthRestore(Player* player, float& addvalue, uint32 HealthIncreaseRate);
+        void OnCanRollForItemInLFG(Player const* player, InventoryResult& RETURN_CODE, ItemTemplate const* proto);
+        void OnQuestXPValue(uint32 playerlevel, uint32& xp, int32 Level, uint32 RewardXPMultiplier, uint32 RewardXPDifficulty, uint32 GetQuestMaxScalingLevel);
+        void OnCreatureDazePlayer(CalcDamageInfo* damageInfo, Unit* attacker, Unit* victim, float& Probability);
+        void OnArmorLevelPenaltyCalculation(Unit const* attacker, Unit const* victim, SpellInfo const* spellInfo, uint8 attackerLevel, float& armor, float& tmpvalue);
+        void OnResistChanceCalculation(Unit const* unit, Unit* victim, SpellSchoolMask schoolMask, SpellInfo const* spellInfo, uint32& resistance);
+        void OnRollMeleeOutcomeAgainst(bool& SkipOtherCode, Unit const* unit, Unit const* victim, WeaponAttackType attType, MeleeHitOutcome& result);
+        void OnMeleeSpellMissChance(Unit const* unit, const Unit* victim, WeaponAttackType attType, uint32 spellId, float& missChance);
+        void OnMeleeSpellHitResult(bool& SkipOtherCode, Unit const* unit, Unit* victim, SpellInfo const* spellInfo, SpellMissInfo& result);
+        void OnAgroRange(Creature const* creature, Unit const* target, float& aggroRadius);
+        void OnStealthDetectLevelCalculate(WorldObject const* me, WorldObject const* obj, int32& detectionValue, bool owner);
+        void OnCalculateMeleeDamage(Unit* me, Unit* victim, uint32 damage, WeaponAttackType attackType, CalcDamageInfo* damageInfo);
+        void OnUpdateCraftSkill(Player* me, uint32 spelllevel, uint32 SkillId, uint32 craft_skill_gain, bool& result);
+        void OnMagicSpellHitLevelCalculate(Unit const* me, Unit* victim, SpellInfo const* spell, int32& modHitChance);
+        void OnUpdateSpellCritChance(Player* me, float& crit);
+        void OnBuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info);
+        void UpdatePotionCooldown(Player* me, Spell* spell, uint32& m_lastPotionId, bool& SkipOtherCode);
+        void OnInitTalentForLevel(Player* me, bool& SkipOtherCode);
+        void OnInitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level, PlayerTaxi* me, bool& SkipOtherCode);
+        void OnCalculateMinMaxDamage(Player* me, WeaponAttackType attType, bool normalized, bool addTotalPct, float& minDamage, float& maxDamage, bool& SkipOtherCode);
+        void OnCanUseItem(Player const* me, Item* pItem, bool not_loading, InventoryResult& RETURN_CODE, bool& SkipOtherCode);
+        void OnCallAssistance(Creature* me, bool m_AlreadyCallAssistance, EventProcessor& m_Events, bool& SkipOtherCode);
+        void OnDurabilityLoss(Player* me, Item* item, double percent, bool& SkipOtherCode);
+        void OnIsPrimaryProfessionSkill(SkillLineEntry const* pSkill, uint32 SkillId, bool& result);
 
     public: /* MapScript */
 
@@ -1287,6 +1469,8 @@ class TC_GAME_API ScriptMgr
         void OnPlayerChoiceResponse(Player* player, uint32 choiceId, uint32 responseId);
         void OnCooldownStart(Player* player, SpellInfo const* spellInfo, uint32 itemId, int32& cooldown, uint32& categoryId, int32& categoryCooldown);
         void OnChargeRecoveryTimeStart(Player* player, uint32 chargeCategoryId, int32& chargeRecoveryTime);
+        void OnCreateItem(Player* player, Item* pItem, uint32 num_to_add, bool& success);
+        void OnPlayerReleasedGhost(Player* player);
         void OnCompleteQuestChoice(Player* player, uint32 choiceId, uint32 responseId);
 	void OnPlayerUnsummonPetTemporary(Player* player);
         void OnPlayerResummonPetTemporary(Player* player);
@@ -1320,6 +1504,9 @@ class TC_GAME_API ScriptMgr
             bool isDestBank, uint8 destContainer, uint8 destSlotId);
         void OnGuildEvent(Guild* guild, uint8 eventType, ObjectGuid::LowType playerGuid1, ObjectGuid::LowType playerGuid2, uint8 newRank);
         void OnGuildBankEvent(Guild* guild, uint8 eventType, uint8 tabId, ObjectGuid::LowType playerGuid, uint64 itemOrMoney, uint16 itemStackCount, uint8 destTabId);
+        void OnBoradcastToGuild(Guild const* me, WorldSession* session, bool officerOnly, std::string const& msg, uint32 language,Player* player, bool& Skip);
+        void OnBroadcastPacketToRank(Guild const* me, WorldPacket const* packet, uint8 rankId, Player* player, bool& Skip);
+        void OnBroadcastPacket(Guild const* me, WorldPacket const* packet, Player* player, bool& Skip);
 
     public: /* GroupScript */
 
@@ -1328,6 +1515,7 @@ class TC_GAME_API ScriptMgr
         void OnGroupRemoveMember(Group* group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, const char* reason);
         void OnGroupChangeLeader(Group* group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid);
         void OnGroupDisband(Group* group);
+        void OnGroupBroadcastPacket(Group* me, WorldPacket const* packet, bool ignorePlayersInBGRaid, int group, ObjectGuid ignoredPlayer, bool& SkipOtherCode);
 
     public: /* UnitScript */
 
@@ -1364,6 +1552,21 @@ class TC_GAME_API ScriptMgr
     public: /* ZoneScript */
         ZoneScript* GetZoneScript(uint32 scriptId);
 
+    public: /* MovementHandlerScript */
+        void OnPlayerMove(Player* player, MovementInfo movementInfo, uint32 opcode);
+
+    public: /*ChannelScript*/
+        void OnSendToAll(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip);
+        void OnSendToAllButOne(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip);
+        void OnSendToOne(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip);
+        void OnSendToAllWatching(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip);
+        void OnHandleJoinChannel(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip);
+
+    public: /*SocialScript*/
+        void OnHandleContactListOpcode(bool& SkipCoreCode, WorldSession* me, WorldPacket& recv_data, Player* player);
+        void OnHandleWhoOpcode(WorldSession* me, WorldPackets::Who::WhoRequestPkt& whoRequest, Player* player, bool& Skip);
+        void OnBroadcastToFriendListers(bool& SkipCoreCode, SocialMgr* me, Player* player, WorldPacket* packet, SocialMgr::SocialMap& m_socialMap);
+        void OnSendSocialList(PlayerSocial* me, Player* player, uint32 flags, bool& SkipCoreCode);
     private:
         uint32 _scriptCount;
 

@@ -51,6 +51,7 @@
 #include "WorldPacket.h"
 #include "ZoneScript.h"
 #include <unordered_map>
+#include "Unit.h"
 
 // Trait which indicates whether this script type
 // must be assigned in the database.
@@ -132,6 +133,22 @@ struct is_script_database_bound<QuestScript>
 
 template<>
 struct is_script_database_bound<ZoneScript>
+    : std::true_type { };
+
+template<>
+struct is_script_database_bound<AllCreatureScript>
+    : std::true_type { };
+
+template<>
+struct is_script_database_bound<ChannelScript>
+    : std::true_type { };
+
+template<>
+struct is_script_database_bound<MovementHandlerScript>
+    : std::true_type { };
+
+template<>
+struct is_script_database_bound<SocialScript>
     : std::true_type { };
 
 enum Spells
@@ -1493,6 +1510,10 @@ void ScriptMgr::OnWorldUpdate(uint32 diff)
     FOREACH_SCRIPT(WorldScript)->OnUpdate(diff);
 }
 
+void ScriptMgr::OnBeforeCreateCharacter(WorldSession* me,bool& failed)
+{
+    FOREACH_SCRIPT(WorldScript)->OnBeforeCreateCharacter(me, failed);
+}
 void ScriptMgr::OnHonorCalculation(float& honor, uint8 level, float multiplier)
 {
     FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, multiplier);
@@ -1531,6 +1552,156 @@ void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
     FOREACH_SCRIPT(FormulaScript)->OnGroupRateCalculation(rate, count, isRaid);
 }
 
+void ScriptMgr::OnTalentCalculation(Player const* player, uint32& result, uint32 m_questRewardTalentCount)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnTalentCalculation(player, result, m_questRewardTalentCount);
+}
+
+void ScriptMgr::OnStatToAttackPowerCalculation(Player const* player, float level, float& val2, bool ranged)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnStatToAttackPowerCalculation( player, level,  val2, ranged);
+}
+
+void ScriptMgr::OnSpellBaseDamageBonusDone(Player const* player, int32& DoneAdvertisedBenefit)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnSpellBaseDamageBonusDone(player,DoneAdvertisedBenefit);
+}
+
+void ScriptMgr::OnSpellBaseHealingBonusDone(Player const* player, int32& DoneAdvertisedBenefit)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnSpellBaseHealingBonusDone(player,DoneAdvertisedBenefit);
+}
+void ScriptMgr::OnUpdateResistance(Player const* player, uint32 school, float& value)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateResistance(player, school,  value);
+}
+void ScriptMgr::OnUpdateArmor(Player const* player, float& value)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateArmor( player,  value);
+}
+void ScriptMgr::OnManaRestore(Player* player, float& addvalue)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnManaRestore( player,  addvalue);
+}
+void ScriptMgr::OnHealthRestore(Player* player, float& addvalue, uint32 HealthIncreaseRate)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnHealthRestore( player,  addvalue, HealthIncreaseRate);
+}
+
+void ScriptMgr::OnCanRollForItemInLFG(Player const* player, InventoryResult& RETURN_CODE, ItemTemplate const* proto)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCanRollForItemInLFG( player,  RETURN_CODE,  proto);
+}
+
+void  ScriptMgr::OnQuestXPValue(uint32 playerlevel, uint32& xp, int32 Level, uint32 RewardXPMultiplier, uint32 RewardXPDifficulty, uint32 GetQuestMaxScalingLevel)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnQuestXPValue(playerlevel,  xp,  Level, RewardXPMultiplier, RewardXPDifficulty, GetQuestMaxScalingLevel);
+}
+
+void ScriptMgr::OnCreatureDazePlayer(CalcDamageInfo* damageInfo, Unit* attacker, Unit* victim, float& Probability)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCreatureDazePlayer( damageInfo,  attacker,  victim, Probability);
+}
+
+void ScriptMgr::OnArmorLevelPenaltyCalculation(Unit const* attacker, Unit const* victim, SpellInfo const* spellInfo, uint8 attackerLevel, float& armor, float& tmpvalue)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnArmorLevelPenaltyCalculation( attacker,  victim,  spellInfo, attackerLevel,  armor,  tmpvalue);
+}
+
+void ScriptMgr::OnResistChanceCalculation(Unit const * me,  Unit* victim, SpellSchoolMask schoolMask, SpellInfo const* spellInfo, uint32& resistance)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnResistChanceCalculation(me,   victim, schoolMask, spellInfo, resistance);
+}
+
+void ScriptMgr::OnRollMeleeOutcomeAgainst(bool& SkipOtherCode,Unit const* me, Unit const* victim, WeaponAttackType attType, MeleeHitOutcome& result)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnRollMeleeOutcomeAgainst(SkipOtherCode, me, victim, attType, result);
+}
+
+void ScriptMgr::OnMeleeSpellMissChance(Unit const* me, const Unit* victim, WeaponAttackType attType, uint32 spellId, float& missChance)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnMeleeSpellMissChance(me, victim, attType, spellId, missChance);
+}
+
+void ScriptMgr::OnMeleeSpellHitResult(bool& SkipOtherCode,Unit const* me, Unit* victim, SpellInfo const*  spellInfo, SpellMissInfo& result)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnMeleeSpellHitResult(SkipOtherCode, me, victim, spellInfo, result);
+}
+
+void ScriptMgr::OnAgroRange(Creature const* me, Unit const* target,float& aggroRadius)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnAgroRange(me, target, aggroRadius);
+}
+
+void ScriptMgr::OnStealthDetectLevelCalculate(WorldObject const* me, WorldObject const* obj, int32& detectionValue, bool owner)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnStealthDetectLevelCalculate(me, obj, detectionValue, owner);
+}
+
+void ScriptMgr::OnCalculateMeleeDamage(Unit* me,Unit* victim,uint32 damage, WeaponAttackType attackType, CalcDamageInfo* damageInfo)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCalculateMeleeDamage(me, victim, damage, attackType, damageInfo);
+}
+
+void ScriptMgr::OnUpdateCraftSkill(Player* me, uint32 spelllevel, uint32 SkillId, uint32 craft_skill_gain, bool& result)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateCraftSkill( me, spelllevel, SkillId, craft_skill_gain,  result);
+}
+
+void ScriptMgr::OnMagicSpellHitLevelCalculate(Unit const* me, Unit* victim, SpellInfo const* spell, int32& modHitChance)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnMagicSpellHitLevelCalculate(me, victim, spell, modHitChance);
+}
+
+void ScriptMgr::OnUpdateSpellCritChance(Player* me, float& crit)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateSpellCritChance(me, crit);
+}
+
+void ScriptMgr::OnBuildPlayerLevelInfo(uint8 race,uint8 _class,uint8 level, PlayerLevelInfo* info)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnBuildPlayerLevelInfo(race, _class, level, info);
+}
+
+void ScriptMgr::UpdatePotionCooldown(Player* me, Spell* spell, uint32& m_lastPotionId,bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->UpdatePotionCooldown(me, spell, m_lastPotionId, SkipOtherCode);
+}
+
+void ScriptMgr::OnInitTalentForLevel(Player* me, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnInitTalentForLevel(me,  SkipOtherCode);
+}
+
+void ScriptMgr::OnInitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level, PlayerTaxi* me, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnInitTaxiNodesForLevel(race, chrClass, level, me,  SkipOtherCode);
+}
+
+void ScriptMgr::OnCalculateMinMaxDamage(Player* me, WeaponAttackType attType, bool normalized, bool addTotalPct, float& minDamage, float& maxDamage,bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCalculateMinMaxDamage(me, attType, normalized, addTotalPct, minDamage, maxDamage, SkipOtherCode);
+}
+
+void ScriptMgr::OnCanUseItem(Player const* me, Item* pItem, bool not_loading, InventoryResult& result, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCanUseItem(me, pItem, not_loading, result, SkipOtherCode);
+}
+
+void ScriptMgr::OnCallAssistance(Creature* me,bool m_AlreadyCallAssistance, EventProcessor& m_Events, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnCallAssistance(me, m_AlreadyCallAssistance, m_Events, SkipOtherCode);
+}
+
+void ScriptMgr::OnDurabilityLoss(Player* me, Item* item, double percent, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnDurabilityLoss( me,  item,  percent,  SkipOtherCode);
+}
+
+void ScriptMgr::OnIsPrimaryProfessionSkill(SkillLineEntry const* pSkill, uint32 SkillId, bool& result)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnIsPrimaryProfessionSkill( pSkill,  SkillId,  result);
+}
 #define SCR_MAP_BGN(M, V, I, E, C, T) \
     if (V->GetEntry() && V->GetEntry()->T()) \
     { \
@@ -1901,6 +2072,8 @@ ZoneScript* ScriptMgr::GetZoneScript(uint32 scriptId)
 void ScriptMgr::OnCreatureUpdate(Creature* creature, uint32 diff)
 {
     ASSERT(creature);
+
+    FOREACH_SCRIPT(AllCreatureScript)->OnAllCreatureUpdate(creature, diff);
 
     GET_SCRIPT(CreatureScript, creature->GetScriptId(), tmpscript);
     tmpscript->OnUpdate(creature, diff);
@@ -2496,6 +2669,16 @@ void ScriptMgr::OnChargeRecoveryTimeStart(Player* player, uint32 chargeCategoryI
     FOREACH_SCRIPT(PlayerScript)->OnChargeRecoveryTimeStart(player, chargeCategoryId, chargeRecoveryTime);
 }
 
+void ScriptMgr::OnCreateItem(Player* player, Item* pItem, uint32 num_to_add, bool& success)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnCreateItem(player, pItem, num_to_add, success);
+}
+
+void ScriptMgr::OnPlayerReleasedGhost(Player* player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnPlayerReleasedGhost(player);
+}
+
 void ScriptMgr::OnCompleteQuestChoice(Player* player, uint32 choiceId, uint32 responseId)
 {
     FOREACH_SCRIPT(PlayerScript)->OnCompleteQuestChoice(player, choiceId, responseId);
@@ -2619,6 +2802,20 @@ void ScriptMgr::OnGuildBankEvent(Guild* guild, uint8 eventType, uint8 tabId, Obj
     FOREACH_SCRIPT(GuildScript)->OnBankEvent(guild, eventType, tabId, playerGuid, itemOrMoney, itemStackCount, destTabId);
 }
 
+void ScriptMgr::OnBoradcastToGuild(Guild const* me, WorldSession* session, bool officerOnly, std::string const& msg, uint32 language,Player* player, bool& Skip)
+{
+    FOREACH_SCRIPT(GuildScript)->OnBoradcastToGuild(me, session, officerOnly, msg, language, player, Skip);
+}
+
+void ScriptMgr::OnBroadcastPacketToRank(Guild const* me, WorldPacket const* packet, uint8 rankId, Player* player, bool& Skip)
+{
+    FOREACH_SCRIPT(GuildScript)->OnBroadcastPacketToRank(me, packet, rankId, player, Skip);
+}
+
+void ScriptMgr::OnBroadcastPacket(Guild const* me, WorldPacket const* packet, Player* player,bool& Skip)
+{
+    FOREACH_SCRIPT(GuildScript)->OnBroadcastPacket(me, packet, player, Skip);
+}
 // Group
 void ScriptMgr::OnGroupAddMember(Group* group, ObjectGuid guid)
 {
@@ -2650,6 +2847,10 @@ void ScriptMgr::OnGroupDisband(Group* group)
     FOREACH_SCRIPT(GroupScript)->OnDisband(group);
 }
 
+void ScriptMgr::OnGroupBroadcastPacket(Group* me, WorldPacket const* packet, bool ignorePlayersInBGRaid, int group, ObjectGuid ignoredPlayer, bool& SkipOtherCode)
+{
+    FOREACH_SCRIPT(GroupScript)->OnGroupBroadcastPacket( me,  packet, ignorePlayersInBGRaid, group, ignoredPlayer,  SkipOtherCode);
+}
 // Unit
 void ScriptMgr::OnHeal(Unit* healer, Unit* reciever, uint32& gain)
 {
@@ -2745,6 +2946,56 @@ void ScriptMgr::OnQuestObjectiveChange(Player* player, Quest const* quest, Quest
 
     GET_SCRIPT(QuestScript, quest->GetScriptId(), tmpscript);
     tmpscript->OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount);
+}
+
+void ScriptMgr::OnPlayerMove(Player* player, MovementInfo movementInfo, uint32 opcode)
+{
+    FOREACH_SCRIPT(MovementHandlerScript)->OnPlayerMove(player, movementInfo, opcode);
+}
+
+void ScriptMgr::OnSendToAll(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnSendToAll(me, player, guid, Skip);
+}
+
+void ScriptMgr::OnSendToAllButOne(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnSendToAllButOne(me, player, guid, Skip);
+}
+
+void ScriptMgr::OnSendToOne(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnSendToOne(me, player, guid, Skip);
+}
+
+void ScriptMgr::OnSendToAllWatching(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnSendToAllWatching(me, player, guid, Skip);
+}
+
+void ScriptMgr::OnHandleJoinChannel(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnHandleJoinChannel(me, player, guid, Skip);
+}
+
+void ScriptMgr::OnHandleContactListOpcode(bool& SkipCoreCode, WorldSession* me, WorldPacket& recv_data, Player* player)
+{
+    FOREACH_SCRIPT(SocialScript)->OnHandleContactListOpcode(SkipCoreCode, me, recv_data, player);
+}
+
+void ScriptMgr::OnHandleWhoOpcode( WorldSession* me, WorldPackets::Who::WhoRequestPkt& whoRequest, Player* player, bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnHandleWhoOpcode( me, whoRequest,  player, Skip);
+}
+
+void ScriptMgr::OnBroadcastToFriendListers(bool& SkipCoreCode, SocialMgr* me, Player* player, WorldPacket* packet, SocialMgr::SocialMap& m_socialMap)
+{
+    FOREACH_SCRIPT(SocialScript)->OnBroadcastToFriendListers(SkipCoreCode, me, player, packet, m_socialMap);
+}
+
+void ScriptMgr::OnSendSocialList( PlayerSocial* me, Player* player, uint32 flags, bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnSendSocialList(me, player, flags, Skip);
 }
 
 SpellScriptLoader::SpellScriptLoader(const char* name)
@@ -2974,6 +3225,29 @@ ZoneScript::ZoneScript(const char* name)
     ScriptRegistry<ZoneScript>::Instance()->AddScript(this);
 }
 
+MovementHandlerScript::MovementHandlerScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<MovementHandlerScript>::Instance()->AddScript(this);
+}
+
+AllCreatureScript::AllCreatureScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<AllCreatureScript>::Instance()->AddScript(this);
+}
+
+ChannelScript::ChannelScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<ChannelScript>::Instance()->AddScript(this);
+}
+SocialScript::SocialScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<SocialScript>::Instance()->AddScript(this);
+}
+
 // Specialize for each script type class like so:
 template class TC_GAME_API ScriptRegistry<SpellScriptLoader>;
 template class TC_GAME_API ScriptRegistry<ServerScript>;
@@ -3008,3 +3282,7 @@ template class TC_GAME_API ScriptRegistry<ConversationScript>;
 template class TC_GAME_API ScriptRegistry<SceneScript>;
 template class TC_GAME_API ScriptRegistry<QuestScript>;
 template class TC_GAME_API ScriptRegistry<ZoneScript>;
+template class TC_GAME_API ScriptRegistry<AllCreatureScript>;
+template class TC_GAME_API ScriptRegistry<MovementHandlerScript>;
+template class TC_GAME_API ScriptRegistry<ChannelScript>;
+template class TC_GAME_API ScriptRegistry<SocialScript>;

@@ -25,6 +25,9 @@
 
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint8 level)
 {
+    bool SkipOtherCode = false;
+    sScriptMgr->OnInitTaxiNodesForLevel(race, chrClass, level, this, SkipOtherCode);
+    if (SkipOtherCode) return;
     // class specific initial known nodes
     TaxiMask const& factionMask = Player::TeamForRace(race) == HORDE ? sHordeTaxiNodesMask : sAllianceTaxiNodesMask;
     switch (chrClass)
