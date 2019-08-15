@@ -1,0 +1,22 @@
+-- Missing id DB
+INSERT INTO `spell_script_names` VALUE
+(78675, "at_dru_solar_beam"),
+(102793, "at_dru_ursols_vortex"),
+(48018, "spell_mage_hot_streak"),
+(195283, "spell_mage_hot_streak"),
+(226757, "spell_mage_conflagration_dot"),
+(116267, "spell_mage_incanters_flow_buff"),
+(114923, "spell_mage_nether_tempest"),
+(114954, "spell_mage_nether_tempest_damage"),
+(205039, "spell_mage_erosion"),
+(210154, "spell_mage_erosion_timer"),
+(195676, "spell_mage_displacement"),
+(11113, "spell_mage_blast_wave"),
+(194182, "spell_arti_pri_sphere_of_insanity_summon");
+
+INSERT INTO `areatrigger_scripts` VALUE
+(5302, "at_monk_chi_burst_damage"),
+(5300, "at_monk_chi_burst_heal"),
+(3691, "at_sha_earthquake_totem"),
+(11353, "at_sha_crashing_storm"),
+(131623, "spell_warl_twilight_ward_s12");

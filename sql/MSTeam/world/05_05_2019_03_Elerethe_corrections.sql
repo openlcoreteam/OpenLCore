@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='boss_elerethe_renferal' WHERE (`entry`='106087');

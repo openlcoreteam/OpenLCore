@@ -1,0 +1,1 @@
+UPDATE `creature` SET `ScriptName`='boss_ursoc' WHERE (`guid`='21013578');
