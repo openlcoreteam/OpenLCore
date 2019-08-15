@@ -124,12 +124,12 @@ class TC_GAME_API PlayerSocial
 
         typedef std::map<ObjectGuid, FriendInfo> PlayerSocialMap;
 
-
+        PlayerSocialMap _playerSocialMap; // Serayn's todo: 需要想办法吧这里封装起来
     private:
         bool _HasContact(ObjectGuid const& guid, SocialFlag flags);
 
         
-        PlayerSocialMap _playerSocialMap;
+        
 
         ObjectGuid _playerGUID;
 };

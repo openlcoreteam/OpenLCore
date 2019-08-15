@@ -1653,9 +1653,9 @@ void ScriptMgr::OnMagicSpellHitLevelCalculate(Unit const* me, Unit* victim, Spel
     FOREACH_SCRIPT(FormulaScript)->OnMagicSpellHitLevelCalculate(me, victim, spell, modHitChance);
 }
 
-void ScriptMgr::OnUpdateSpellCritChance(Player* me, float& crit)
+void ScriptMgr::OnUpdateChances(Player* me, uint32 ChanceType, float& value)
 {
-    FOREACH_SCRIPT(FormulaScript)->OnUpdateSpellCritChance(me, crit);
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateChances(me, ChanceType, value);
 }
 
 void ScriptMgr::OnBuildPlayerLevelInfo(uint8 race,uint8 _class,uint8 level, PlayerLevelInfo* info)
@@ -2816,6 +2816,11 @@ void ScriptMgr::OnBroadcastPacket(Guild const* me, WorldPacket const* packet, Pl
 {
     FOREACH_SCRIPT(GuildScript)->OnBroadcastPacket(me, packet, player, Skip);
 }
+
+void ScriptMgr::OnGuildGetMember(Guild* me, Player* player, bool& Skip)
+{
+    FOREACH_SCRIPT(GuildScript)->OnGuildGetMember(me, player, Skip);
+}
 // Group
 void ScriptMgr::OnGroupAddMember(Group* group, ObjectGuid guid)
 {
@@ -2978,6 +2983,10 @@ void ScriptMgr::OnHandleJoinChannel(Channel* me, Player* player, ObjectGuid cons
     FOREACH_SCRIPT(ChannelScript)->OnHandleJoinChannel(me, player, guid, Skip);
 }
 
+void ScriptMgr::OnListChannel(Channel* me,Player const* player,bool& Skip)
+{
+    FOREACH_SCRIPT(ChannelScript)->OnListChannel(me, player, Skip);
+}
 void ScriptMgr::OnHandleContactListOpcode(bool& SkipCoreCode, WorldSession* me, WorldPacket& recv_data, Player* player)
 {
     FOREACH_SCRIPT(SocialScript)->OnHandleContactListOpcode(SkipCoreCode, me, recv_data, player);
@@ -2997,7 +3006,22 @@ void ScriptMgr::OnSendSocialList( PlayerSocial* me, Player* player, uint32 flags
 {
     FOREACH_SCRIPT(SocialScript)->OnSendSocialList(me, player, flags, Skip);
 }
-
+void ScriptMgr::OnGetFriendInfo(SocialMgr* me, Player* player, ObjectGuid const& friendGUID, FriendInfo& friendInfo, PlayerSocial::PlayerSocialMap _playerSocialMap,bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnGetFriendInfo(me, player, friendGUID, friendInfo, _playerSocialMap, Skip);
+}
+void ScriptMgr::OnSendFriendStatus(SocialMgr* me, Player* player, FriendsResult result, ObjectGuid const& friendGuid, bool broadcast ,bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnSendFriendStatus(me, player, result, friendGuid, broadcast, Skip);
+}
+void ScriptMgr::OnBroadcastToFriendListers(SocialMgr* me,Player* player, WorldPacket const* packet, SocialMgr::SocialMap* _socialMap, bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnBroadcastToFriendListers(me, player, packet, _socialMap, Skip);
+}
+void ScriptMgr::OnIsVisibleGloballyFor(Player const* me,Player const* u,bool& Skip)
+{
+    FOREACH_SCRIPT(SocialScript)->OnIsVisibleGloballyFor(me, u, Skip);
+}
 SpellScriptLoader::SpellScriptLoader(const char* name)
     : ScriptObject(name)
 {

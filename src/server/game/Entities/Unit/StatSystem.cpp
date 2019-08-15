@@ -510,6 +510,7 @@ void Player::UpdateBlockPercentage()
 
         value = value < 0.0f ? 0.0f : value;
     }
+    sScriptMgr->OnUpdateChances(this, 8, value);
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
 
@@ -518,24 +519,52 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     BaseModGroup modGroup;
     uint16 index;
     CombatRating cr;
-
+    uint32 chanceType;
     switch (attType)
     {
         case OFF_ATTACK:
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_OFFHAND_CRIT_PERCENTAGE;
             cr = CR_CRIT_MELEE;
+            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
+            {
+            case 7:
+            case 16:
+            case 18:
+                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
+                break;
+            default:
+                chanceType = 1;
+            }
             break;
         case RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
             index = PLAYER_RANGED_CRIT_PERCENTAGE;
             cr = CR_CRIT_RANGED;
+            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
+            {
+            case 34:
+                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
+                break;
+            default:
+                chanceType = 3;
+            }
             break;
         case BASE_ATTACK:
         default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_CRIT_PERCENTAGE;
             cr = CR_CRIT_MELEE;
+            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
+            {
+            case 7:
+            case 16:
+            case 18:
+                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
+                break;
+            default:
+                chanceType = 1;
+            }
             break;
     }
 
@@ -547,6 +576,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
          value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_CRIT) : value;
 
     value = value < 0.0f ? 0.0f : value;
+    sScriptMgr->OnUpdateChances(this, chanceType, value);
     SetStatFloatValue(index, value);
 }
 
@@ -689,6 +719,7 @@ void Player::UpdateParryPercentage()
 
         value = value < 0.0f ? 0.0f : value;
     }
+    sScriptMgr->OnUpdateChances(this, 7, value);
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
 
@@ -724,6 +755,7 @@ void Player::UpdateDodgePercentage()
          value = value > sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) ? sWorld->getFloatConfig(CONFIG_STATS_LIMITS_DODGE) : value;
 
     value = value < 0.0f ? 0.0f : value;
+    sScriptMgr->OnUpdateChances(this, 6, value);
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
 
@@ -736,7 +768,7 @@ void Player::UpdateSpellCritChance()
     crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
     // Increase crit from spell crit ratings
     crit += GetRatingBonusValue(CR_CRIT_SPELL);
-    sScriptMgr->OnUpdateSpellCritChance(this,crit);
+    sScriptMgr->OnUpdateChances(this, 5, crit);
     // Store crit value
     SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, crit);
 }
@@ -751,18 +783,21 @@ void Player::UpdateMeleeHitChances()
 {
     m_modMeleeHitChance = 7.5f + (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
     m_modMeleeHitChance += GetRatingBonusValue(CR_HIT_MELEE);
+    sScriptMgr->OnUpdateChances(this, 0, m_modMeleeHitChance);
 }
 
 void Player::UpdateRangedHitChances()
 {
     m_modRangedHitChance = 7.5f + (float)GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
     m_modRangedHitChance += GetRatingBonusValue(CR_HIT_RANGED);
+    sScriptMgr->OnUpdateChances(this, 2, m_modRangedHitChance);
 }
 
 void Player::UpdateSpellHitChances()
 {
     m_modSpellHitChance = 15.0f + (float)GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
     m_modSpellHitChance += GetRatingBonusValue(CR_HIT_SPELL);
+    sScriptMgr->OnUpdateChances(this, 4, m_modSpellHitChance);
 }
 
 void Player::UpdateExpertise(WeaponAttackType attack)

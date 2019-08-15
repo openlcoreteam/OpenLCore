@@ -172,6 +172,9 @@ SocialMgr* SocialMgr::instance()
 
 void SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friendGUID, FriendInfo& friendInfo)
 {
+    bool Skip = false;
+    sScriptMgr->OnGetFriendInfo(this, player, friendGUID, friendInfo, player->GetSocial()->_playerSocialMap, Skip);
+    if (Skip)return;
     if (!player)
         return;
 
@@ -216,6 +219,9 @@ void SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friendGUID, Frie
 
 void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGuid const& friendGuid, bool broadcast /*= false*/)
 {
+    bool Skip = false;
+    sScriptMgr->OnSendFriendStatus(this, player, result, friendGuid, broadcast, Skip);
+    if (Skip) return;
     FriendInfo fi;
     GetFriendInfo(player, friendGuid, fi);
 
@@ -231,7 +237,9 @@ void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGui
 void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket const* packet)
 {
     ASSERT(player);
-
+    bool Skip = false;
+    sScriptMgr->OnBroadcastToFriendListers(this, player, packet, &_socialMap, Skip);
+    if (Skip) return;
     AccountTypes gmSecLevel = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
     for (SocialMap::const_iterator itr = _socialMap.begin(); itr != _socialMap.end(); ++itr)
     {

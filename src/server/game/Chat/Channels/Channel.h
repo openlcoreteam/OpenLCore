@@ -238,7 +238,7 @@ class TC_GAME_API Channel
     private:
 
         template <class Builder>
-        void SendToAll(Builder& builder, ObjectGuid const& guid = ObjectGuid::Empty) const;
+        void SendToAll(Builder& builder, ObjectGuid const& who = ObjectGuid::Empty) const;
 
         template <class Builder>
         void SendToAllButOne(Builder& builder, ObjectGuid const& who) const;

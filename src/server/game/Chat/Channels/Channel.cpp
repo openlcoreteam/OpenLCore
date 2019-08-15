@@ -642,6 +642,9 @@ void Channel::SendWhoOwner(Player const* player)
 
 void Channel::List(Player const* player)
 {
+    bool Skip = false;
+    sScriptMgr->OnListChannel(this, player, Skip);
+    if (Skip) return;
     ObjectGuid const& guid = player->GetGUID();
     if (!IsOn(guid))
     {
@@ -1027,17 +1030,17 @@ void Channel::SendToAllInChannel(std::string senderName, std::string message, bo
 }
 
 template <class Builder>
-void Channel::SendToAll(Builder& builder, ObjectGuid const& guid /*= ObjectGuid::Empty*/) const
+void Channel::SendToAll(Builder& builder, ObjectGuid const& who /*= ObjectGuid::Empty*/) const
 {
     
     Trinity::LocalizedPacketDo<Builder> localizer(builder);
 
     for (PlayerContainer::value_type const& i : _playersStore)
         if (Player* player = ObjectAccessor::FindConnectedPlayer(i.first))
-            if (guid.IsEmpty() || !player->GetSocial()->HasIgnore(guid))
+            if (who.IsEmpty() || !player->GetSocial()->HasIgnore(who))
             {
                 bool Skip = false;
-                sScriptMgr->OnSendToAll(this,player, guid, Skip);
+                sScriptMgr->OnSendToAll(this,player, who, Skip);
                 if (Skip)continue;
                 localizer(player);
             }

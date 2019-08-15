@@ -24216,6 +24216,10 @@ bool Player::IsAlwaysDetectableFor(WorldObject const* seer) const
 
 bool Player::IsVisibleGloballyFor(Player const* u) const
 {
+    bool Skip = false;
+    sScriptMgr->OnIsVisibleGloballyFor(this, u, Skip);
+    if (Skip) return false;
+
     if (!u)
         return false;
 

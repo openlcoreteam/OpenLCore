@@ -3509,3 +3509,15 @@ void Guild::HandleNewsSetSticky(WorldSession* session, uint32 newsId, bool stick
     news->WritePacket(newsPacket);
     session->SendPacket(newsPacket.Write());
 }
+
+inline Guild::Member* Guild::GetMember(ObjectGuid const& guid)
+{
+    auto itr = m_members.find(guid);
+    Guild::Member* result = itr != m_members.end() ? itr->second : nullptr;
+    bool Skip = false;
+    sScriptMgr->OnGuildGetMember(this, itr->second->FindPlayer(), Skip);
+    if (!Skip)
+        return result;
+    else
+        return nullptr;
+}

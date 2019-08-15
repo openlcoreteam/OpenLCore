@@ -381,7 +381,23 @@ class TC_GAME_API FormulaScript : public ScriptObject
 
         virtual void OnMagicSpellHitLevelCalculate(Unit const* /*me*/, Unit* /*victim*/, SpellInfo const* /*spell*/, int32& /*modHitChance*/) { }
 
-        virtual void OnUpdateSpellCritChance(Player* /*me*/, float& /*crit*/) { }
+        virtual void OnUpdateChances(Player* /*me*/, uint32 /*ChanceType*/, float& /*value*/)
+        {
+            /*
+                 enum ChanceTypes:uint32
+                 {
+                     Melee_HitChance,
+                     Melee_CritChance,
+                     Range_HitChance,
+                     Range_CritChance,
+                     Spell_HitChance,
+                     Spell_CritChance,
+                     Dodge_Chance,
+                     Parry_Chance,
+                     Block_Chance,
+                 };
+            */
+        }
 
         virtual void OnBuildPlayerLevelInfo(uint8 /*race*/, uint8 /*_class*/, uint8 /*level*/, PlayerLevelInfo* /*info*/) { }
 
@@ -1026,6 +1042,7 @@ class TC_GAME_API GuildScript : public ScriptObject
         virtual void OnBoradcastToGuild(Guild const* /*me*/, WorldSession* /*session*/, bool /*officerOnly*/, std::string const& /*msg*/, uint32 /*language*/,Player* /*player*/, bool& /*Skip*/) {}
         virtual void OnBroadcastPacketToRank(Guild const* /*me*/, WorldPacket const* /*packet*/, uint8 /*rankId*/, Player* /*player*/, bool& /*Skip*/) {}
         virtual void OnBroadcastPacket(Guild const* /*me*/, WorldPacket const* /*packet*/, Player* /*player*/, bool& /*Skip*/) {}
+        virtual void OnGuildGetMember(Guild* /*me*/, Player* /*player*/, bool& /*Skip*/) {}
 };
 
 class TC_GAME_API GroupScript : public ScriptObject
@@ -1163,6 +1180,7 @@ public:
     virtual void OnSendToOne(Channel const* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
     virtual void OnSendToAllWatching(Channel* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
     virtual void OnHandleJoinChannel(Channel* /*me*/, Player* /*player*/, ObjectGuid const& /*guid*/, bool& /*Skip*/) {}
+    virtual void OnListChannel(Channel* /*me*/, Player const* /*player*/, bool& /*Skip*/) {}
 };
 
 class TC_GAME_API SocialScript : public ScriptObject
@@ -1176,6 +1194,10 @@ public:
     virtual void OnHandleWhoOpcode(WorldSession* /*me*/, WorldPackets::Who::WhoRequestPkt& /*whoRequest*/, Player* /*player*/, bool& /*Skip*/) {}
     virtual void OnBroadcastToFriendListers(bool& SkipCoreCode, SocialMgr* /*me*/, Player* /*player*/, WorldPacket* /*packet*/, SocialMgr::SocialMap& /*m_socialMap*/) {}
     virtual void OnSendSocialList(PlayerSocial* /*me*/, Player* /*player*/, uint32 /*flags*/, bool& /*SkipCoreCode*/) {}
+    virtual void OnGetFriendInfo(SocialMgr* /*me*/, Player* /*player*/, ObjectGuid const& /*friendGUID*/, FriendInfo& /*friendInfo*/, PlayerSocial::PlayerSocialMap /*_playerSocialMap*/, bool& /*Skip*/) {}
+    virtual void OnSendFriendStatus(SocialMgr* /*me*/, Player* /*player*/, FriendsResult /*result*/, ObjectGuid const& /*friendGuid*/, bool /*broadcast*/, bool& /*Skip*/) {}
+    virtual void OnBroadcastToFriendListers(SocialMgr* /*me*/, Player* /*player*/, WorldPacket const* /*packet*/, SocialMgr::SocialMap* /*_socialMap*/, bool& /*Skip*/) {}
+    virtual void OnIsVisibleGloballyFor(Player const* /*me*/, Player const* /*u*/, bool& /*Skip*/) {}
 };
 // Manages registration, loading, and execution of scripts.
 class TC_GAME_API ScriptMgr
@@ -1293,7 +1315,7 @@ class TC_GAME_API ScriptMgr
         void OnCalculateMeleeDamage(Unit* me, Unit* victim, uint32 damage, WeaponAttackType attackType, CalcDamageInfo* damageInfo);
         void OnUpdateCraftSkill(Player* me, uint32 spelllevel, uint32 SkillId, uint32 craft_skill_gain, bool& result);
         void OnMagicSpellHitLevelCalculate(Unit const* me, Unit* victim, SpellInfo const* spell, int32& modHitChance);
-        void OnUpdateSpellCritChance(Player* me, float& crit);
+        void OnUpdateChances(Player* me,uint32 ChanceType, float& value);
         void OnBuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, PlayerLevelInfo* info);
         void UpdatePotionCooldown(Player* me, Spell* spell, uint32& m_lastPotionId, bool& SkipOtherCode);
         void OnInitTalentForLevel(Player* me, bool& SkipOtherCode);
@@ -1507,6 +1529,7 @@ class TC_GAME_API ScriptMgr
         void OnBoradcastToGuild(Guild const* me, WorldSession* session, bool officerOnly, std::string const& msg, uint32 language,Player* player, bool& Skip);
         void OnBroadcastPacketToRank(Guild const* me, WorldPacket const* packet, uint8 rankId, Player* player, bool& Skip);
         void OnBroadcastPacket(Guild const* me, WorldPacket const* packet, Player* player, bool& Skip);
+        void OnGuildGetMember(Guild* me, Player* player, bool& Skip);
 
     public: /* GroupScript */
 
@@ -1561,12 +1584,18 @@ class TC_GAME_API ScriptMgr
         void OnSendToOne(Channel const* me, Player* player, ObjectGuid const& guid, bool& Skip);
         void OnSendToAllWatching(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip);
         void OnHandleJoinChannel(Channel* me, Player* player, ObjectGuid const& guid, bool& Skip);
+        void OnListChannel(Channel* me, Player const* player, bool& Skip);
 
     public: /*SocialScript*/
         void OnHandleContactListOpcode(bool& SkipCoreCode, WorldSession* me, WorldPacket& recv_data, Player* player);
         void OnHandleWhoOpcode(WorldSession* me, WorldPackets::Who::WhoRequestPkt& whoRequest, Player* player, bool& Skip);
         void OnBroadcastToFriendListers(bool& SkipCoreCode, SocialMgr* me, Player* player, WorldPacket* packet, SocialMgr::SocialMap& m_socialMap);
         void OnSendSocialList(PlayerSocial* me, Player* player, uint32 flags, bool& SkipCoreCode);
+        void OnGetFriendInfo(SocialMgr* me, Player* player, ObjectGuid const& friendGUID, FriendInfo& friendInfo, PlayerSocial::PlayerSocialMap _playerSocialMap, bool& Skip);
+        void OnSendFriendStatus(SocialMgr* me, Player* player, FriendsResult result, ObjectGuid const& friendGuid, bool broadcast, bool& Skip);
+        void OnBroadcastToFriendListers(SocialMgr* me, Player* player, WorldPacket const* packet, SocialMgr::SocialMap* _socialMap, bool& Skip);
+        void OnIsVisibleGloballyFor(Player const* me, Player const* u, bool& Skip);
+
     private:
         uint32 _scriptCount;
 
