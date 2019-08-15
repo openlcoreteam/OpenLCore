@@ -526,48 +526,24 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_OFFHAND_CRIT_PERCENTAGE;
             cr = CR_CRIT_MELEE;
-            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
-            {
-            case 7:
-            case 16:
-            case 18:
-                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
-                break;
-            default:
-                chanceType = 1;
-            }
+            chanceType = 11;
             break;
         case RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
             index = PLAYER_RANGED_CRIT_PERCENTAGE;
             cr = CR_CRIT_RANGED;
-            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
-            {
-            case 34:
-                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
-                break;
-            default:
-                chanceType = 3;
-            }
+            chanceType = 3;
             break;
         case BASE_ATTACK:
         default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_CRIT_PERCENTAGE;
             cr = CR_CRIT_MELEE;
-            switch (this->GetWeaponForAttack(attType)->GetTemplate()->GetSubClass())
-            {
-            case 7:
-            case 16:
-            case 18:
-                chanceType = this->GetStat(STAT_AGILITY) > this->GetStat(STAT_STRENGTH) ? 3 : 1;
-                break;
-            default:
-                chanceType = 1;
-            }
+            chanceType = 1;
             break;
     }
-
+    
+    chanceType = 1;
     float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(cr);
     // Modify crit from weapon skill and maximized defense skill of same level victim difference
     value += (int32(GetMaxSkillValueForLevel()) - int32(GetMaxSkillValueForLevel())) * 0.04f;

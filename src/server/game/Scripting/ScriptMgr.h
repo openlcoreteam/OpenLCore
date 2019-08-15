@@ -395,6 +395,7 @@ class TC_GAME_API FormulaScript : public ScriptObject
                      Dodge_Chance,
                      Parry_Chance,
                      Block_Chance,
+                     OffHand_CritChance,
                  };
             */
         }
