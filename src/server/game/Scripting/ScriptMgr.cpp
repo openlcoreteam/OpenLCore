@@ -1740,6 +1740,24 @@ bool ScriptMgr::OnItemRemove(Player* player, Item* item)
     return tmpscript->OnRemove(player, item);
 }
 
+void ScriptMgr::OnGossipSelect(Player* player, Item* item, uint32 sender, uint32 action)
+{
+    ASSERT(player);
+    ASSERT(item);
+
+    GET_SCRIPT(ItemScript, item->GetScriptId(), tmpscript);
+    tmpscript->OnGossipSelect(player, item, sender, action);
+}
+
+void ScriptMgr::OnGossipSelectCode(Player* player, Item* item, uint32 sender, uint32 action, const char* code)
+{
+    ASSERT(player);
+    ASSERT(item);
+
+    GET_SCRIPT(ItemScript, item->GetScriptId(), tmpscript);
+    tmpscript->OnGossipSelectCode(player, item, sender, action, code);
+}
+
 bool ScriptMgr::OnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex, Creature* target)
 {
     ASSERT(caster);
@@ -2388,6 +2406,16 @@ void ScriptMgr::OnPlayerUpdateArea(Player* player, Area* newArea, Area* oldArea)
     FOREACH_SCRIPT(PlayerScript)->OnUpdateArea(player, newArea, oldArea);
 }
 
+ void ScriptMgr::OnGossipSelect(Player* player, uint32 menu_id, uint32 sender, uint32 action)
+ {
+     FOREACH_SCRIPT(PlayerScript)->OnGossipSelect(player, menu_id, sender, action);
+ }
+ 
+ void ScriptMgr::OnGossipSelectCode(Player* player, uint32 menu_id, uint32 sender, uint32 action, const char* code)
+ {
+     FOREACH_SCRIPT(PlayerScript)->OnGossipSelectCode(player, menu_id, sender, action, code);
+ }
+ 
 void ScriptMgr::OnQuestAccept(Player* player, const Quest* quest)
 {
     FOREACH_SCRIPT(PlayerScript)->OnQuestAccept(player, quest);

@@ -49,6 +49,11 @@
 
 void WorldSession::HandleTabardVendorActivateOpcode(WorldPackets::NPC::Hello& packet)
 {
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (packet.Unit.IsAnyTypeCreature())
+        if (Creature* creature = _player->GetMap()->GetCreature(packet.Unit))
+            creature->SendMirrorSound(_player, 0);
+#endif
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(packet.Unit, UNIT_NPC_FLAG_TABARDDESIGNER);
     if (!unit)
     {
@@ -79,6 +84,11 @@ void WorldSession::SendShowMailBox(ObjectGuid guid)
 
 void WorldSession::HandleTrainerListOpcode(WorldPackets::NPC::Hello& packet)
 {
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (packet.Unit.IsAnyTypeCreature())
+        if (Creature* creature = _player->GetMap()->GetCreature(packet.Unit))
+            creature->SendMirrorSound(_player, 0);
+#endif
     Creature* npc = GetPlayer()->GetNPCIfCanInteractWith(packet.Unit, UNIT_NPC_FLAG_TRAINER);
     if (!npc)
     {
@@ -317,6 +327,11 @@ void WorldSession::HandleTrainerBuySpellOpcodeLegacy(WorldPackets::NPC::TrainerB
 
 void WorldSession::HandleGossipHelloOpcode(WorldPackets::NPC::Hello& packet)
 {
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (packet.Unit.IsAnyTypeCreature())
+        if (Creature* creature = _player->GetMap()->GetCreature(packet.Unit))
+            creature->SendMirrorSound(_player, 0);
+#endif
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(packet.Unit, UNIT_NPC_FLAG_GOSSIP);
     if (!unit)
     {
@@ -366,6 +381,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPackets::NPC::GossipSelec
     if (_player->PlayerTalkClass->GetInteractionData().SourceGuid != packet.GossipUnit)
         return;
 
+    Item* item = nullptr;
     Creature* unit = nullptr;
     GameObject* go = nullptr;
     if (packet.GossipUnit.IsCreatureOrVehicle())
@@ -383,6 +399,23 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPackets::NPC::GossipSelec
         if (!go)
         {
             TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", packet.GossipUnit.ToString().c_str());
+            return;
+        }
+    }
+    else if (packet.GossipUnit.IsItem())
+    {
+        item = _player->GetItemByGuid(packet.GossipUnit);
+        if (!item || _player->IsBankPos(item->GetPos()))
+        {
+            TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - %s not found.", packet.GossipUnit.ToString().c_str());
+            return;
+        }
+    }
+    else if (packet.GossipUnit.IsPlayer())
+    {
+        if (packet.GossipUnit != _player->GetGUID() || static_cast<uint32>(packet.GossipID) != _player->PlayerTalkClass->GetGossipMenu().GetMenuId())
+        {
+            TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - %s not found.", packet.GossipUnit.ToString().c_str());
             return;
         }
     }
@@ -417,11 +450,19 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPackets::NPC::GossipSelec
             if (!sScriptMgr->OnGossipSelectCode(_player, unit, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode.c_str()))
                 _player->OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
         }
-        else
+        else if (go)
         {
             go->AI()->GossipSelectCode(_player, packet.GossipID, packet.GossipIndex, packet.PromotionCode.c_str());
             if (!sScriptMgr->OnGossipSelectCode(_player, go, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode.c_str()))
                 _player->OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+        }
+        else if (item)
+        {
+            sScriptMgr->OnGossipSelectCode(_player, item, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode.c_str());
+        }
+        else
+        {
+            sScriptMgr->OnGossipSelectCode(_player, packet.GossipID, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex), packet.PromotionCode.c_str());
         }
     }
     else
@@ -432,11 +473,19 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPackets::NPC::GossipSelec
             if (!sScriptMgr->OnGossipSelect(_player, unit, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex)))
                 _player->OnGossipSelect(unit, packet.GossipIndex, packet.GossipID);
         }
-        else
+        else if (go)
         {
             go->AI()->GossipSelect(_player, packet.GossipID, packet.GossipIndex);
             if (!sScriptMgr->OnGossipSelect(_player, go, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex)))
                 _player->OnGossipSelect(go, packet.GossipIndex, packet.GossipID);
+        }
+        else if (item)
+        {
+            sScriptMgr->OnGossipSelect(_player, item, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex));
+        }
+        else
+        {
+            sScriptMgr->OnGossipSelect(_player, packet.GossipID, _player->PlayerTalkClass->GetGossipOptionSender(packet.GossipIndex), _player->PlayerTalkClass->GetGossipOptionAction(packet.GossipIndex));
         }
     }
 }
@@ -524,6 +573,11 @@ void WorldSession::SendBindPoint(Creature* npc)
 
 void WorldSession::HandleRequestStabledPets(WorldPackets::NPC::RequestStabledPets& packet)
 {
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    if (packet.StableMaster.IsAnyTypeCreature())
+        if (Creature* creature = _player->GetMap()->GetCreature(packet.StableMaster))
+            creature->SendMirrorSound(_player, 0);
+#endif
     if (!CheckStableMaster(packet.StableMaster))
         return;
 
