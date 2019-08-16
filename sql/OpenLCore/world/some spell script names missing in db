@@ -1,5 +1,5 @@
 -- Missing id DB
-INSERT INTO `spell_script_names` VALUE
+REPLACE INTO `spell_script_names` VALUE
 (78675, "at_dru_solar_beam"),
 (102793, "at_dru_ursols_vortex"),
 (48018, "spell_mage_hot_streak"),
@@ -14,7 +14,7 @@ INSERT INTO `spell_script_names` VALUE
 (11113, "spell_mage_blast_wave"),
 (194182, "spell_arti_pri_sphere_of_insanity_summon");
 
-INSERT INTO `areatrigger_scripts` VALUE
+REPLACE INTO `areatrigger_scripts` VALUE
 (5302, "at_monk_chi_burst_damage"),
 (5300, "at_monk_chi_burst_heal"),
 (3691, "at_sha_earthquake_totem"),
