@@ -2089,7 +2089,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'Ashamane','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,26972,1,1);
+(1,'OpenLCore','127.0.0.1','127.0.0.1','255.255.255.0',8085,0,0,1,0,0,26972,1,1);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2130,7 +2130,7 @@ CREATE TABLE `updates_include` (
 
 LOCK TABLES `updates_include` WRITE;
 /*!40000 ALTER TABLE `updates_include` DISABLE KEYS */;
-INSERT INTO `updates_include` VALUES ('$/sql/ashamane/auth','RELEASED');
+INSERT INTO `updates_include` VALUES ('$/sql/OpenLCore/auth','RELEASED');
 /*!40000 ALTER TABLE `updates_include` ENABLE KEYS */;
 UNLOCK TABLES;
 

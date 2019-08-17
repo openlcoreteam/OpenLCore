@@ -3472,7 +3472,7 @@ CREATE TABLE `updates_include` (
 
 LOCK TABLES `updates_include` WRITE;
 /*!40000 ALTER TABLE `updates_include` DISABLE KEYS */;
-INSERT INTO `updates_include` VALUES ('$/sql/ashamane/characters','RELEASED');
+INSERT INTO `updates_include` VALUES ('$/sql/OpenLCore/characters','RELEASED');
 /*!40000 ALTER TABLE `updates_include` ENABLE KEYS */;
 UNLOCK TABLES;
 
