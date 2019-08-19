@@ -625,10 +625,10 @@ void ObjectMgr::LoadCreatureTemplateAddons()
                 TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong spell %u defined in `auras` field in `creature_template_addon`.", entry, spellId);
                 continue;
             }
-
+            /* //Serayn: This situation seems harmless and try to remove it for cleaner output. (charset GB2312: 这个问题似乎是无害的，所以姑且去掉以清洁输出)
             if (AdditionalSpellInfo->HasAura(DIFFICULTY_NONE, SPELL_AURA_CONTROL_VEHICLE))
                 TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has SPELL_AURA_CONTROL_VEHICLE aura %u defined in `auras` field in `creature_template_addon`.", entry, spellId);
-
+            */
             if (std::find(creatureAddon.auras.begin(), creatureAddon.auras.end(), spellId) != creatureAddon.auras.end())
             {
                 TC_LOG_ERROR("sql.sql", "Creature (Entry: %u) has duplicate aura (spell %u) in `auras` field in `creature_template_addon`.", entry, spellId);
@@ -1225,8 +1225,8 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     // set to that value to the current expansion's max leveling level
     if (cInfo->HealthScalingExpansion == EXPANSION_LEVEL_CURRENT)
     {
-        const_cast<CreatureTemplate*>(cInfo)->minlevel = (MAX_LEVEL + cInfo->minlevel);
-        const_cast<CreatureTemplate*>(cInfo)->maxlevel = (MAX_LEVEL + cInfo->maxlevel);
+        if (cInfo->minlevel <= 0)const_cast<CreatureTemplate*>(cInfo)->minlevel = (MAX_LEVEL + cInfo->minlevel);
+        if (cInfo->maxlevel <= 0)const_cast<CreatureTemplate*>(cInfo)->maxlevel = (MAX_LEVEL + cInfo->maxlevel);
         const_cast<CreatureTemplate*>(cInfo)->HealthScalingExpansion = CURRENT_EXPANSION;
     }
 
