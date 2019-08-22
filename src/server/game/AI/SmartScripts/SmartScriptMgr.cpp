@@ -216,7 +216,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
 
             if (creatureInfo->AIName != "SmartAI")
             {
-                TC_LOG_ERROR("sql.sql", "SmartAIMgr::LoadSmartAIFromDB: Creature entry (%u) guid (" SI64FMTD ") is not using SmartAI, skipped loading.", creature->id, -temp.entryOrGuid);
+                TC_LOG_ERROR("sql.sql", "SmartAIMgr::LoadSmartAIFromDB: Creature entry (%u) guid (" SI64FMTD ") is not using SmartAI but using %s, skipped loading.", creature->id, -temp.entryOrGuid, creatureInfo->AIName.c_str());
                 continue;
             }
         }

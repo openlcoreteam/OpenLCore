@@ -979,7 +979,7 @@ public:
         else
         {
             // The script uses a script name from database, but isn't assigned to anything.
-            TC_LOG_ERROR("sql.sql", "Script named '%s' does not have a script name assigned in database.",
+            TC_LOG_ERROR("sql.sql", "Script named '%s' in the core is ready for assignment.",
                 script->GetName().c_str());
 
             // Avoid calling "delete script;" because we are currently in the script constructor
