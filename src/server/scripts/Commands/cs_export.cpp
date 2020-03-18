@@ -100,7 +100,7 @@ public:
         //Check if is on template
         if ( ItemTemplate const* itemProto = sObjectMgr->GetItemTemplate(item_entry) )
         {
-            if ( itemProto->GetName(defaultLocale) > 0 )
+            if ( itemProto->GetName(defaultLocale) )
                 return itemProto->GetName(defaultLocale);
             else
                 return "";
