@@ -906,11 +906,12 @@ class TC_GAME_API Guild
             return itr != m_members.end() ? itr->second : nullptr;
         }
 
-        inline Member* GetMember(ObjectGuid const& guid)
-        {
+        inline Member* GetMember(ObjectGuid const& guid);
+        /*{
             auto itr = m_members.find(guid);
             return itr != m_members.end() ? itr->second : nullptr;
-        }
+        }*/
+
 
         inline Member* GetMember(std::string const& name)
         {
