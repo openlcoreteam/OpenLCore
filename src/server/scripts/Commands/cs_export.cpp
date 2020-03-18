@@ -5070,7 +5070,8 @@ public:
             //
             // Exportar para el fichero
             _FileName << "GameObject " << "[" << aEntry << "] " << CheckName(_GameObjectName) << ".sql";
-            this->FlushToFile(_FileName.str(), aEntry, _GameObjectName);
+            std::string _fName = _FileName.str();
+            this->FlushToFile(_fName, aEntry, _GameObjectName);
 
             this->fHandler->PSendSysMessage("%s gameobject_template exported in: %u ms.", _GameObjectName.c_str(), ::GetMSTimeDiffToNow(_StartTime));
             return true;
