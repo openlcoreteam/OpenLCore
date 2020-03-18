@@ -3572,6 +3572,26 @@ void SpellMgr::LoadSpellInfoCorrections()
     });
     // ENDOF THE WANDERING ISLE SPELLS
 
+    //
+    // ANTORUS THE BURNING THRONE SPELLS
+    //
+
+    // Decimation
+    ApplySpellFix({ 244449 }, [](SpellInfo* spellInfo)
+    {
+        // For some reason there is a instakill effect that serves absolutely no purpose.
+        // Until we figure out what it's actually used for we disable it.
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_2))->Effect = 0;
+    });
+
+    // Annihilation
+    ApplySpellFix({ 244761 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+    });
+
+    // ENDOF ANTORUS THE BURNING THRONE SPELLS
+
     // BlackRook Hold - Bloodthirsty Leap
     ApplySpellFix({ 225963 }, [](SpellInfo* spellInfo)
     {
@@ -3652,6 +3672,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_4))->Effect = 0;
     });
 
+    // Garothi Worldbreaker - Annihilation - No players in area
+    ApplySpellFix({ 244762 }, [](SpellInfo* spellInfo) {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_500_YARDS); // Not the right value.
+    });
+
+    // Garothi Worldbreaker - Fel Bombardment
+    ApplySpellFix({ 244532 }, [](SpellInfo* spellInfo)
+    {
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_0))->RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+        const_cast<SpellEffectInfo*>(spellInfo->GetEffect(EFFECT_1))->RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_7_YARDS);
+    });
+
     // Ray of Frost
     ApplySpellFix({ 205021 }, [](SpellInfo* spellInfo)
     {
@@ -3681,6 +3713,11 @@ void SpellMgr::LoadSpellInfoCorrections()
         }
     });
 
+    // Hyjal Intro Flight
+    ApplySpellFix({ 73518 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(7);  // 10yd
+    });
 
     ApplySpellFix({
         70661, // See quest invis 1

@@ -891,6 +891,16 @@ struct DungeonEncounter
 typedef std::list<DungeonEncounter const*> DungeonEncounterList;
 typedef std::unordered_map<uint64, DungeonEncounterList> DungeonEncounterContainer;
 
+struct DungeonCreditEncounter
+{
+    DungeonCreditEncounter(uint32 _dbcEntry, uint32 _creditEntry)
+        : dbcEntry(_dbcEntry), creditEntry(_creditEntry) { }
+    uint32 dbcEntry;
+    uint32 creditEntry;
+};
+
+typedef std::unordered_map<uint32, DungeonCreditEncounter*> DungeonCreditEncounterMap;
+
 struct TerrainSwapInfo
 {
     uint32 Id;
@@ -1240,6 +1250,7 @@ class TC_GAME_API ObjectMgr
         void LoadPointOfInterestLocales();
         void LoadInstanceTemplate();
         void LoadInstanceEncounters();
+        uint32 GetDungeonEncounterID(uint32 creatureEntry);
         void LoadMailLevelRewards();
         void LoadVehicleTemplateAccessories();
         void LoadVehicleAccessories();
@@ -1702,6 +1713,7 @@ class TC_GAME_API ObjectMgr
         AreaTriggerScriptContainer _areaTriggerScriptStore;
         AccessRequirementContainer _accessRequirementStore;
         DungeonEncounterContainer _dungeonEncounterStore;
+        DungeonCreditEncounterMap _DungeonCreditEncounters;
 
         RepRewardRateContainer _repRewardRateStore;
         RepOnKillContainer _repOnKillStore;

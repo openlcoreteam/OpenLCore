@@ -265,6 +265,7 @@ public:
             { "set",       rbac::RBAC_PERM_COMMAND_NPC_SET,       false, nullptr,              "", npcSetCommandTable },
             { "evade",     rbac::RBAC_PERM_COMMAND_NPC_EVADE,     false, &HandleNpcEvadeCommand,             ""       },
             { "reload",    rbac::RBAC_PERM_COMMAND_NPC_RELOAD,    false, &HandleNpcReloadCommand,            ""		  },
+            { "aianimkit", rbac::RBAC_PERM_COMMAND_NPC,           false, &HandleNpcAIAnimKitCommand,         ""		  },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -742,6 +743,7 @@ public:
         handler->PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
         handler->PSendSysMessage(LANG_NPCINFO_EQUIPMENT, target->GetCurrentEquipmentId(), target->GetOriginalEquipmentId());
         handler->PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), std::to_string(target->GetMaxHealth()).c_str(), std::to_string(target->GetHealth()).c_str());
+        handler->PSendSysMessage("GossipMenuId: %u", cInfo->GossipMenuId);
         handler->PSendSysMessage(LANG_NPCINFO_INHABIT_TYPE, cInfo->InhabitType);
 
         handler->PSendSysMessage(LANG_NPCINFO_UNIT_FIELD_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS));
@@ -772,6 +774,15 @@ public:
 
         handler->PSendSysMessage(LANG_NPCINFO_ARMOR, target->GetArmor());
         handler->PSendSysMessage(LANG_NPCINFO_POSITION, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+
+        // alexkulya: added motion type information for command .npc info
+        if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE ||
+            target->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE ||
+            target->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+            handler->PSendSysMessage("Motion type: |CFFFF0000%u|R", target->GetMotionMaster()->GetCurrentMovementGeneratorType());
+        else
+            handler->PSendSysMessage("Motion type: |CFFFF0000%u|R", target->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE);
+
         handler->PSendSysMessage(LANG_NPCINFO_AIINFO, target->GetAIName().c_str(), target->GetScriptName().c_str());
         handler->PSendSysMessage(LANG_NPCINFO_FLAGS_EXTRA, cInfo->flags_extra);
         for (uint8 i = 0; i < FLAGS_EXTRA_COUNT; ++i)
@@ -1156,8 +1167,9 @@ public:
         if (phaseID != 0)
             PhasingHandler::AddPhase(creature, phaseID, true);
 
-        creature->SetDBPhase(phaseID);
+        handler->GetSession()->GetPlayer()->UpdateVisibilityForPlayer();
 
+        creature->SetDBPhase(phaseID);
         creature->SaveToDB();
 
         TC_LOG_DEBUG("sql.dev", "UPDATE creature SET PhaseId = %u WHERE guid = %s;", phaseID, std::to_string(creature->GetSpawnId()).c_str());
@@ -1743,6 +1755,25 @@ public:
         TC_LOG_DEBUG("sql.dev", "UPDATE creature_template SET InhabitType = %u WHERE entry = %u;", inhabitType, entry);
 
         handler->PSendSysMessage("InhabitType updated in database, reboot needed");
+        return true;
+    }
+
+static bool HandleNpcAIAnimKitCommand(ChatHandler* handler, char const* args)
+    {
+        Creature* creatureTarget = handler->getSelectedCreature();
+        if (!creatureTarget)
+        {
+            handler->PSendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        CommandArgs cmdArgs = CommandArgs(handler, args, { CommandArgs::ARG_UINT, CommandArgs::ARG_UINT_OPTIONAL });
+        if (!cmdArgs.ValidArgs())
+            return false;
+
+       // creatureTarget->SetAIAnimKitId(cmdArgs.GetArg<uint32>(0), bool(cmdArgs.GetArg<uint32>(1, 0)));
+
         return true;
     }
 };

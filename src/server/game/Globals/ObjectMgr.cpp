@@ -2081,12 +2081,12 @@ void ObjectMgr::LoadCreatures()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                               0              1   2    3       4        5             6           7           8           9            10             11
+    //                                                      0        1   2     3        4          5            6           7           8            9            10           11
     QueryResult result = WorldDatabase.Query("SELECT creature.guid, id, map, areaId, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, "
-    //   12               13         14       15            16                 17          18          19                20                   21                    22
+    //         12            13        14          15              16              17          18            19                  20                   21                    22
         "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, "
-    //   23                     24                      25                26                   27                       28
-        "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName "
+    //            23                     24                    25                26                      27                      28                 29
+        "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName, creature.movementmode "
         "FROM creature "
         "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
         "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
@@ -2150,6 +2150,7 @@ void ObjectMgr::LoadCreatures()
         data.phaseGroup     = fields[26].GetUInt32();
         data.terrainSwapMap = fields[27].GetInt32();
         data.ScriptId       = GetScriptId(fields[28].GetString());
+        data.movementmode   = fields[29].GetFloat();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -2237,6 +2238,18 @@ void ObjectMgr::LoadCreatures()
         {
             TC_LOG_ERROR("sql.sql", "Table `creature` has creature (GUID: " UI64FMTD " Entry: %u) with abs(`orientation`) > 2*PI (orientation is expressed in radians), normalized.", guid, data.id);
             data.orientation = Position::NormalizeOrientation(data.orientation);
+        }
+
+        if (data.movementmode < 0.0f)
+        {
+            TC_LOG_ERROR("sql.sql", "Table `creature` has creature (GUID: %u Entry: %u) with `movementmode`< 0, set to 0.", guid, data.id);
+            data.movementmode = 0.0f;
+        }
+
+        if (data.movementmode > 1.0f)
+        {
+            TC_LOG_ERROR("sql.sql", "Table `creature` has creature (GUID: %u Entry: %u) with `movementmode` > 1, set to 1.", guid, data.id);
+            data.movementmode = 1.0f;
         }
 
         if (data.phaseUseFlags & ~PHASE_USE_FLAGS_ALL)
@@ -2419,6 +2432,7 @@ ObjectGuid::LowType ObjectMgr::AddCreatureData(uint32 entry, uint32 mapId, float
     data.npcflag = cInfo->npcflag;
     data.unit_flags = cInfo->unit_flags;
     data.dynamicflags = cInfo->dynamicflags;
+    data.movementmode = 0;
 
     AddCreatureToGrid(guid, &data);
 
@@ -5707,7 +5721,7 @@ void ObjectMgr::LoadInstanceTemplate()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 instance templates. DB table `page_text` is empty!");
+        TC_LOG_INFO("server.loading", ">> Loaded 0 instance templates. DB table `instance_template` is empty!");
         return;
     }
 
@@ -5752,7 +5766,7 @@ InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 mapID) const
 void ObjectMgr::LoadInstanceEncounters()
 {
     uint32 oldMSTime = getMSTime();
-
+    _DungeonCreditEncounters.clear();
     //                                                 0         1            2                3
     QueryResult result = WorldDatabase.Query("SELECT entry, creditType, creditEntry, lastEncounterDungeon FROM instance_encounters");
     if (!result)
@@ -5770,6 +5784,13 @@ void ObjectMgr::LoadInstanceEncounters()
         uint8 creditType = fields[1].GetUInt8();
         uint32 creditEntry = fields[2].GetUInt32();
         uint32 lastEncounterDungeon = fields[3].GetUInt16();
+
+        if (creditType == ENCOUNTER_CREDIT_KILL_CREATURE)
+        {
+            DungeonCreditEncounter* dungenCreditEncounter = new DungeonCreditEncounter(entry, creditEntry);
+            _DungeonCreditEncounters[creditEntry] = dungenCreditEncounter;
+        }
+
         DungeonEncounterEntry const* dungeonEncounter = sDungeonEncounterStore.LookupEntry(entry);
         if (!dungeonEncounter)
         {
@@ -5846,6 +5867,14 @@ void ObjectMgr::LoadInstanceEncounters()
     } while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u instance encounters in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+uint32 ObjectMgr::GetDungeonEncounterID(uint32 creatureEntry)
+{
+    if (_DungeonCreditEncounters.find(creatureEntry) == _DungeonCreditEncounters.end())
+        return 0;
+    DungeonCreditEncounter* dce = _DungeonCreditEncounters.find(creatureEntry)->second;
+    return (dce) ? dce->dbcEntry : 0;
 }
 
 NpcText const* ObjectMgr::GetNpcText(uint32 Text_ID) const
@@ -10386,7 +10415,7 @@ void ObjectMgr::LoadRaceAndClassExpansionRequirements()
                 continue;
             }
 
-            if (expansion >= MAX_ACCOUNT_EXPANSIONS)
+            if (expansion >= MAX_EXPANSIONS)
             {
                 TC_LOG_ERROR("sql.sql", "Class %u defined in `class_expansion_requirement` has incorrect expansion %u, skipped.", classID, expansion);
                 continue;

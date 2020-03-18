@@ -117,7 +117,6 @@ enum WarlockSpells
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 63106,
     SPELL_WARLOCK_GLYPH_OF_SOULWELL                 = 58094,
     SPELL_WARLOCK_GLYPH_OF_SOULWELL_VISUAL          = 34145,
-    SPELL_WARLOCK_GLYPH_OF_HEALTHSTONE              = 56224,
     SPELL_WARLOCK_GRIMOIRE_FELGUARD                 = 111898,
     SPELL_WARLOCK_GRIMOIRE_FELHUNTER                = 111897,
     SPELL_WARLOCK_GRIMOIRE_IMP                      = 111859,
@@ -511,36 +510,28 @@ class spell_warl_conflagrate : public SpellScript
 };
 
 // 6201 - Create Healthstone
-class spell_warl_create_healthstone : public SpellScriptLoader
+class spell_warl_create_healthstone : public SpellScript
 {
-public:
-    spell_warl_create_healthstone() : SpellScriptLoader("spell_warl_create_healthstone") { }
+    PrepareSpellScript(spell_warl_create_healthstone);
 
-    class spell_warl_create_healthstone_SpellScript : public SpellScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        PrepareSpellScript(spell_warl_create_healthstone_SpellScript);
+        return ValidateSpellInfo({ SPELL_WARLOCK_CREATE_HEALTHSTONE });
+    }
 
-        enum eSpells
-        {
-            CreateHealthstone = 23517
-        };
-
-        void HandleAfterCast()
-        {
-            Unit* l_Caster = GetCaster();
-
-            l_Caster->CastSpell(l_Caster, CreateHealthstone, true);
-        }
-
-        void Register()
-        {
-            AfterCast += SpellCastFn(spell_warl_create_healthstone_SpellScript::HandleAfterCast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
+    bool Load() override
     {
-        return new spell_warl_create_healthstone_SpellScript();
+        return GetCaster()->IsPlayer();
+    }
+
+    void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_WARLOCK_CREATE_HEALTHSTONE, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warl_create_healthstone::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };
 
@@ -781,42 +772,19 @@ class spell_warl_health_funnel : public AuraScript
 };
 
 // 6262 - Healthstone
-class spell_warl_healthstone : public SpellScriptLoader
+class spell_warl_healthstone_heal : public SpellScript
 {
-public:
-    spell_warl_healthstone() : SpellScriptLoader("spell_warl_healthstone") { }
+    PrepareSpellScript(spell_warl_healthstone_heal);
 
-    class spell_warl_healthstone_SpellScript : public SpellScript
+    void HandleOnHit()
     {
-        PrepareSpellScript(spell_warl_healthstone_SpellScript);
+        int32 heal = int32(CalculatePct(GetCaster()->GetCreateHealth(), GetHitHeal()));
+        SetHitHeal(heal);
+    }
 
-        enum eSpells
-        {
-            GlyphOfHealthstone = 56224
-        };
-
-        void HandleHeal(SpellEffIndex /*p_EffIndex*/)
-        {
-            if (GetCaster()->HasAura(eSpells::GlyphOfHealthstone))
-                PreventHitHeal();
-        }
-
-        void HandlePeriodicHeal(SpellEffIndex /*p_EffIndex*/)
-        {
-            if (!GetCaster()->HasAura(eSpells::GlyphOfHealthstone))
-                PreventHitAura();
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_healthstone_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
-            OnEffectHitTarget += SpellEffectFn(spell_warl_healthstone_SpellScript::HandlePeriodicHeal, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
+    void Register() override
     {
-        return new spell_warl_healthstone_SpellScript();
+        OnHit += SpellHitFn(spell_warl_healthstone_heal::HandleOnHit);
     }
 };
 
@@ -3775,6 +3743,7 @@ void AddSC_warlock_spell_scripts()
     RegisterSpellScript(spell_warl_conflagrate);
     RegisterSpellScript(spell_warl_conflagrate_aura);
     RegisterAuraScript(spell_warl_corruption_effect);
+    RegisterSpellScript(spell_warl_create_healthstone);
     RegisterSpellScript(spell_warl_create_healthstone_soulwell);
     RegisterAuraScript(spell_warl_dark_pact);
     RegisterAuraScript(spell_warl_dark_regeneration);
@@ -3794,8 +3763,7 @@ void AddSC_warlock_spell_scripts()
     RegisterAuraScript(aura_warl_haunt);
     new spell_warl_havoc();
     RegisterAuraScript(spell_warl_health_funnel);
-    new spell_warl_healthstone();
-    new spell_warl_create_healthstone();
+    RegisterSpellScript(spell_warl_healthstone_heal);
     new spell_warl_immolate();
     RegisterAuraScript(spell_warl_immolate_aura);
     new spell_warl_life_tap();
@@ -3852,6 +3820,6 @@ void AddSC_warlock_spell_scripts()
     new spell_npc_warl_demonic_gateway_purple();
     new npc_pet_warlock_darkglare();
     RegisterCreatureAI(npc_pet_warlock_wild_imp);
-	new spell_warl_sindorei_spite();
+    new spell_warl_sindorei_spite();
     new spell_warl_sindorei_spite_proc();
 }

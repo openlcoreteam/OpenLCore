@@ -431,7 +431,8 @@ class CreatureGameObjectAreaTriggerScriptRegistrySwapHooks
         ASSERT(!creature->IsCharmed(),
                "There is a disabled AI which is still loaded.");
 
-        creature->AI()->EnterEvadeMode();
+        if (creature->IsAlive())
+            creature->AI()->EnterEvadeMode();
     }
 
     static void UnloadDestroyScript(Creature* creature)
@@ -979,7 +980,7 @@ public:
         else
         {
             // The script uses a script name from database, but isn't assigned to anything.
-            TC_LOG_ERROR("sql.sql", "Script named '%s' in the core is ready for assignment.",
+            TC_LOG_ERROR("sql.sql", "Script named '%s' does not have a script name assigned in database.",
                 script->GetName().c_str());
 
             // Avoid calling "delete script;" because we are currently in the script constructor
@@ -2519,9 +2520,9 @@ void ScriptMgr::OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emote
     FOREACH_SCRIPT(PlayerScript)->OnTextEmote(player, textEmote, emoteNum, guid);
 }
 
-void ScriptMgr::OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck, bool SkipOtherCode)
+void ScriptMgr::OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck)
 {
-    FOREACH_SCRIPT(PlayerScript)->OnSpellCast(player, spell, skipCheck, SkipOtherCode);
+    FOREACH_SCRIPT(PlayerScript)->OnSpellCast(player, spell, skipCheck);
 }
 
 void ScriptMgr::OnPlayerSuccessfulSpellCast(Player* player, Spell* spell)
@@ -2577,6 +2578,11 @@ void ScriptMgr::OnPlayerUpdateZone(Player* player, Area* newArea, Area* oldArea)
 void ScriptMgr::OnPlayerUpdateArea(Player* player, Area* newArea, Area* oldArea)
 {
     FOREACH_SCRIPT(PlayerScript)->OnUpdateArea(player, newArea, oldArea);
+}
+
+void ScriptMgr::OnPlayerUpdateAreaAlternate(Player* player, uint32 newArea, uint32 oldArea)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnUpdateAreaAlternate(player, newArea, oldArea);
 }
 
  void ScriptMgr::OnGossipSelect(Player* player, uint32 menu_id, uint32 sender, uint32 action)
@@ -2692,6 +2698,16 @@ void ScriptMgr::OnPlayerUnsummonPetTemporary(Player* player)
  void ScriptMgr::OnPlayerResummonPetTemporary(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnResummonPetTemporary(player);
+}
+
+void ScriptMgr::OnPlayerMovementUpdate(Player* player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnMovementUpdate(player);
+}
+
+void ScriptMgr::OnPlayerStartChallengeMode(Player* player, uint8 level)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnStartChallengeMode(player, level);
 }
 
 // Account

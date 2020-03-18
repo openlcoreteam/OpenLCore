@@ -37,6 +37,7 @@
 #include "SpellHistory.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "SpellInfo.h"
 
 // Generic script for handling item dummy effects which trigger another spell.
 class spell_item_trigger_spell : public SpellScriptLoader
@@ -2825,7 +2826,7 @@ class spell_item_crystal_prison_dummy_dnd : public SpellScriptLoader
                 if (Creature* target = GetHitCreature())
                     if (target->isDead() && !target->IsPet())
                     {
-                        GetCaster()->SummonGameObject(OBJECT_IMPRISONED_DOOMGUARD, *target, QuaternionData(), uint32(target->GetRespawnTime()-time(NULL)));
+                        GetCaster()->SummonGameObject(OBJECT_IMPRISONED_DOOMGUARD, *target, QuaternionData::fromEulerAnglesZYX(target->GetOrientation(), 0.0f, 0.0f), uint32(target->GetRespawnTime()-time(NULL)));
                         target->DespawnOrUnsummon();
                     }
             }
@@ -4666,6 +4667,373 @@ class aura_item_burning_essence : public AuraScript
     }
 };
 
+// 207472 - Xavarics Magnum Opus (legendary item 132444 - Prydaz, Xavarics Magnum Opus)
+class spell_item_prydaz_abs : public SpellScriptLoader
+{
+public:
+    spell_item_prydaz_abs() : SpellScriptLoader("spell_item_prydaz_abs") { }
+ 
+    class spell_item_prydaz_abs_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_item_prydaz_abs_AuraScript);
+ 
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+        {
+            if (auto plr = GetCaster()->ToPlayer())
+            {
+                if (plr->isInTankSpec()) // for tank specs
+                    amount = plr->CountPctFromMaxHealth(GetSpellInfo()->GetEffect(EFFECT_0)->CalcValue(plr)) * 0.6f;
+                else
+                    amount = plr->CountPctFromMaxHealth(GetSpellInfo()->GetEffect(EFFECT_0)->CalcValue(plr));
+            }
+        }
+ 
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_item_prydaz_abs_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        }
+    };
+ 
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_item_prydaz_abs_AuraScript();
+    }
+};
+
+/// Sunreaver Beacon(For Horde) - 95568, Called by: 140300
+class spell_item_sunreaver_beacon : public SpellScriptLoader
+{
+    public:
+        spell_item_sunreaver_beacon() : SpellScriptLoader("spell_item_sunreaver_beacon") { }
+
+        class spell_item_sunreaver_beacon_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_sunreaver_beacon_SpellScript);
+
+            void HandleDummy()
+            {
+                Unit* Caster = GetCaster();
+                if (Caster == nullptr)
+                    return;
+
+                Player* Player = Caster->ToPlayer();
+                if (Player == nullptr)
+                    return;
+
+                Player->TeleportTo(1064, 7250.192871f, 6277.653320f, 19.352745f, 5.504922f);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_item_sunreaver_beacon_SpellScript::HandleDummy);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_item_sunreaver_beacon_SpellScript();
+        }
+};
+
+/// Swapblaster - 161399
+class spell_item_Swapblaster : public SpellScriptLoader
+{
+    public:
+        spell_item_Swapblaster() : SpellScriptLoader("spell_item_Swapblaster") { }
+
+        class spell_item_Swapblaster_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_Swapblaster_SpellScript);
+
+            void HandleOnHit()
+            {
+                Unit* l_Caster = GetCaster();
+                Unit* l_Target = GetHitUnit();
+
+                if (l_Target == nullptr)
+                    return;
+
+                float l_X = l_Target->GetPositionX();
+                float l_Y = l_Target->GetPositionY();
+                float l_Z = l_Target->GetPositionZ();
+                float l_Orientation = l_Target->GetOrientation();
+
+                l_Target->NearTeleportTo(l_Caster->GetPositionX(), l_Caster->GetPositionY(), l_Caster->GetPositionZ(), l_Caster->GetOrientation());
+                l_Caster->NearTeleportTo(l_X, l_Y, l_Z, l_Orientation);
+            }
+
+            void Register() override
+            {
+                OnHit += SpellHitFn(spell_item_Swapblaster_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_item_Swapblaster_SpellScript();
+        }
+};
+
+/// The Perfect Blossom - 127766
+/// Called by The Perfect Blossom - 187676
+class spell_item_the_perfect_blossom : public SpellScriptLoader
+{
+    public:
+        spell_item_the_perfect_blossom() : SpellScriptLoader("spell_item_the_perfect_blossom") { }
+
+        class spell_item_the_perfect_blossom_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_the_perfect_blossom_SpellScript);
+
+            enum eSpells
+            {
+                FelPetal = 127768,
+                minEntry = 1,
+                maxEntry = 5
+            };
+
+            void HandleCast()
+            {
+                Unit* l_Caster = GetCaster();
+                if (l_Caster == nullptr)
+                    return;
+
+                Player* l_Player = l_Caster->ToPlayer();
+                if (l_Player == nullptr)
+                    return;
+
+                uint32 l_Count = urand(eSpells::minEntry, eSpells::maxEntry);
+                if (!l_Count)
+                    return;
+
+                l_Player->AddItem(eSpells::FelPetal, l_Count);
+            }
+
+            void Register()
+            {
+                AfterCast += SpellCastFn(spell_item_the_perfect_blossom_SpellScript::HandleCast);
+
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_item_the_perfect_blossom_SpellScript();
+        }
+};
+
+/// Super Simian Sphere - 37254
+/// Called by Going Ape - 48333
+class spell_item_super_simian_sphere : public SpellScriptLoader
+{
+    public:
+        spell_item_super_simian_sphere() : SpellScriptLoader("spell_item_super_simian_sphere") { }
+
+        class  spell_item_super_simian_sphere_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_item_super_simian_sphere_AuraScript);
+
+            enum eSpells
+            {
+                GoingApe = 48332
+            };
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Player* l_Player = GetTarget()->ToPlayer();
+                if (l_Player == nullptr)
+                    return;
+
+                if (l_Player->HasAura(eSpells::GoingApe))
+                    l_Player->RemoveAura(eSpells::GoingApe);
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_item_super_simian_sphere_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_item_super_simian_sphere_AuraScript();
+        }
+};
+
+enum AuraOfXavaricsMagnumOpus
+{
+    SPELL_XAVARICS_MAGNUM_OPUS = 207472
+};
+
+//207472 xavarics_magnum_opus
+// @Version : 7.3.5.26365
+class spell_item_xavarics_magnum_opus : public AuraScript
+{
+    PrepareAuraScript(spell_item_xavarics_magnum_opus);
+
+
+    void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+    {
+        amount = ((int32)GetCaster()->GetMaxHealth() * 25) / 100;
+    }
+
+    void OnApply(const AuraEffect*  aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+
+        if (!caster->IsAlive())
+            return;
+        int32 basepoint = GetSpellInfo()->GetEffect(0)->BasePoints;
+        int64 amount = (caster->GetMaxHealth() * basepoint) / 100;
+
+        caster->CastCustomSpell(SPELL_XAVARICS_MAGNUM_OPUS, SPELLVALUE_BASE_POINT0, amount, caster, true, nullptr, aurEff);
+
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_item_xavarics_magnum_opus::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectApply += AuraEffectApplyFn(spell_item_xavarics_magnum_opus::OnApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AuraEffectHandleModes::AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// 45051 - Mad Alchemist's Potion (34440)
+class spell_item_mad_alchemists_potion : public SpellScriptLoader
+{
+public:
+    spell_item_mad_alchemists_potion() : SpellScriptLoader("spell_item_mad_alchemists_potion") {}
+
+    class mad_alchemists_potion_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(mad_alchemists_potion_SpellScript);
+
+        void SecondaryEffect()
+        {
+            std::vector<uint32> availableElixirs =
+            {
+                // Battle Elixirs
+                33720, // Onslaught Elixir (28102)
+                54452, // Adept's Elixir (28103)
+                33726, // Elixir of Mastery (28104)
+                28490, // Elixir of Major Strength (22824)
+                28491, // Elixir of Healing Power (22825)
+                28493, // Elixir of Major Frost Power (22827)
+                54494, // Elixir of Major Agility (22831)
+                28501, // Elixir of Major Firepower (22833)
+                28503,// Elixir of Major Shadow Power (22835)
+                38954, // Fel Strength Elixir (31679)
+                // Guardian Elixirs
+                39625, // Elixir of Major Fortitude (32062)
+                39626, // Earthen Elixir (32063)
+                39627, // Elixir of Draenic Wisdom (32067)
+                39628, // Elixir of Ironskin (32068)
+                28502, // Elixir of Major Defense (22834)
+                28514, // Elixir of Empowerment (22848)
+                // Other
+                28489, // Elixir of Camouflage (22823)
+                28496  // Elixir of the Searching Eye (22830)
+            };
+
+            Unit* target = GetCaster();
+
+            if (target->GetPowerType() == POWER_MANA)
+                availableElixirs.push_back(28509); // Elixir of Major Mageblood (22840)
+
+            uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+
+            bool useElixir = true;
+
+            SpellGroup chosenSpellGroup = SPELL_GROUP_NONE;
+            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_BATTLE))
+                chosenSpellGroup = SPELL_GROUP_ELIXIR_BATTLE;
+            if (sSpellMgr->IsSpellMemberOfSpellGroup(chosenElixir, SPELL_GROUP_ELIXIR_GUARDIAN))
+                chosenSpellGroup = SPELL_GROUP_ELIXIR_GUARDIAN;
+            // If another spell of the same group is already active the elixir should not be cast
+            if (chosenSpellGroup)
+            {
+                Unit::AuraApplicationMap& Auras = target->GetAppliedAuras();
+                for (Unit::AuraApplicationMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
+                {
+                    uint32 spell_id = itr->second->GetBase()->GetId();
+                    if (sSpellMgr->IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) && spell_id != chosenElixir)
+                    {
+                        useElixir = false;
+                        break;
+                    }
+                }
+            }
+
+            if (useElixir)
+                target->CastSpell(target, chosenElixir, true, GetCastItem());
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(mad_alchemists_potion_SpellScript::SecondaryEffect);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new mad_alchemists_potion_SpellScript();
+    }
+};
+
+// 53750 - Crazy Alchemist's Potion (40077)
+class spell_item_crazy_alchemists_potion : public SpellScriptLoader
+{
+public:
+    spell_item_crazy_alchemists_potion() : SpellScriptLoader("spell_item_crazy_alchemists_potion") {}
+
+    class crazy_alchemists_potion_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(crazy_alchemists_potion_SpellScript);
+
+        void SecondaryEffect()
+        {
+            std::vector<uint32> availableElixirs =
+            {
+                43185, // Runic Healing Potion (33447)
+                53750, // Crazy Alchemist's Potion (40077)
+                53761, // Powerful Rejuvenation Potion (40087)
+                53762, // Indestructible Potion (40093)
+                53908, // Potion of Speed (40211)
+                53909, // Potion of Wild Magic (40212)
+                53910, // Mighty Arcane Protection Potion (40213)
+                53911, // Mighty Fire Protection Potion (40214)
+                53913, // Mighty Frost Protection Potion (40215)
+                53914, // Mighty Nature Protection Potion (40216)
+                53915  // Mighty Shadow Protection Potion (40217)
+            };
+
+            Unit* target = GetCaster();
+
+            if (!target->IsInCombat())
+                availableElixirs.push_back(53753); // Potion of Nightmares (40081)
+            if (target->GetPowerType() == POWER_MANA)
+                availableElixirs.push_back(43186); // Runic Mana Potion(33448)
+
+            uint32 chosenElixir = Trinity::Containers::SelectRandomContainerElement(availableElixirs);
+
+            target->CastSpell(target, chosenElixir, true, GetCastItem());
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(crazy_alchemists_potion_SpellScript::SecondaryEffect);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new crazy_alchemists_potion_SpellScript();
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -4678,8 +5046,12 @@ void AddSC_item_spell_scripts()
     new spell_item_trigger_spell("spell_item_mithril_mechanical_dragonling", SPELL_MITHRIL_MECHANICAL_DRAGONLING);
 
     new spell_item_aegis_of_preservation();
+    new spell_item_Swapblaster();
+    new spell_item_the_perfect_blossom();
     new spell_item_arcane_shroud();
+    new spell_item_sunreaver_beacon();
     new spell_item_alchemist_stone();
+    new spell_item_super_simian_sphere();
     new spell_item_anger_capacitor<8>("spell_item_tiny_abomination_in_a_jar");
     new spell_item_anger_capacitor<7>("spell_item_tiny_abomination_in_a_jar_hero");
     new spell_item_aura_of_madness();
@@ -4782,5 +5154,9 @@ void AddSC_item_spell_scripts()
     new spell_item_world_queller_focus();
     new spell_item_water_strider();
     new spell_item_brutal_kinship();
+    RegisterAuraScript(spell_item_xavarics_magnum_opus);
     RegisterAuraScript(aura_item_burning_essence);
+
+    new spell_item_mad_alchemists_potion();
+    new spell_item_crazy_alchemists_potion();
 }

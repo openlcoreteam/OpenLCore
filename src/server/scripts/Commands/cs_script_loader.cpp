@@ -16,6 +16,7 @@
  */
 
 // This is where scripts' loading functions should be declared:
+void AddSC_export_commandscript();
 void AddSC_account_commandscript();
 void AddSC_achievement_commandscript();
 void AddSC_ahbot_commandscript();
@@ -65,6 +66,7 @@ void AddSC_wp_commandscript();
 // void Add${NameOfDirectory}Scripts()
 void AddCommandsScripts()
 {
+    AddSC_export_commandscript();
     AddSC_account_commandscript();
     AddSC_achievement_commandscript();
     AddSC_ahbot_commandscript();

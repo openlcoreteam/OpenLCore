@@ -416,6 +416,14 @@ namespace WorldPackets
             void Read() override { }
         };
 
+		class BattlemasterJoinRatedBG final : public ClientPacket
+        {
+        public:
+            BattlemasterJoinRatedBG(WorldPacket&& packet) : ClientPacket(CMSG_JOIN_RATED_BATTLEGROUND, std::move(packet)) { }
+
+            void Read() override { }
+        };
+
         struct RatedInfo
         {
             uint32 ArenaPersonalRating;

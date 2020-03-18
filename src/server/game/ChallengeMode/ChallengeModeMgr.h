@@ -26,11 +26,13 @@ public:
     static ChallengeModeMgr* instance();
 
     MapChallengeModeEntry const* GetMapChallengeModeEntry(uint32 mapId);
+    MapChallengeModeEntry const * GetMapChallengeModeEntryByModeId(uint32 modeId);
 
     uint32 GetDamageMultiplier(uint8 challengeLevel);
     uint32 GetHealthMultiplier(uint8 challengeLevel);
 
     uint32 GetRandomChallengeId(uint32 flags = 4);
+    uint32 GetRandomChallengeAffixId(uint32 affix, uint32 level = 2);
 
     std::vector<int32> GetBonusListIdsForRewards(uint32 baseItemIlevel, uint8 challengeLevel);
     void Reward(Player* player, uint8 challengeLevel);

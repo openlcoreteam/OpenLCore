@@ -225,6 +225,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
         ABORT();
     }
 
+    uint32 _zoneid  = 0;
     // some instances only have one difficulty
     sDB2Manager.GetDownscaledMapDifficultyData(GetId(), difficulty);
 
@@ -238,7 +239,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
 
     bool load_data = save != NULL;
     map->CreateInstanceData(load_data);
-    if (InstanceScenario* instanceScenario = sScenarioMgr->CreateInstanceScenario(map, team))
+    if (InstanceScenario* instanceScenario = sScenarioMgr->CreateInstanceScenario(map, team, _zoneid))
         map->SetInstanceScenario(instanceScenario);
 
     if (sWorld->getBoolConfig(CONFIG_INSTANCEMAP_LOAD_GRIDS))

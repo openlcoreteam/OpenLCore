@@ -20,28 +20,39 @@
 #include "InstanceScript.h"
 #include "vault_of_the_wardens.h"
 
-class instance_vault_of_the_wardens : public InstanceMapScript
+DoorData const doorData[] =
 {
-    public:
-        instance_vault_of_the_wardens() : InstanceMapScript("instance_vault_of_the_wardens", 1493) { }
-
-        struct instance_vault_of_the_wardens_InstanceMapScript : public InstanceScript
-        {
-            instance_vault_of_the_wardens_InstanceMapScript(InstanceMap* map) : InstanceScript(map) { }
-
-            void Initialize() override
-            {
-                SetBossNumber(DATA_MAX_ENCOUNTERS);
-            }
-        };
-
-        InstanceScript* GetInstanceScript(InstanceMap* map) const override
-        {
-            return new instance_vault_of_the_wardens_InstanceMapScript(map);
-        }
+    { GO_BOSS01_FIRWALL_1,          DATA_TIRATHON,   DOOR_TYPE_PASSAGE },
+    { GO_BOSS01_FIRWALL_2,          DATA_TIRATHON,   DOOR_TYPE_PASSAGE },
+    { GO_BOSS01_DOOR_1,             DATA_TIRATHON,   DOOR_TYPE_PASSAGE },
+    { GO_BOSS01_DOOR_2,             DATA_TIRATHON,   DOOR_TYPE_PASSAGE },
+    //{ GO_AFTER_BOSS01_DOOR,         DATA_TIRATHON,   DOOR_TYPE_PASSAGE },
+    { GO_DOOR_1,                    DATA_INQUISITOR,   DOOR_TYPE_PASSAGE },
 };
+
+struct instance_vault_of_the_wardens : public InstanceScript
+{
+    instance_vault_of_the_wardens(InstanceMap* map) : InstanceScript(map)
+    {
+        SetHeaders(DataHeader);
+        SetBossNumber(EncounterCount);
+        LoadDoorData(doorData);
+        //SetFontOfPowerPos({ 4184.534f, -756.3125f, 269.6668f, 4.67393f });
+    }
+
+    void OnCreatureCreate(Creature* creature) override
+    {
+        InstanceScript::OnCreatureCreate(creature);
+
+        if (instance->IsHeroic())
+            creature->SetBaseHealth(creature->GetMaxHealth() * 2.f);
+        if (instance->IsMythic())
+            creature->SetBaseHealth(creature->GetMaxHealth() * 1.33f);
+    }
+};
+
 
 void AddSC_instance_vault_of_the_wardens()
 {
-    new instance_vault_of_the_wardens();
+    RegisterInstanceScript(instance_vault_of_the_wardens, 1493);
 }

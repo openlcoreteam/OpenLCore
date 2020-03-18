@@ -36,6 +36,10 @@ enum DruidSpells
     SPELL_DRUID_BLESSING_OF_ANSHE                   = 202739,
     SPELL_DRUID_STARLORD_DUMMY                      = 202345,
     SPELL_DRUID_STARLORD_SOLAR                      = 202416,
+    SPELL_DRUID_FORM_AQUATIC                        = 1066,
+    SPELL_DRUID_FORM_FLIGHT                         = 33943,
+    SPELL_DRUID_FORM_STAG                           = 165961,
+    SPELL_DRUID_FORM_SWIFT_FLIGHT                   = 40120,
     SPELL_DRUID_STARLORD_LUNAR                      = 202423,
     SPELL_DRUID_GLYPH_OF_STARS                      = 114301,
     SPELL_DRUID_CHOSEN_OF_ELUNE                     = 102560,
@@ -48,10 +52,6 @@ enum DruidSpells
     SPELL_DRUID_REJUVENATION                        = 774,
     SPELL_DRUID_HEALING_TOUCH                       = 5185,
     SPELL_DRUID_SWIFTMEND                           = 18562,
-    SPELL_DRUID_FORM_AQUATIC                        = 1066,
-    SPELL_DRUID_FORM_FLIGHT                         = 33943,
-    SPELL_DRUID_FORM_STAG                           = 165961,
-    SPELL_DRUID_FORM_SWIFT_FLIGHT                   = 40120,
     SPELL_DRUID_TRAVEL_FORM                         = 783,
     SPELL_DRUID_FELINE_SWIFTNESS                    = 131768,
     SPELL_DRUID_SHRED                               = 5221,
@@ -61,6 +61,10 @@ enum DruidSpells
     SPELL_DRUID_MOONFIRE_CAT                        = 155625,
     SPELL_DRUID_SWIPE_CAT                           = 106785,
     SPELL_DRUID_SABERTOOTH                          = 202031,
+    SPELL_DRUID_TALLENT_STONEBARK                   = 197061,
+    SPELL_DRUID_REJUVENATION_GERMINATION            = 155777,
+    SPELL_DRUID_TALLNET_REJUVENATION_GERMINATION    = 155675,
+
 };
 
 enum ShapeshiftFormSpells
@@ -74,59 +78,59 @@ enum ShapeshiftFormSpells
 
 enum SoulOfTheForestSpells
 {
-    SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO_TALENT  = 158478,
-    SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO         = 114108
+    SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO_TALENT     = 158478,
+    SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO            = 114108
 };
 
 enum EfflorescenceSpells
 {
-    SPELL_DRUID_EFFLORESCENCE_HEAL   = 81269,
-    SPELL_DRUID_EFFLORESCENCE_DUMMY  = 81262
+    SPELL_DRUID_EFFLORESCENCE_HEAL                  = 81269,
+    SPELL_DRUID_EFFLORESCENCE_DUMMY                 = 81262
 };
 
 enum GoreSpells
 {
-    SPELL_DRUID_THRASH = 106832,
-    SPELL_DRUID_MAUL = 6807,
-    SPELL_DRUID_MOONFIRE = 8921,
-    SPELL_DRUID_SWIPE = 213764
+    SPELL_DRUID_THRASH                              = 106832,
+    SPELL_DRUID_MAUL                                = 6807,
+    SPELL_DRUID_MOONFIRE                            = 8921,
+    SPELL_DRUID_SWIPE                               = 213764
 };
 
 enum BalanceAffinitySpells
 {
-    SPELL_DRUID_BALANCE_AFFINITY_DPS    = 197488,
-    SPELL_DRUID_BALANCE_AFFINITY_RESTO  = 197632,
+    SPELL_DRUID_BALANCE_AFFINITY_DPS                = 197488,
+    SPELL_DRUID_BALANCE_AFFINITY_RESTO              = 197632,
 
-    SPELL_DRUID_ASTRAL_INFLUENCE        = 197524,
-    SPELL_DRUID_MOONKIN_FORM_TALENT     = 197625,
-    SPELL_DRUID_STARSURGE               = 197626,
-    SPELL_DRUID_LUNAR_STRIKE            = 197628,
-    SPELL_DRUID_SOLAR_WRATH             = 197629,
-    SPELL_DRUID_SUNFIRE                 = 197630
+    SPELL_DRUID_ASTRAL_INFLUENCE                    = 197524,
+    SPELL_DRUID_MOONKIN_FORM_TALENT                 = 197625,
+    SPELL_DRUID_STARSURGE                           = 197626,
+    SPELL_DRUID_LUNAR_STRIKE                        = 197628,
+    SPELL_DRUID_SOLAR_WRATH                         = 197629,
+    SPELL_DRUID_SUNFIRE                             = 197630
 };
 
 enum FeralAffinitySpells
 {
-    SPELL_DRUID_FERAL_AFFINITY_BALANCE  = 202157,
-    SPELL_DRUID_FERAL_AFFINITY_RESTO    = 197490,
-    SPELL_DRUID_FERAL_AFFINITY_TANK     = 202155
+    SPELL_DRUID_FERAL_AFFINITY_BALANCE              = 202157,
+    SPELL_DRUID_FERAL_AFFINITY_RESTO                = 197490,
+    SPELL_DRUID_FERAL_AFFINITY_TANK                 = 202155
 };
 
 enum GuardianAffinitySpells
 {
-    SPELL_DRUID_GUARDIAN_AFFINITY_RESTO = 197491,
-    SPELL_DRUID_GUARDIAN_AFFINITY_DPS   = 217615,
+    SPELL_DRUID_GUARDIAN_AFFINITY_RESTO             = 197491,
+    SPELL_DRUID_GUARDIAN_AFFINITY_DPS               = 217615,
 
-    SPELL_DRUID_THICK_HIDE              = 16931,
-    SPELL_DRUID_MANGLE                  = 33917,
-    SPELL_DRUID_THRASH_BEAR             = 106832,
-    SPELL_DRUID_IRON_FUR                = 192081,
-    SPELL_DRUID_FRENZIED_REGENERATION   = 22842
+    SPELL_DRUID_THICK_HIDE                          = 16931,
+    SPELL_DRUID_MANGLE                              = 33917,
+    SPELL_DRUID_THRASH_BEAR                         = 106832,
+    SPELL_DRUID_IRON_FUR                            = 192081,
+    SPELL_DRUID_FRENZIED_REGENERATION               = 22842
 };
 
 enum RestorationAffinitySpells
 {
-    SPELL_DRUID_RESTORATION_AFFINITY    = 197492
+    SPELL_DRUID_RESTORATION_AFFINITY                = 197492
 };
 
 // 210706 - Gore 7.3.5
@@ -303,21 +307,55 @@ class spell_dru_efflorescence_aura : public AuraScript
 };
 
 // Efflorescence (Heal) - 81269
-class spell_dru_efflorescence_heal : public SpellScript
+class spell_dru_efflorescence_heal : public SpellScriptLoader
 {
-    PrepareSpellScript(spell_dru_efflorescence_heal);
+    public:
+    spell_dru_efflorescence_heal() : SpellScriptLoader("spell_dru_efflorescence_heal") {}
 
-    void SortTargets(std::list<WorldObject*>& targets)
+    class spell_dru_efflorescence_heal_SpellScript : public SpellScript
     {
-        targets.sort(Trinity::HealthPctOrderPred());
+        PrepareSpellScript(spell_dru_efflorescence_heal_SpellScript);
 
-        if (targets.size() > 3)
-            targets.resize(3);
-    }
+        int32 targetCount;
 
-    void Register() override
+        bool Load() override
+        {
+            targetCount = 0;
+            return true;
+        }
+
+
+        void SortTargets(std::list<WorldObject*>& targets)
+        {
+            targets.sort(Trinity::HealthPctOrderPred());
+        }
+
+        void HandleHeal(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            if (caster == target || targetCount > 2)
+            {
+                SetHitHeal(0);
+            }
+            else
+                targetCount++;
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_efflorescence_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_efflorescence_heal_SpellScript::SortTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_efflorescence_heal::SortTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+        return new spell_dru_efflorescence_heal_SpellScript();
     }
 };
 
@@ -1934,6 +1972,7 @@ public:
                 triggeredSpellId = player->GetSkillValue(SKILL_RIDING) >= 300 ? SPELL_DRUID_FORM_SWIFT_FLIGHT : SPELL_DRUID_FORM_FLIGHT;
             else if (CheckLocationForForm(SPELL_DRUID_FORM_STAG) == SPELL_CAST_OK) // Stag form
                 triggeredSpellId = SPELL_DRUID_FORM_STAG;
+
             // If chosen form is current aura, just don't remove it.
             if (triggeredSpellId == m_scriptSpellId)
                 PreventDefaultAction();
@@ -2632,12 +2671,171 @@ class aura_dru_guardian_affinity_dps : public AuraScript
     }
 };
 
+// 190984 - Solar Wrath | 194153 - Lunar Strike
+class spell_dru_blessing_of_elune : public SpellScriptLoader
+{
+public:
+    spell_dru_blessing_of_elune() : SpellScriptLoader("spell_dru_blessing_of_elune") { }
+
+
+    class spell_dru_blessing_of_elune_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_blessing_of_elune_SpellScript);
+
+        void HandleEnergize(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+
+            if (!caster)
+                return;
+
+            uint32 power = GetHitDamage();
+
+            if (Aura* aura = caster->GetAura(202737))
+                if (AuraEffect* aurEff = aura->GetEffect(EFFECT_0))
+                    power += CalculatePct(power, aurEff->GetAmount());
+
+            SetHitDamage(power);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_blessing_of_elune_SpellScript::HandleEnergize, EFFECT_1, SPELL_EFFECT_ENERGIZE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_blessing_of_elune_SpellScript();
+    }
+};
+
+// 194153 - Lunar Strike
+class spell_druid_lunar_strike : public SpellScript
+{
+    PrepareSpellScript(spell_druid_lunar_strike);
+
+    enum Spells
+    {
+        SPELL_DRUID_LUNAR_STRIKE = 194153,
+        SPELL_DRUID_WARRIOR_OF_ELUNE = 202425,
+        SPELL_DRUID_NATURES_BALANCE = 202430,
+    };
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_DRUID_MOONFIRE_DAMAGE, SPELL_DRUID_WARRIOR_OF_ELUNE, SPELL_DRUID_LUNAR_STRIKE, SPELL_DRUID_NATURES_BALANCE });
+    }
+
+    void HandleHitTarget(SpellEffIndex /*effIndex*/)
+    {
+        Unit* explTarget = GetExplTargetUnit();
+        Unit* currentTarget = GetHitUnit();
+
+        if (!explTarget || !currentTarget)
+            return;
+
+        if (currentTarget != explTarget)
+            SetHitDamage(GetHitDamage() * GetSpellInfo()->GetEffect(EFFECT_2)->BasePoints / 100);
+
+        if (GetCaster()->HasAura(SPELL_DRUID_NATURES_BALANCE))
+            if (Aura* moonfireDOT = currentTarget->GetAura(SPELL_DRUID_MOONFIRE_DAMAGE, GetCaster()->GetGUID()))
+            {
+                int32 duration = moonfireDOT->GetDuration();
+                int32 newDuration = duration + 6 * IN_MILLISECONDS;
+
+                if (newDuration > moonfireDOT->GetMaxDuration())
+                    moonfireDOT->SetMaxDuration(newDuration);
+
+                moonfireDOT->SetDuration(newDuration);
+            }
+    }
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (Aura* WarriorOfElune = GetCaster()->GetAura(SPELL_DRUID_WARRIOR_OF_ELUNE))
+        {
+            int32 amount = WarriorOfElune->GetEffect(EFFECT_0)->GetAmount();
+            WarriorOfElune->GetEffect(EFFECT_0)->SetAmount(amount - 1);
+            if (amount == -102)
+                GetCaster()->RemoveAurasDueToSpell(SPELL_DRUID_WARRIOR_OF_ELUNE);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_druid_lunar_strike::HandleHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        OnEffectHit += SpellEffectFn(spell_druid_lunar_strike::HandleHit, EFFECT_1, SPELL_EFFECT_ENERGIZE);
+    }
+};
+
+class spell_dru_ironbark : public SpellScriptLoader
+{
+public:
+    spell_dru_ironbark() : SpellScriptLoader("spell_dru_ironbark") { }
+
+    class spell_dru_ironbark_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_ironbark_SpellScript);
+
+
+        void HandleAfterCast()
+        {
+            if (GetCaster()->HasAura(SPELL_DRUID_TALLENT_STONEBARK))
+                GetCaster()->ToPlayer()->GetSpellHistory()->ModifyCooldown(GetSpellInfo()->Id, 0);
+        }
+
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_dru_ironbark_SpellScript::HandleAfterCast);
+        }
+    };
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_ironbark_SpellScript();
+    }
+};
+
+class spell_dru_germination : public SpellScriptLoader
+{
+public:
+    spell_dru_germination() : SpellScriptLoader("spell_dru_germination") { }
+
+    class spell_dru_germination_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_germination_AuraScript);
+        void HandleCalculateAmount(AuraEffect const* p_AurEff, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            if (Unit* l_Caster = GetCaster())
+            {
+                ///If soul of the forest is activated we increase the heal by 100%
+                if (l_Caster->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO))
+                {
+                    amount *= 2;
+                    l_Caster->RemoveAura(SPELL_DRUID_SOUL_OF_THE_FOREST_RESTO);
+                }
+            }
+        }
+
+        void Register()
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_germination_AuraScript::HandleCalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dru_germination_AuraScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     // Spells Scripts
     RegisterSpellScript(spell_dru_efflorescence);
     RegisterAuraScript(spell_dru_efflorescence_aura);
-    RegisterSpellScript(spell_dru_efflorescence_heal);
+    new spell_dru_efflorescence_heal();
     new spell_dru_primal_fury();
     new spell_dru_predatory_swiftness();
     new spell_dru_predatory_swiftness_aura();
@@ -2692,6 +2890,12 @@ void AddSC_druid_spell_scripts()
     RegisterAuraScript(aura_dru_feral_affinity_resto);
     RegisterAuraScript(aura_dru_feral_affinity_tank);
     RegisterAuraScript(aura_dru_frenzied_regeneration);
+    new spell_dru_blessing_of_elune();
+    new spell_dru_germination();
+    new spell_dru_ironbark();
+
+
+    RegisterSpellScript(spell_druid_lunar_strike);
 
     // AreaTrigger Scripts
     new at_dru_solar_beam();

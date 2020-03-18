@@ -39,12 +39,17 @@ void AddSC_shadopan_monastery();
 void AddSC_instance_shadopan_monastery();
 
 // Siege of The Niuzao Temple
-void AddSC_boss_jinbak();
-void AddSC_siege_of_the_niuzao_temple();
-void AddSC_instance_siege_of_the_niuzao_temple();
+void AddSC_boss_commander_vojak();
+void AddSC_boss_general_pavalak();
+void AddSC_boss_vizier_jinbak();
+void AddSC_boss_wing_leader_neronok();
+void AddSC_siege_of_niuzao_temple();
+void AddSC_instance_siege_of_niuzao_temple();
 
 // Stormstout Brewery
+void AddSC_boss_hoptallus();
 void AddSC_boss_ook_ook();
+void AddSC_boss_yan_zhu_the_uncasked();
 void AddSC_stormstout_brewery();
 void AddSC_instance_stormstout_brewery();
 
@@ -74,6 +79,27 @@ void AddSC_boss_unsok();
 void AddSC_boss_shekzeer();
 void AddSC_heart_of_fear();
 void AddSC_instance_heart_of_fear();
+
+// Siege of Orgrimmar
+void AddSC_boss_fallen_protectors();
+void AddSC_boss_galakras();
+void AddSC_boss_garrosh_hellscream();
+void AddSC_boss_general_nazgrim();
+void AddSC_boss_immerseus();
+void AddSC_boss_iron_juggernaut();
+void AddSC_boss_korkron_dark_shaman();
+void AddSC_boss_malkorok();
+void AddSC_boss_norushen();
+void AddSC_boss_paragons_of_the_klaxxi();
+void AddSC_boss_sha_of_pride();
+void AddSC_boss_siegecrafter_blackfuse();
+void AddSC_boss_spoils_of_pandaria();
+void AddSC_boss_thok_the_bloodthirsty();
+void AddSC_instance_siege_of_orgrimmar();
+void AddSC_siege_of_orgrimmar_part_1();
+void AddSC_siege_of_orgrimmar_part_2();
+void AddSC_siege_of_orgrimmar_part_3();
+void AddSC_siege_of_orgrimmar_part_4();
 
 // WorldBosses
 void AddSC_boss_chi_ji();
@@ -124,12 +150,17 @@ void AddPandariaScripts()
     AddSC_instance_shadopan_monastery();
 
     // Siege of The Niuzao Temple
-    AddSC_boss_jinbak();
-    AddSC_siege_of_the_niuzao_temple();
-    AddSC_instance_siege_of_the_niuzao_temple();
+    AddSC_boss_commander_vojak();
+    AddSC_boss_general_pavalak();
+    AddSC_boss_vizier_jinbak();
+    AddSC_boss_wing_leader_neronok();
+    AddSC_siege_of_niuzao_temple();
+    AddSC_instance_siege_of_niuzao_temple();
 
     // Stormstout Brewery
+    AddSC_boss_hoptallus();
     AddSC_boss_ook_ook();
+    AddSC_boss_yan_zhu_the_uncasked();
     AddSC_stormstout_brewery();
     AddSC_instance_stormstout_brewery();
 
@@ -159,6 +190,27 @@ void AddPandariaScripts()
     AddSC_boss_shekzeer();
     AddSC_heart_of_fear();
     AddSC_instance_heart_of_fear();
+
+    // Siege of Orgrimmar
+    AddSC_boss_fallen_protectors();
+    AddSC_boss_galakras();
+    AddSC_boss_garrosh_hellscream();
+    AddSC_boss_general_nazgrim();
+    AddSC_boss_immerseus();
+    AddSC_boss_iron_juggernaut();
+    AddSC_boss_korkron_dark_shaman();
+    AddSC_boss_malkorok();
+    AddSC_boss_norushen();
+    AddSC_boss_paragons_of_the_klaxxi();
+    AddSC_boss_sha_of_pride();
+    AddSC_boss_siegecrafter_blackfuse();
+    AddSC_boss_spoils_of_pandaria();
+    AddSC_boss_thok_the_bloodthirsty();
+    AddSC_instance_siege_of_orgrimmar();
+    AddSC_siege_of_orgrimmar_part_1();
+    AddSC_siege_of_orgrimmar_part_2();
+    AddSC_siege_of_orgrimmar_part_3();
+    AddSC_siege_of_orgrimmar_part_4();
 
     // WorldBosses
     AddSC_boss_chi_ji();

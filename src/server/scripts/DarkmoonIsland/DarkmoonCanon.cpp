@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
+﻿/*
+ * Copyright (C) 2019 MagicStorm.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,7 @@ class npc_canon_maxima : public CreatureScript
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->GetQuestStatus(QUEST_HUMANOID_CANNONBALL) == QUEST_STATUS_INCOMPLETE)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Je souhaite devenir un homme canon !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I wish to become a hot man!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
             SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
             return true;
@@ -57,7 +57,7 @@ class npc_canon_maxima : public CreatureScript
         {
             if (!player->HasItemCount(ITEM_DARKMOON_TOKEN))
             {
-                creature->Whisper("Vous devez posseder un Jeton de Sombrelune pour utiliser le canon !", LANG_UNIVERSAL, player);
+                creature->Whisper("You must have a Darkmoon Game Token to use the canon!", LANG_UNIVERSAL, player);
                 CloseGossipMenuFor(player);
                 return true;
             }
@@ -135,32 +135,6 @@ class npc_darkmoon_canon_target : public CreatureScript
         };
 };
 
-class npc_canon_fozlebub : public CreatureScript
-{
-    public:
-        npc_canon_fozlebub() : CreatureScript("npc_canon_fozlebub") { }
-
-        bool OnGossipHello(Player* player, Creature* creature) override
-        {
-            if (creature->IsQuestGiver())
-                player->PrepareQuestMenu(creature->GetGUID());
-
-            if (player->GetQuestStatus(QUEST_HUMANOID_CANNONBALL) != QUEST_STATUS_NONE)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Teleportez moi au canon !", GOSSIP_SENDER_MAIN, 0, "Souhaitez-vous payer 30 piece d'argent ?", 3000, false);
-
-            player->PlayerTalkClass->SendGossipMenu(player->GetGossipTextId(creature), creature->GetGUID());
-            return true;
-        }
-
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 /*action*/) override
-        {
-            player->ModifyMoney(-3000);
-            player->TeleportTo(974, -4019.00f, 6286.58f, 12.49f, 1.39f);
-
-            CloseGossipMenuFor(player);
-            return true;
-        }
-};
 
 class spell_darkmoon_canon_preparation : public SpellScriptLoader
 {
@@ -198,6 +172,5 @@ void AddSC_darkmoon_canon()
 {
     new npc_canon_maxima();
     new npc_darkmoon_canon_target();
-    new npc_canon_fozlebub();
     new spell_darkmoon_canon_preparation();
 };

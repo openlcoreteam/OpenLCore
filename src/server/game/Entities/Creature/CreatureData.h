@@ -264,6 +264,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_XP_AT_KILL        = 0x00000040,       // creature kill not provide XP
     CREATURE_FLAG_EXTRA_TRIGGER              = 0x00000080,       // trigger creature
     CREATURE_FLAG_EXTRA_NO_TAUNT             = 0x00000100,       // creature is immune to taunt auras and effect attack me
+    CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE = 0x00000200,       // creature won't update movement flags
     CREATURE_FLAG_EXTRA_WORLDEVENT           = 0x00004000,       // custom flag for world event creatures (left room for merging)
     CREATURE_FLAG_EXTRA_GUARD                = 0x00008000,       // Creature is guard
     CREATURE_FLAG_EXTRA_NO_CRIT              = 0x00020000,       // creature can't do critical strikes
@@ -501,7 +502,7 @@ struct CreatureData
                      posX(0.0f), posY(0.0f), posZ(0.0f), orientation(0.0f), spawntimesecs(0),
                      spawndist(0.0f), currentwaypoint(0), curhealth(0), curmana(0), movementType(0),
                      spawnDifficulties(), npcflag(0), unit_flags(0), unit_flags2(0), unit_flags3(0), dynamicflags(0),
-                     phaseUseFlags(0), phaseId(0), phaseGroup(0), terrainSwapMap(-1), ScriptId(0), dbData(true) { }
+                     phaseUseFlags(0), phaseId(0), phaseGroup(0), terrainSwapMap(-1), ScriptId(0), movementmode(0.0f), dbData(true) { }
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
     uint32 areaId;
@@ -528,6 +529,7 @@ struct CreatureData
     uint32 phaseGroup;
     int32 terrainSwapMap;
     uint32 ScriptId;
+    float movementmode;
     bool dbData;
 };
 

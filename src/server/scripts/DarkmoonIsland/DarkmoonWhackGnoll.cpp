@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
+ * Copyright (C) 2019 MagicStorm.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -212,7 +212,7 @@ class npc_whack_gnoll_mola : public CreatureScript
                 player->PrepareQuestMenu(creature->GetGUID());
 
             if (player->GetQuestStatus(QUEST_WHACK_A_GNOLL) == QUEST_STATUS_INCOMPLETE)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Je souhaite jouer a Cogne-Gnoll !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want to play Cogne-Gnoll!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
             player->PlayerTalkClass->SendGossipMenu(player->GetGossipTextId(creature), creature->GetGUID());
             return true;
@@ -222,7 +222,7 @@ class npc_whack_gnoll_mola : public CreatureScript
         {
             if (!player->HasItemCount(ITEM_DARKMOON_TOKEN))
             {
-                creature->Whisper("Vous devez posseder un Jeton de Sombrelune pour jouer a Cogne-Gnoll !", LANG_UNIVERSAL, player);
+                creature->Whisper("You must own a Darkmoon Token to play Cogne-Gnoll!", LANG_UNIVERSAL, player);
                 return true;
             }
 
@@ -357,45 +357,6 @@ class spell_whack_gnoll_whack : public SpellScriptLoader
         }
 };
 
-// This is the spell the player can cancel (SPELL_OVERRIDE_ACTION : 101612)
-class spell_whack_gnoll_override_action : public SpellScriptLoader
-{
-public:
-    spell_whack_gnoll_override_action() : SpellScriptLoader("spell_whack_gnoll_override_action") { }
-
-    class spell_whack_gnoll_override_action_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_whack_gnoll_override_action_AuraScript);
-
-        bool Validate(SpellInfo const* /*entry*/) override
-        {
-            return true;
-        }
-
-        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-
-            if (!target)
-                return;
-
-            target->SetPower(POWER_ALTERNATE_POWER, 0);
-            target->RemoveAurasDueToSpell(SPELL_ENABLE_POWERBAR);
-            target->RemoveAurasDueToSpell(SPELL_DOLL_STUN);
-            target->CastSpell(target, SPELL_FORBIDDEN_ZONE, true);
-        }
-
-        void Register() override
-        {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_whack_gnoll_override_action_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_OVERRIDE_SPELLS, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_whack_gnoll_override_action_AuraScript();
-    }
-};
 
 /*######
 ## at_whack_a_gnoll_entrance (7344)
@@ -423,6 +384,5 @@ void AddSC_darkmoon_whack_gnoll()
     new npc_whack_gnoll_mola();
     new npc_whack_gnoll_barrel();
     new spell_whack_gnoll_whack();
-    new spell_whack_gnoll_override_action();
     new AreaTrigger_at_whack_a_gnoll_entrance();
 };

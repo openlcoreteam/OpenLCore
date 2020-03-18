@@ -1,0 +1,149 @@
+Syntax:
+
+    .add id quantity bonusid
+    .add id quantity bonusid1;bonusid2 (Don't do like more than 4, you might crash)
+
+1
+Heroic
+Changes appearance to: 1
+
+2
+Pristine Crafting Material
+
+44
+Warforged
+
+448
+Warforged
+
+449
+Heroic
+Changes appearance to: 1
+
+450
+Mythic
+Changes appearance to: 3
+
+451
+Raid Finder
+Changes appearance to: 4
+
+498
+Cooking Ingredient
+
+499
+Warforged
+
+524
+Heroic
+Changes appearance to: 1
+
+525
+Stage 1 of 6
+Changes appearance to: 6
+
+526
+Stage 2 of 6
+Changes appearance to: 7
+
+527
+Stage 3 of 6
+Changes appearance to: 8
+
+546
+Warforged
+
+547
+Warforged
+
+558
+Stage 2 of 6
+Changes appearance to: 7
+
+559
+Stage 3 of 6
+Changes appearance to: 8
+
+560
+Warforged
+
+561
+Warforged
+
+562
+Warforged
+
+566
+Heroic
+Changes appearance to: 1
+
+567
+Mythic
+Changes appearance to: 3
+
+569
+Mythic
+
+570
+Heroic
+
+571
+Warforged
+
+593
+Stage 4 of 6
+Changes appearance to: 8
+
+594
+Stage 4 of 6
+Changes appearance to: 8
+
+602
+Timewalker
+
+615
+Timewarped
+
+617
+Stage 5 of 6
+Changes appearance to: 8
+
+618
+Stage 6 of 6
+Changes appearance to: 8
+
+619
+Stage 5 of 6
+Changes appearance to: 8
+
+620
+Stage 6 of 6
+Changes appearance to: 8
+
+642
+Mythic
+Changes appearance to: 3
+
+644
+Warforged
+
+645
+Timewarped Warforged
+
+646
+Warforged
+
+648
+Empowered
+
+652
+Baleful
+
+653
+Baleful
+
+656
+Warforged
+
+692
+Timewarped

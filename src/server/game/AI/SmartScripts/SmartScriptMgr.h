@@ -491,6 +491,7 @@ enum SMART_ACTION
     SMART_ACTION_MOUNT_TO_ENTRY_OR_MODEL            = 43,     // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to dismount)
     SMART_ACTION_SET_INGAME_PHASE_ID                = 44,     // PhaseId, apply
     SMART_ACTION_SET_DATA                           = 45,     // Field, Data (only creature @todo)
+    SMART_ACTION_MOVE_FORWARD                       = 46,     // distance
     SMART_ACTION_SET_VISIBILITY                     = 47,     // on/off
     SMART_ACTION_SET_ACTIVE                         = 48,     // on/off
     SMART_ACTION_ATTACK_START                       = 49,     //
@@ -585,6 +586,7 @@ enum SMART_ACTION
     SMART_ACTION_ADD_FLYING_MOVEMENT_FLAG           = 213,    // Variation
     SMART_ACTION_REMOVE_FLYING_MOVEMENT_FLAG        = 214,    // Variation
     SMART_ACTION_CAST_SPELL_OFFSET                  = 215,    // SpellId, triggered if value = 1.
+    SMART_ACTION_RISE_UP                            = 216,    // distance
 
     SMART_ACTION_END
 };

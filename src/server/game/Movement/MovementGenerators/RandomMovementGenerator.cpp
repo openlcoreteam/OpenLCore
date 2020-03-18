@@ -111,7 +111,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
 
     Movement::MoveSplineInit init(creature);
     init.MoveTo(destX, destY, destZ);
-    init.SetWalk(true);
+    init.SetWalk(creature->GetMovementMode() == 1 ? false : true);
     init.Launch();
 
     //Call for creature group update

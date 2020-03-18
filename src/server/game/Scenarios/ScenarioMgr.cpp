@@ -29,7 +29,7 @@ ScenarioMgr* ScenarioMgr::Instance()
     return &instance;
 }
 
-InstanceScenario* ScenarioMgr::CreateInstanceScenario(Map const* map, TeamId team) const
+InstanceScenario* ScenarioMgr::CreateInstanceScenario(Map const* map, TeamId team, uint32 zoneId) const
 {
     auto dbDataItr = _scenarioDBData.find(std::make_pair(map->GetId(), map->GetDifficultyID()));
     // No scenario registered for this map and difficulty in the database
@@ -46,15 +46,72 @@ InstanceScenario* ScenarioMgr::CreateInstanceScenario(Map const* map, TeamId tea
     uint32 scenarioID = 0;
     switch (team)
     {
-        case TEAM_ALLIANCE:
+    case TEAM_ALLIANCE:
+        if (dbDataItr->second.ZoneID > 0)
+        {
+            if (zoneId == dbDataItr->second.ZoneID)
+            {
+                scenarioID = dbDataItr->second.Scenario_A;
+            }
+        }
+        else
+        {
             scenarioID = dbDataItr->second.Scenario_A;
-            break;
-        case TEAM_HORDE:
+        }
+        break;
+    case TEAM_HORDE:
+        if (dbDataItr->second.ZoneID > 0)
+        {
+            if (zoneId == dbDataItr->second.ZoneID)
+            {
+                scenarioID = dbDataItr->second.Scenario_H;
+            }
+        }
+        else
+        {
             scenarioID = dbDataItr->second.Scenario_H;
-            break;
-        default:
-            break;
+        }
+        break;
+    default:
+        break;
     }
+
+
+    auto itr = _scenarioData.find(scenarioID);
+    if (itr == _scenarioData.end())
+    {
+        TC_LOG_ERROR("scenario", "Table `scenarios` contained data linking scenario (Id: %u) to map (Id: %u), difficulty (Id: %u) but no scenario data was found related to that scenario Id.", scenarioID, map->GetId(), map->GetDifficultyID());
+        return nullptr;
+    }
+
+    return new InstanceScenario(map, &itr->second);
+}
+
+InstanceScenario * ScenarioMgr::CreateInstanceScenarioByID(Map const * map, uint32 zoneId)
+{
+    auto dbDataItr = _scenarioDBData.find(std::make_pair(map->GetId(), map->GetDifficultyID()));
+    // No scenario registered for this map and difficulty in the database
+    if (dbDataItr == _scenarioDBData.end())
+        return nullptr;
+
+    uint32 scenarioID = 0;
+   // scenarioID = scenarioId;
+
+
+        if (dbDataItr->second.ZoneID > 0)
+        {
+            if (zoneId == dbDataItr->second.ZoneID)
+            {
+                scenarioID = dbDataItr->second.Scenario_A;
+            }
+        }
+        else
+        {
+            scenarioID = dbDataItr->second.Scenario_A;
+        }
+
+
+    
 
     auto itr = _scenarioData.find(scenarioID);
     if (itr == _scenarioData.end())
@@ -72,7 +129,7 @@ void ScenarioMgr::LoadDBData()
 
     uint32 oldMSTime = getMSTime();
 
-    QueryResult result = WorldDatabase.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
+    QueryResult result = WorldDatabase.Query("SELECT map, difficulty, scenario_A, scenario_H, zoneid FROM scenarios");
 
     if (!result)
     {
@@ -86,6 +143,7 @@ void ScenarioMgr::LoadDBData()
 
         uint32 mapId = fields[0].GetUInt32();
         uint8 difficulty = fields[1].GetUInt8();
+        uint32 zoneid = fields[4].GetUInt32();
 
         uint32 scenarioAllianceId = fields[2].GetUInt32();
         if (scenarioAllianceId > 0 && _scenarioData.find(scenarioAllianceId) == _scenarioData.end())
@@ -107,6 +165,7 @@ void ScenarioMgr::LoadDBData()
         ScenarioDBData& data = _scenarioDBData[std::make_pair(mapId, difficulty)];
         data.MapID = mapId;
         data.DifficultyID = difficulty;
+        data.ZoneID = zoneid;
         data.Scenario_A = scenarioAllianceId;
         data.Scenario_H = scenarioHordeId;
     }

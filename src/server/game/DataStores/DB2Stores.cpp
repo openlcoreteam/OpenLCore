@@ -83,7 +83,7 @@ DB2Storage<ChrSpecializationEntry>              sChrSpecializationStore("ChrSpec
 DB2Storage<CinematicCameraEntry>                sCinematicCameraStore("CinematicCamera.db2", CinematicCameraLoadInfo::Instance());
 DB2Storage<CinematicSequencesEntry>             sCinematicSequencesStore("CinematicSequences.db2", CinematicSequencesLoadInfo::Instance());
 DB2Storage<ConversationLineEntry>               sConversationLineStore("ConversationLine.db2", ConversationLineLoadInfo::Instance());
-DB2Storage<CreatureDisplayInfoEntry>            sCreatureDisplayInfoStoreRaw("CreatureDisplayInfo.db2", CreatureDisplayInfoLoadInfo::Instance());
+DB2Storage<CreatureDisplayInfoEntry>            sCreatureDisplayInfoStore("CreatureDisplayInfo.db2", CreatureDisplayInfoLoadInfo::Instance());
 CreatureDisplayInfoStore                        sCreatureDisplayInfoStore;
 bool CreatureDisplayInfoStore::HasRecord(uint32 id) const { return sCreatureDisplayInfoStoreRaw.HasRecord(sObjectMgr->GetRealDisplayId(id)); }
 const CreatureDisplayInfoEntry * CreatureDisplayInfoStore::LookupEntry(uint32 id) const { return sCreatureDisplayInfoStoreRaw.LookupEntry(sObjectMgr->GetRealDisplayId(id)); }
@@ -557,7 +557,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
     LOAD_DB2(sCinematicCameraStore);
     LOAD_DB2(sCinematicSequencesStore);
     LOAD_DB2(sConversationLineStore);
-    LOAD_DB2(sCreatureDisplayInfoStoreRaw);
+    LOAD_DB2(sCreatureDisplayInfoStore);
     LOAD_DB2(sCreatureDisplayInfoExtraStore);
     LOAD_DB2(sCreatureFamilyStore);
     LOAD_DB2(sCreatureModelDataStore);
@@ -2427,4 +2427,10 @@ bool DB2Manager::MountTypeXCapabilityEntryComparator::Compare(MountTypeXCapabili
     if (left->MountTypeID == right->MountTypeID)
         return left->OrderIndex < right->OrderIndex;
     return left->MountTypeID < right->MountTypeID;
+}
+
+bool DB2Manager::HasItemBonusTree(uint32 itemId) const
+{
+    auto itemIdRange = _itemToBonusTree.equal_range(itemId);
+    return itemIdRange.first != itemIdRange.second;
 }

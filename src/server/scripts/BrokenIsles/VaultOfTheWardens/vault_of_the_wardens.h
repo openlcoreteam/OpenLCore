@@ -19,6 +19,8 @@
 #ifndef DEF_VAULT_OF_THE_WARDENS_H
 #define DEF_VAULT_OF_THE_WARDENS_H
 
+#define DataHeader "VOTW"
+uint32 const EncounterCount = 5;
 enum DataTypes
 {
     DATA_TIRATHON           = 0,
@@ -28,6 +30,27 @@ enum DataTypes
     DATA_CORDANA            = 4,
 
     DATA_MAX_ENCOUNTERS     = 5
+};
+
+enum Creatures
+{
+    NPC_TIRATHON_SALTHERIL      = 95885,
+    NPC_INQUISITOR_TORMENTORUM  = 96015,    
+    NPC_GLAZER                  = 95887,
+    NPC_ASH_GOLM                = 95886,
+    NPC_CORDANA_FELSONG         = 95888,
+
+    NPC_DRELANIM_WHISPERWIND = 99013,
+};
+
+enum GameObjects
+{
+    GO_BOSS01_FIRWALL_1 = 247082,
+    GO_BOSS01_FIRWALL_2 = 247081,
+    GO_BOSS01_DOOR_1 = 246054,
+    GO_BOSS01_DOOR_2 = 246053,
+    GO_AFTER_BOSS01_DOOR = 247080,
+    GO_DOOR_1 = 246112,
 };
 
 #endif

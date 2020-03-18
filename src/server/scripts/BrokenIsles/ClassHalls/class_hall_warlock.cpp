@@ -17,23 +17,33 @@
  */
 
 #include "ScriptMgr.h"
-enum
-{
-    ///WARLOCK Quest 
-    NPC_RITSSYN_FLAMESCOWL_103506 = 103506,
-    QUEST_THE_SIXTH = 40716,
 
-    QUEST_THE_NEW_BLOOD = 40729,
+enum WarlockClassHall
+{
+    // Creatures
+    NPC_RITSSYN_FLAMESCOWL_103506           = 103506,
+
+    // Texts
+    RITSSYN_FLAMESCOWL_TEXT_00              = 0,
+    RITSSYN_FLAMESCOWL_TEXT_01              = 1,
+
+    // Quests
+    QUEST_THE_SIXTH                         = 40716,
+    QUEST_THE_NEW_BLOOD                     = 40729
 };
 
 struct npc_ritssyn_flamescowl_103506 : public ScriptedAI
 {
-    npc_ritssyn_flamescowl_103506(Creature* creature) : ScriptedAI(creature) { SayHi = false; }
+    npc_ritssyn_flamescowl_103506(Creature* creature) : ScriptedAI(creature)
+    {
+        SayHi = false;
+    }
 
     void MoveInLineOfSight(Unit* who) override
     {
         if (!who || !who->IsInWorld())
             return;
+
         if (!me->IsWithinDist(who, 25.0f, false))
             return;
 
@@ -41,12 +51,14 @@ struct npc_ritssyn_flamescowl_103506 : public ScriptedAI
 
         if (!player)
             return;
+
         me->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, me->GetFollowAngle());
+
         if (!SayHi)
         {
             SayHi = true;
-            //summon one door
-            Talk(0, player);
+            // Summon one door
+            Talk(RITSSYN_FLAMESCOWL_TEXT_00, player);
         }
     }
 
@@ -54,11 +66,13 @@ struct npc_ritssyn_flamescowl_103506 : public ScriptedAI
     {
         if (quest->GetQuestId() == QUEST_THE_SIXTH)
         {
-            Talk(1, player);
+            Talk(RITSSYN_FLAMESCOWL_TEXT_01, player);
             me->DespawnOrUnsummon(5000);
         }
     }
+
 private:
+
     bool SayHi;
 };
 

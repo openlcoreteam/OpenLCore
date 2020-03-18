@@ -274,6 +274,9 @@ class TC_GAME_API Item : public Object
         ItemDynamicFieldGems const* GetGem(uint16 slot) const;
         void SetGem(uint16 slot, ItemDynamicFieldGems const* gem, uint32 gemScalingLevel);
 
+        static void GenerateItemBonus(uint32 itemId, uint32 bonusTreeMod, std::vector<int32>& itemBonus, bool onlyHeroicOrMithic = false, uint8 Difficulty = 0, uint32 ChallengeLevel = 0, bool IsOplote = false);
+        static int32 GenerateForgedBonus(uint32& itemLevel, std::vector<int32>& bonusLists, bool t19 = false);
+
         std::string const& GetText() const { return m_text; }
         void SetText(std::string const& text) { m_text = text; }
 

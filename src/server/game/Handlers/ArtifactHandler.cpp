@@ -289,5 +289,10 @@ void WorldSession::HandleArtifactAddRelicTalent(WorldPackets::Artifact::Artifact
             //[0] [5] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 8
 }
 
-void WorldSession::HandleArtifactAttuneSocketedRelic(WorldPackets::Artifact::ArtifactAttuneSocketedRelic& /*packet*/)
-{ }
+void WorldSession::HandleArtifactAttuneSocketedRelic(WorldPackets::Artifact::ArtifactAttuneSocketedRelic& packet)
+{
+    WorldPackets::Artifact::ArtifactAttuneSocketedRelicData art;
+    art.ArtifactGUID = packet.ArtifactGUID;
+    art.Result = packet.RelicSlotIndex;//or result
+    SendPacket(art.Write());
+}

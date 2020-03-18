@@ -290,7 +290,6 @@ enum Stats : uint16
     STAT_AGILITY                       = 1,
     STAT_STAMINA                       = 2,
     STAT_INTELLECT                     = 3,
-    //STAT_SPIRIT                        = 4,
 };
 
 #define MAX_STATS                        4
@@ -2485,7 +2484,7 @@ enum GameObjectDestructibleState
     GO_DESTRUCTIBLE_REBUILDING  = 3
 };
 
-// EmotesText.dbc (6.0.2.18988)
+// EmotesText.dbc (7.3.5.26972)
 enum TextEmotes
 {
     TEXT_EMOTE_AGREE                = 1,
@@ -2741,7 +2740,13 @@ enum TextEmotes
     TEXT_EMOTE_SWEAT                = 451,
     TEXT_EMOTE_YW                   = 453,
     TEXT_EMOTE_READ                 = 456,
-    TEXT_EMOTE_BOOT                 = 506
+    TEXT_EMOTE_BOOT                 = 506,
+    TEXT_EMOTE_FORTHEALLIANCE       = 507,
+    TEXT_EMOTE_FORTHEHORDE          = 508,
+    TEXT_EMOTE_WHOA                 = 517,
+    TEXT_EMOTE_OOPS                 = 518,
+    TEXT_EMOTE_ALLIANCE             = 519,
+    TEXT_EMOTE_HORDE                = 50,
 };
 
 // Emotes.dbc (6.0.2.18988)
@@ -4248,7 +4253,7 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
     return 0;
 }
 
-// SkillLine.dbc (6.0)
+// SkillLine.dbc (7.3.5)
 enum SkillType
 {
     SKILL_NONE                           = 0,
@@ -4438,6 +4443,15 @@ enum SkillType
     SKILL_WARGLAIVES                     = 2152,
     SKILL_PET_MECHANICAL                 = 2189,
     SKILL_PET_ABOMINATION                = 2216,
+    SKILL_PET_OXEN                       = 2279,
+    SKILL_PET_SCALEHIDE                  = 2280,
+    SKILL_PET_FEATHERMANE                = 2361,
+    SKILL_RACIAL_NIGHTBORNE              = 2419,
+    SKILL_RACIAL_HIGHTMOUNTAIN_TAUREN    = 2420,
+    SKILL_RACIAL_LIGHTFORGED_DRAENEI     = 2421,
+    SKILL_RACIAL_VOID_ELF                = 2423,
+    SKILL_LANG_SHALASSIAN                = 2464,
+    SKILL_LANG_THALASSIAN2               = 2465,
 };
 
 inline SkillType SkillByLockType(LockType locktype)
@@ -4653,31 +4667,31 @@ enum ChatMsg
 /// 7.1.5
 enum ToastTypes
 {
-    TOAST_TYPE_ITEM = 0,
-    TOAST_TYPE_CURRENCY = 1,
-    TOAST_TYPE_MONEY = 2,
+    TOAST_TYPE_ITEM      = 0,
+    TOAST_TYPE_CURRENCY  = 1,
+    TOAST_TYPE_MONEY     = 2,
 };
 
 /// 6.0.3 19116
 enum DisplayToastMethod
 {
-    DISPLAY_TOAST_METHOD_UNK1 = 0,
-    DISPLAY_TOAST_METHOD_LOOT = 1,
-    DISPLAY_TOAST_METHOD_PET_BATTLE_LOOT = 2,
-    DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM = 3,
-    DISPLAY_TOAST_METHOD_CURRENCY_OR_GOLD = 4,
-    DISPLAY_TOAST_METHOD_LOOT_TOAST_UPGRADE_1 = 5,
-    DISPLAY_TOAST_METHOD_LOOT_TOAST_UPGRADE_2 = 6,
-    DISPLAY_TOAST_METHOD_UNK3 = 7,
-    DISPLAY_TOAST_METHOD_GARRISON_MISSION_BONUS_ROLL_LOOT_2 = 8,
-    DISPLAY_TOAST_METHOD_PVP_FACTION_LOOT_TOAST = 9,
-    DISPLAY_TOAST_METHOD_GARRISON_CACHE = 10,
-    DISPLAT_TOAST_METHOD_UNK4 = 11,
-    DISPLAT_TOAST_METHOD_UNK5 = 12,
-    DISPLAT_TOAST_METHOD_UNK6 = 13,
-    DISPLAT_TOAST_METHOD_UNK7 = 14,
-    DISPLAT_TOAST_METHOD_UNK8 = 15,
-    DISPLAT_TOAST_METHOD_TASK_LOOT = 16
+    DISPLAY_TOAST_METHOD_UNK1                                = 0,
+    DISPLAY_TOAST_METHOD_LOOT                                = 1,
+    DISPLAY_TOAST_METHOD_PET_BATTLE_LOOT                     = 2,
+    DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM                    = 3,
+    DISPLAY_TOAST_METHOD_CURRENCY_OR_GOLD                    = 4,
+    DISPLAY_TOAST_METHOD_LOOT_TOAST_UPGRADE_1                = 5,
+    DISPLAY_TOAST_METHOD_LOOT_TOAST_UPGRADE_2                = 6,
+    DISPLAY_TOAST_METHOD_UNK3                                = 7,
+    DISPLAY_TOAST_METHOD_GARRISON_MISSION_BONUS_ROLL_LOOT_2  = 8,
+    DISPLAY_TOAST_METHOD_PVP_FACTION_LOOT_TOAST              = 9,
+    DISPLAY_TOAST_METHOD_GARRISON_CACHE                      = 10,
+    DISPLAT_TOAST_METHOD_UNK4                                = 11,
+    DISPLAT_TOAST_METHOD_UPGRADE                             = 12,
+    DISPLAT_TOAST_METHOD_LEGENDARY                           = 13,
+    DISPLAT_TOAST_METHOD_UNK7                                = 14,
+    DISPLAT_TOAST_METHOD_UNK8                                = 15,
+    DISPLAT_TOAST_METHOD_TASK_LOOT                           = 16
 };
 
 #define GM_SILENCE_AURA 1852

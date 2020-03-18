@@ -38,6 +38,16 @@ MapChallengeModeEntry const* ChallengeModeMgr::GetMapChallengeModeEntry(uint32 m
     return nullptr;
 }
 
+MapChallengeModeEntry const* ChallengeModeMgr::GetMapChallengeModeEntryByModeId(uint32 modeId)
+{
+    for (uint32 i = 0; i < sMapChallengeModeStore.GetNumRows(); ++i)
+        if (MapChallengeModeEntry const* challengeModeEntry = sMapChallengeModeStore.LookupEntry(i))
+            if (challengeModeEntry->ID == modeId)
+                return challengeModeEntry;
+
+    return nullptr;
+}
+
 uint32 ChallengeModeMgr::GetDamageMultiplier(uint8 challengeLevel)
 {
     if (GtChallengeModeDamage const* challengeDamage = sChallengeModeDamage.GetRow(challengeLevel))
@@ -61,13 +71,57 @@ uint32 ChallengeModeMgr::GetRandomChallengeId(uint32 flags/* = 4*/)
     for (uint32 i = 0; i < sMapChallengeModeStore.GetNumRows(); ++i)
         if (MapChallengeModeEntry const* challengeModeEntry = sMapChallengeModeStore.LookupEntry(i))
             if (challengeModeEntry->Flags & flags &&
-                (challengeModeEntry->ID == 197 || challengeModeEntry->ID == 198 || challengeModeEntry->ID == 199)) // Temp fix, only doable dungeons here
+                (challengeModeEntry->ID == 197 || challengeModeEntry->ID == 198 || challengeModeEntry->ID == 199 || challengeModeEntry->ID == 200 || challengeModeEntry->ID == 206 || challengeModeEntry->ID == 207 || challengeModeEntry->ID == 208 || challengeModeEntry->ID == 209 || challengeModeEntry->ID == 210 || challengeModeEntry->ID == 227 || challengeModeEntry->ID == 233 || challengeModeEntry->ID == 234 || challengeModeEntry->ID == 239)) // Temp fix, only doable dungeons here
                 challenges.push_back(challengeModeEntry->ID);
 
     if (challenges.empty())
         return 0;
 
     return Trinity::Containers::SelectRandomContainerElement(challenges);
+}
+
+uint32 ChallengeModeMgr::GetRandomChallengeAffixId(uint32 affix,uint32 level/* = 2*/)
+{
+    std::vector<uint32> affixs;
+    switch (affix)
+    {
+    case 1:
+        if (level >= 4)
+        {
+            affixs.push_back(5);//??
+            affixs.push_back(6);//??
+            affixs.push_back(7);//??
+            affixs.push_back(8);//??
+            affixs.push_back(11);//??
+        }
+        break;
+    case 2:
+        if (level >= 7)
+        {
+            affixs.push_back(13);//??
+            affixs.push_back(14);//??
+            affixs.push_back(12);//??
+            affixs.push_back(2);//??
+            affixs.push_back(4);//??
+            affixs.push_back(3);//??
+        }
+        break;
+    case 3:
+        if (level >= 10)
+        {
+            affixs.push_back(9);//??
+            affixs.push_back(10);//??
+            affixs.push_back(15);//??
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (affixs.empty())
+        return 0;
+
+    return Trinity::Containers::SelectRandomContainerElement(affixs);
 }
 
 std::vector<int32> ChallengeModeMgr::GetBonusListIdsForRewards(uint32 baseItemIlevel, uint8 challengeLevel)

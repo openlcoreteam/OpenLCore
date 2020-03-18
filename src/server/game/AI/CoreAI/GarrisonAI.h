@@ -34,6 +34,9 @@ class TC_GAME_API GarrisonAI
         // Called when player check if he can upgrade his garrison
         virtual bool OnCheckUpgradeable() { return true; }
 
+        // Called when player if he upgrade his garrison
+        virtual void OnUpgrade(Player* /*player*/) { }
+
         // Called when a player enter the garrison
         virtual void OnPlayerEnter(Player* /*player*/) { }
 

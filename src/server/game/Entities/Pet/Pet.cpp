@@ -907,33 +907,33 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         {
             switch (GetEntry())
             {
-                case 510: // mage Water Elemental
-                case 78116:
+                case NPC_ENTRY_WATER_ELEMENTAL_01: // Water Elemental
+                case NPC_ENTRY_WATER_ELEMENTAL_02:
                 {
                     SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC)));
                     break;
                 }
-                case 1964: //force of nature
+                case NPC_ENTRY_TREANT: // Treant
                 {
                     float bonusDmg = GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
                     break;
                 }
-                case 15352: //earth elemental 36213
+                case NPC_ENTRY_GREATER_EARTH_ELEMENTAL: // Greater Earth Elemental
                 {
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
                 }
-                case 15438: //fire elemental
+                case NPC_ENTRY_GREATER_FIRE_ELEMENTAL: // Greater Fire Elemental
                 {
                     SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
                     break;
                 }
-                case 19668: // Shadowfiend
+                case NPC_ENTRY_SHADOWFIEND: // Shadowfiend
                 {
                     int32 bonus_dmg = int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.3f);
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
@@ -941,19 +941,19 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
                     break;
                 }
-                case 19833: //Snake Trap - Venomous Snake
+                case NPC_ENTRY_VENOMOUS_SNAKE: // Snake Trap - Venomous Snake
                 {
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel / 2) - 25));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel / 2) - 18));
                     break;
                 }
-                case 19921: //Snake Trap - Viper
+                case NPC_ENTRY_VIPER: // Snake Trap - Viper
                 {
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
                     break;
                 }
-                case 29264: // Feral Spirit
+                case NPC_ENTRY_SPIRIT_WOLF: // Spirit Wolf
                 {
                     // wolf attack speed is 1.5s
                     SetBaseAttackTime(BASE_ATTACK, cinfo->BaseAttackTime);
@@ -967,20 +967,20 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
                     break;
                 }
-                case 31216: // Mirror Image
+                case NPC_ENTRY_MIRROR_IMAGE: // Mirror Image
                 {
                     SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
                     SetDisplayId(GetOwner()->GetDisplayId());
                     break;
                 }
-                case 27829: // Ebon Gargoyle
+                case NPC_ENTRY_EBON_GARGOYLE: // Ebon Gargoyle
                 {
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
                 }
-                case 28017: // Bloodworms
+                case NPC_ENTRY_BLOODWORM: // Bloodworm
                 {
                     SetCreateHealth(4 * petlevel);
                     SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
@@ -988,7 +988,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
                     break;
                 }
-                case 98035: // Dreadstalkers
+                case NPC_ENTRY_DREADSTALKER: // Dreadstalker
                 {
                     SetBaseAttackTime(BASE_ATTACK, cinfo->BaseAttackTime);
 

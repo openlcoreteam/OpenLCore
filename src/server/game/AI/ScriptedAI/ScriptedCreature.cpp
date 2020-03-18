@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ObjectMgr.h"
 #include "ScriptedCreature.h"
 #include "AreaBoundary.h"
 #include "DB2Stores.h"
@@ -128,7 +129,9 @@ ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
     summons(creature),
     damageEvents(creature),
     instance(creature->GetInstanceScript()),
-    _isCombatMovementAllowed(true)
+    _isCombatMovementAllowed(true),
+	haseventdata(false),
+    hastalkdata(false)
 {
     _isHeroic = me->GetMap()->IsHeroic();
     _difficulty = me->GetMap()->GetDifficultyID();
@@ -160,6 +163,14 @@ void ScriptedAI::UpdateAI(uint32 diff)
     events.Update(diff);
 
     DoMeleeAttackIfReady();
+}
+
+void ScriptedAI::SetUnlock(uint32 time)
+{
+    me->GetScheduler().Schedule(Milliseconds(time), [this](TaskContext context)
+    {
+        IsLock = false;
+    });
 }
 
 void ScriptedAI::DoStartMovement(Unit* victim, float distance, float angle)
@@ -452,6 +463,7 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
 {
     if (instance)
         SetBoundary(instance->GetBossBoundary(bossId));
+ 	_dungeonEncounterId = sObjectMgr->GetDungeonEncounterID(creature->GetEntry());
 }
 
 void BossAI::_Reset()
@@ -478,8 +490,11 @@ void BossAI::_JustDied()
     {
         instance->SetBossState(_bossId, DONE);
         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+ 		if(_dungeonEncounterId>0)
+            instance->SendBossKillCredit(_dungeonEncounterId);
     }
     Talk(BOSS_TALK_JUST_DIED);
+    GetTalkData(EVENT_ON_JUSTDIED);/////here
 }
 
 void BossAI::_JustReachedHome()
@@ -494,6 +509,8 @@ void BossAI::_KilledUnit(Unit* victim)
 {
     if (victim->IsPlayer() && urand(0, 1))
         Talk(BOSS_TALK_KILL_PLAYER);
+    if (victim->IsPlayer() && urand(0, 1))
+        GetTalkData(EVENT_ON_KILLEDUNIT);
 }
 
 void BossAI::_DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -523,6 +540,7 @@ void BossAI::_EnterCombat(bool showFrameEngage /*= true*/)
     DoZoneInCombat();
     ScheduleTasks();
     Talk(BOSS_TALK_ENTER_COMBAT);
+    GetTalkData(EVENT_ON_ENTERCOMBAT);
 }
 
 void BossAI::TeleportCheaters()
@@ -542,6 +560,7 @@ void BossAI::JustSummoned(Creature* summon)
     summons.Summon(summon);
     if (me->IsInCombat())
         DoZoneInCombat(summon);
+    GetTalkData(EVENT_ON_JUSTSUMMON);
 }
 
 void BossAI::SummonedCreatureDespawn(Creature* summon)
@@ -745,4 +764,85 @@ void GetRandPosFromCenterInDist(Position* centerPos, float dist, Position& moveP
 void GetPositionWithDistInFront(Position* centerPos, float dist, Position& movePosition)
 {
     GetPositionWithDistInOrientation(centerPos, dist, centerPos->GetOrientation(), movePosition);
+}
+
+void ScriptedAI::LoadEventData(EventData const * data)
+{
+    if (data)
+    {
+        eventslist = data;
+        haseventdata = true;
+    }        
+}
+
+void ScriptedAI::GetEventData(uint16 group)
+{
+    if (!eventslist)
+        return;
+    if (!haseventdata)
+        return;
+
+    EventData const* list = eventslist;
+    while (list->eventId)
+    {
+        if (list->group == group)
+            events.ScheduleEvent(list->eventId, list->time, list->group, list->phase);
+        ++list;
+    }
+}
+
+void ScriptedAI::LoadTalkData(TalkData const * data)
+{
+    if (data)
+    {
+        talkslist = data;
+        hastalkdata = true;
+    }      
+}
+
+void ScriptedAI::GetTalkData(uint32 eventId)
+{
+    if (!talkslist)
+        return;
+    if (!hastalkdata)
+        return;
+
+    TalkData const* list = talkslist;
+    while (list->eventId)
+    {
+        if (list->eventId == eventId)
+        {
+            switch (list->eventType)
+            {
+            case EVENT_TYPE_TALK:
+                me->AI()->Talk(list->eventData);
+                break;
+            case EVENT_TYPE_CONVERSATION:
+                if (list->eventData > 0)
+                    if (instance)
+                        instance->DoConversation(list->eventData);
+                break;
+            case EVENT_TYPE_ACHIEVEMENT:
+                if (list->eventData > 0)
+                    if (instance)
+                        instance->DoCompleteAchievement(list->eventData);
+                break;
+            case EVENT_TYPE_SPELL:
+                if (list->eventData > 0)
+                    if (instance)
+                        instance->DoCastSpellOnPlayers(list->eventData);
+                break;
+            case EVENT_TYPE_YELL:
+                if (list->eventData > 0)
+                    me->Yell(list->eventData);
+                break;
+            case EVENT_TYPE_SAY:
+                if (list->eventData > 0)
+                    me->Say(list->eventData);
+                break;
+            }
+        }
+        ++list;
+    }
+    
 }

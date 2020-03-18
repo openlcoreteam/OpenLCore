@@ -199,7 +199,7 @@ void WorldQuestMgr::ActivateQuest(WorldQuestTemplate* worldQuestTemplate)
             if (Player* player = iter->second->GetPlayer())
                 if (player->HasWorldQuestEnabled())
                     if (player->GetQuestStatus(worldQuestTemplate->QuestId) == QUEST_STATUS_NONE)
-                        player->AddQuest(quest, nullptr);
+                        player->AddQuestAndCheckCompletion(quest, nullptr);
     }
 
     PreparedStatement* stmt = nullptr;
@@ -480,7 +480,7 @@ void WorldQuestMgr::AddEmissaryQuestsOnPlayerIfNeeded(Player* player)
             if (Quest const* quest = worldQuestTemplate->GetQuest())
                 if (quest->IsEmissaryQuest())
                     if (player->GetQuestStatus(itr.first) == QUEST_STATUS_NONE)
-                        player->AddQuest(quest, nullptr);
+                        player->AddQuestAndCheckCompletion(quest, nullptr);
 }
 
 uint32 WorldQuestMgr::GetTimerForQuest(uint32 questId)

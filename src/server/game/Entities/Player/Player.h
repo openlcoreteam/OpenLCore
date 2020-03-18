@@ -39,6 +39,8 @@
 #include <queue>
 #include "GarrisonMgr.h"
 #include "PlayerStorage.h"
+#include "TaskScheduler.h"
+#include "Conversation.h"
 
 struct AccessRequirement;
 struct AchievementEntry;
@@ -445,7 +447,8 @@ enum PlayerFlags
 enum PlayerFlagsEx
 {
     PLAYER_FLAGS_EX_REAGENT_BANK_UNLOCKED   = 0x0001,
-    PLAYER_FLAGS_EX_MERCENARY_MODE          = 0x0002
+    PLAYER_FLAGS_EX_MERCENARY_MODE          = 0x0002,
+    PLAYER_FLAGS_EX_ARTIFACT_FORGE_CHEAT    = 0x0004
 };
 
 enum PlayerLocalFlags
@@ -1024,6 +1027,41 @@ struct ResurrectionData
     uint32 Aura;
 };
 
+struct CompletedChallenge
+{
+    CompletedChallenge()
+    {
+        MapID = 0;
+        BestCompletion = 0;
+        LastCompletion = 0;
+        BestMedal = 0;
+        BestMedalDate = 0;
+    }
+
+    uint32 MapID = 0;
+    uint32 BestCompletion = 0;
+    uint32 LastCompletion = 0;
+    uint32 BestMedal = 0;
+    uint32 BestMedalDate = 0;
+};
+
+/// MapID
+typedef std::map<uint32, CompletedChallenge> CompletedChallengesMap;
+
+struct ChallengeAffix
+{
+    ChallengeAffix()
+    {
+        affix_1 = 0;
+        affix_2 = 0;
+        affix_3 = 0;
+    }
+
+    uint32 affix_1 = 0;
+    uint32 affix_2 = 0;
+    uint32 affix_3 = 0;
+};
+
 struct GroupUpdateCounter
 {
     ObjectGuid GroupGuid;
@@ -1123,6 +1161,7 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const;
 
         void SendInitialPacketsBeforeAddToMap();
+        void SendNewDiff(Difficulty difficulty);
         void SendInitialPacketsAfterAddToMap();
         void SendSupercededSpell(uint32 oldSpell, uint32 newSpell) const;
         void SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg = 0) const;
@@ -1177,8 +1216,12 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         void SetCommandStatusOff(uint32 command) { _activeCheats &= ~command; }
 
         // TimeIsMoneyFriend
-	uint32 ptr_Interval;
-	uint32 ptr_Money;
+        uint32 ptr_Interval;
+        uint32 ptr_Money;
+
+        // KeystoneAffix
+        uint32 m_affix_stauts;
+        ChallengeAffix m_ChallengeAffix;
 
         // Played Time Stuff
         time_t m_logintime;
@@ -2538,6 +2581,53 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         // Send custom message with system message (addon, custom interfaces ...etc)
         void SendCustomMessage(std::string const& opcode, std::string const& data = "");
         void SendCustomMessage(std::string const& opcode, std::vector<std::string> const& data);
+
+		/* delay teleport */
+        void AddDelayedTeleport(uint32 delay, uint32 mapID, float x, float y, float z, float o)
+        {
+            WorldLocation loc;
+            loc = WorldLocation(mapID);
+            loc.Relocate(x, y, z, o);
+
+            this->GetScheduler().Schedule(Milliseconds(delay), [loc](TaskContext context)
+            {
+                if (Player* player = GetContextPlayer())
+                {
+                    if (loc.GetMapId() == player->GetMapId())
+                        player->NearTeleportTo(loc, false);
+                    else
+                        player->TeleportTo(loc);
+                }
+            });
+
+        }
+        void AddDelayedTeleport(uint32 delay, uint32 mapID, Position pos)
+        {
+            AddDelayedTeleport(delay, mapID, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+        }
+
+        /*conversation delay teleport */
+        void AddConversationDelayedTeleport(uint32 delay, uint32 conversationId, uint32 mapID, float x, float y, float z, float o)
+        {
+            Conversation::CreateConversation(conversationId, this, this->GetPosition(), { this->GetGUID() });
+            AddDelayedTeleport(delay, mapID, x, y, z, o);           
+        }
+        void AddConversationDelayedTeleport(uint32 delay, uint32 conversationId, uint32 mapID, Position pos)
+        {
+            AddConversationDelayedTeleport(delay, conversationId, mapID, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+        }
+
+        void AddDelayedConversation(uint32 delay, uint32 conversationId)
+        {
+            this->GetScheduler().Schedule(Milliseconds(delay), [conversationId](TaskContext context)
+            {
+                if (Player* player = GetContextPlayer())
+                {
+                    Conversation::CreateConversation(conversationId, player, player->GetPosition(), { player->GetGUID() });
+                }
+            });
+        }
+	void _LoadChallengesAffix();
 
     protected:
         // Gamemaster whisper whitelist

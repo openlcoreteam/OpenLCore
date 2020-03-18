@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
@@ -17,6 +17,12 @@
  */
 
 #include "ScriptMgr.h"
+#include "ObjectMgr.h"
+#include "PhasingHandler.h"
+#include "GameObject.h"
+#include "ScriptedGossip.h"
+#include "Log.h"
+
 enum
 {
     ///Priest Quest
@@ -59,7 +65,27 @@ private:
     bool SayHi;
 };
 
+struct npc_calia_102343 : public ScriptedAI
+{
+    npc_calia_102343(Creature* creature) : ScriptedAI(creature) {  }
+
+    void sGossipSelect(Player* player, uint32 menuId, uint32 gossipListId)
+    {
+        if (player->HasQuest(QUEST_PRIESTLY_MATTERS))
+        {
+            if (gossipListId == 0)
+            {
+                player->KilledMonsterCredit(102340);
+                CloseGossipMenuFor(player);
+                me->SummonCreature(102358, Position(2602.699951f, -534.164978f, 88.999901f, 4.55463f), TEMPSUMMON_MANUAL_DESPAWN);
+            }
+        }
+
+    }
+};
+
 void AddSC_class_hall_priest()
 {
     RegisterCreatureAI(npc_hooded_priestess);
+    RegisterCreatureAI(npc_calia_102343);
 }

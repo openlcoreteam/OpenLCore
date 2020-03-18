@@ -906,11 +906,11 @@ void AuctionBotSeller::AddNewAuctions(SellerConfiguration& config)
     switch (config.GetHouseType())
     {
         case AUCTION_HOUSE_ALLIANCE:
-            houseid = 1; auctioneer = 10181731; break;
+            houseid = 1; auctioneer = 79707; break;
         case AUCTION_HOUSE_HORDE:
-            houseid = 6; auctioneer = 10180097; break;
+            houseid = 6; auctioneer = 4656; break;
         default:
-            houseid = 7; auctioneer = 282977; break;
+            houseid = 7; auctioneer = 23442; break;
     }
 
     AuctionHouseEntry const* ahEntry = sAuctionHouseStore.LookupEntry(houseid);

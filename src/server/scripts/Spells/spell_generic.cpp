@@ -33,6 +33,7 @@
 #include "LFGMgr.h"
 #include "Log.h"
 #include "NPCPackets.h"
+#include "ObjectMgr.h"
 #include "Pet.h"
 #include "ReputationMgr.h"
 #include "SkillDiscovery.h"
@@ -4864,6 +4865,197 @@ public:
     }
 };
 
+// https://ru.wowhead.com/spell=160331
+// 7.3.5
+class spell_gen_blood_elf_illusion : public SpellScriptLoader
+{
+    public:
+        spell_gen_blood_elf_illusion() : SpellScriptLoader("spell_gen_blood_elf_illusion") { }
+
+        class spell_gen_blood_elf_illusion_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_blood_elf_illusion_AuraScript);
+
+            enum eSpells
+            {
+                BloodElfMale   = 20578,
+                BloodElfFemale = 20579,
+            };
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* l_Caster = GetCaster();
+                if (l_Caster == nullptr)
+                    return;
+
+                if (l_Caster->getGender() == GENDER_MALE)
+                    l_Caster->SetDisplayId(eSpells::BloodElfMale);
+                else if (l_Caster->getGender() == GENDER_FEMALE)
+                    l_Caster->SetDisplayId(eSpells::BloodElfFemale);
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectRemoveFn(spell_gen_blood_elf_illusion_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_gen_blood_elf_illusion_AuraScript();
+        }
+};
+
+// https://ru.wowhead.com/spell=187150
+// 7.3.5
+class spell_gen_jewel_of_hellfire_trigger : public SpellScriptLoader
+{
+    public:
+        spell_gen_jewel_of_hellfire_trigger() : SpellScriptLoader("spell_gen_jewel_of_hellfire_trigger") { }
+
+        class spell_gen_jewel_of_hellfire_trigger_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_jewel_of_hellfire_trigger_SpellScript);
+
+            enum eSpells
+            {
+                JewelAura = 187174
+            };
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* l_Caster = GetCaster();
+                l_Caster->CastSpell(l_Caster, eSpells::JewelAura, false);
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_gen_jewel_of_hellfire_trigger_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_jewel_of_hellfire_trigger_SpellScript();
+        }
+};
+
+// https://ru.wowhead.com/spell=187174
+// 7.3.5
+class spell_gen_jewel_of_hellfire : public SpellScriptLoader
+{
+public:
+    spell_gen_jewel_of_hellfire() : SpellScriptLoader("spell_gen_jewel_of_hellfire") { }
+
+    class  spell_gen_jewel_of_hellfire_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_jewel_of_hellfire_AuraScript);
+
+        enum eDatas
+        {
+            MorphMale   = 63130,
+            MorphFemale = 63138
+        };
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* l_Player = GetTarget()->ToPlayer();
+
+            if (l_Player == nullptr)
+                return;
+
+            if (l_Player->getGender() == GENDER_MALE)
+                l_Player->SetDisplayId(eDatas::MorphMale);
+            else
+                l_Player->SetDisplayId(eDatas::MorphFemale);
+        }
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* l_Player = GetTarget()->ToPlayer();
+
+            if (l_Player == nullptr)
+                return;
+
+            l_Player->SetDisplayId(l_Player->GetNativeDisplayId());
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectRemoveFn(spell_gen_jewel_of_hellfire_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_gen_jewel_of_hellfire_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_gen_jewel_of_hellfire_AuraScript();
+    }
+};
+
+// https://ru.wowhead.com/spell=192225
+// 7.3.5
+// 
+uint32 Models[71] = { /*Daleera Moonfang*/56438, /*Ulna Thresher*/57339, /*Karg Bloodfury*/49772, /*Cleric Maluuf*/60947,
+                      /*Soulbinder Tuulani*/54040, /*Shadow Hunter Rala*/54367, /*Fiona*/34450, /*Talonpriest Ishaal*/59461,
+                      /*Millhouse Manastorm*/60701, /*Magister Krelas*/55069, /*Magister Serena*/55068, /*Image of Archmage Vargoth*/19078,
+                      /*Aeda Brightdawn*/59874, /*Defender Illona*/59839, /*Professor Felblast*/60952, /*Spirit of Bony Xuk*/59265,
+                      /*Rangari Erdanii*/57151, /*Bruma Swiftstone*/57340, /*Ka'la*/56419, /*Mulverick*/54373,
+                      /*Shelly Hamby*/60121, /*Hulda Shadowblade*/57783, /*Dark Ranger Velonara*/57772, /*Dagg*/55124,
+                      /*Goldmane the Skinner*/55515, /*Kimzee Pinchwhistle*/56213, /*Alexi Barov*/10456, /*Weldon Barov*/10457,
+                      /*Thisalee Crow*/32254, /*Choluna*/32253, /*Qiana Moonshadow*/55047, /*Olin Umberhide*/55046,
+                      /*Phylarch the Evergreen*/58429, /*Pitfighter Vaandaam*/55056, /*Bruto*/52202, /*Lokra*/53371,
+                      /*Rangari Chel*/57053, /*Kaz the Shrieker*/52195, /*Rangari Kaalya*/54263, /*Vindicator Heluun*/60959,
+                      /*Cacklebone*/60944, /*Kal'gor the Honorable*/52490, /*Apprentice Artificer Andren*/56236, /*Greatmother Geyah*/60995,
+                      /*Vindicator Onaala*/57717, /*Gronnstalker Rokash*/54968, /*Rulkan*/53097, /*Leorajh*/61487,
+                      /*Glirin*/58509, /*Penny Clobberbottom*/58501, /*Nat Pagle*/13099, /*Admiral Taylor*/60858,
+                      /*Benjamin Gibb*/59710, /*Vivianne*/56610, /*Delvar Ironfist*/59353, /*Abu'gar*/57237,
+                      /*Artificer Romuul*/52508, /*Weaponsmith Na'Shra*/52397, /*Croman*/61582, /*Leeroy Jenkins*/57227,
+                      /*Tormmok*/57173, /*Talon Guard Kurekk*/59484, /*Miall*/54905, /*Morketh Bladehowl*/54952,
+                      /*Meatball*/37621, /*Lantresor of the Blade*/56659, /*Blook*/55543, /*Aknor Steelbringer*/61553,
+                      /*Ahm*/60860, /*Ziri'ak*/58876, /*Pleasure-Bot 8000*/57057 };
+
+class spell_gen_coin_of_many_faces : public SpellScriptLoader
+{
+    public:
+        spell_gen_coin_of_many_faces() : SpellScriptLoader("spell_gen_coin_of_many_faces") { }
+
+        class  spell_gen_coin_of_many_faces_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_coin_of_many_faces_AuraScript);
+
+            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* l_Caster = GetCaster();
+                if (l_Caster == nullptr)
+                    return;
+
+                l_Caster->SetDisplayId(Models[rand() % 71]);
+           }
+
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* l_Player = GetTarget()->ToPlayer();
+
+                if (l_Player == nullptr)
+                    return;
+
+                l_Player->RestoreDisplayId();
+            }
+
+            void Register()
+            {
+                AfterEffectApply += AuraEffectRemoveFn(spell_gen_coin_of_many_faces_AuraScript::OnApply, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_gen_coin_of_many_faces_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_gen_coin_of_many_faces_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -4978,4 +5170,8 @@ void AddSC_generic_spell_scripts()
     RegisterSpellScript(spell_light_judgement);
     new playerscript_light_reckoning();
     new spell_gen_sands_of_time();
+    new spell_gen_blood_elf_illusion();
+    new spell_gen_jewel_of_hellfire_trigger();
+    new spell_gen_jewel_of_hellfire();
+    new spell_gen_coin_of_many_faces();
 }

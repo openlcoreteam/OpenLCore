@@ -49,6 +49,9 @@ void WorldSession::HandleChallengeModeStart(WorldPackets::ChallengeMode::StartRe
 
     uint32 challengeModeId      = key->GetModifier(ITEM_MODIFIER_CHALLENGE_MAP_CHALLENGE_MODE_ID);
     uint32 challengeModeLevel   = key->GetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_LEVEL);
+    uint32 challengeModeAffix1 = key->GetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_1);
+    uint32 challengeModeAffix2 = key->GetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_2);
+    uint32 challengeModeAffix3 = key->GetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_3);
 
     MapChallengeModeEntry const* entry = sMapChallengeModeStore.LookupEntry(challengeModeId);
     if (!entry || !challengeModeLevel || entry->MapID != _player->GetMapId())
@@ -58,7 +61,7 @@ void WorldSession::HandleChallengeModeStart(WorldPackets::ChallengeMode::StartRe
     }
 
     if (InstanceScript* instanceScript = _player->GetInstanceScript())
-        instanceScript->StartChallengeMode(challengeModeLevel);
+        instanceScript->StartChallengeMode(challengeModeId, challengeModeLevel, challengeModeAffix1, challengeModeAffix2, challengeModeAffix3);
 
     // Blizzard do not delete the key at challenge start, will require mort research
     _player->DestroyItem(start.Bag, start.Slot, true);

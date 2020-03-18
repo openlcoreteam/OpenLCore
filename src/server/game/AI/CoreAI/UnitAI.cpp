@@ -114,6 +114,22 @@ void UnitAI::SelectTargetList(std::list<Unit*>& targetList, uint32 num, SelectAg
     SelectTargetList(targetList, DefaultTargetSelector(me, dist, playerOnly, aura), num, targetType);
 }
 
+void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
+{
+    if (me->IsInCombat())
+    {
+        ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
+        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+        {
+            if (Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+                if (unit->GetTypeId() == TYPEID_PLAYER)
+                    me->CastSpell(unit, spellid, triggered);
+        }
+    }
+    else
+        return;
+}
+
 void UnitAI::DoCast(uint32 spellId)
 {
     Unit* target = NULL;

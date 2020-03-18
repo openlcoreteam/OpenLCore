@@ -1451,7 +1451,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                 else
                 {
                     item->is_blocked = false;
-                    item->rollWinnerGUID = player->GetGUID();
+                   // item->rollWinnerGUID = player->GetGUID();
                     player->SendEquipError(msg, nullptr, nullptr, roll->itemid);
 
                 }
@@ -1505,7 +1505,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                     else
                     {
                         item->is_blocked = false;
-                        item->rollWinnerGUID = player->GetGUID();
+                        //item->rollWinnerGUID = player->GetGUID();
                         player->SendEquipError(msg, nullptr, nullptr, roll->itemid);
                     }
                 }
