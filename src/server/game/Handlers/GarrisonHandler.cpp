@@ -23,6 +23,9 @@
 #include "GarrisonPackets.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Creature.h"
+#include "SpellMgr.h"
+#include "SpellInfo.h"
 
 void WorldSession::HandleGetGarrisonInfo(WorldPackets::Garrison::GetGarrisonInfo& /*getGarrisonInfo*/)
 {
@@ -78,6 +81,7 @@ void WorldSession::HandleGarrisonGetBuildingLandmarks(WorldPackets::Garrison::Ga
     if (Garrison* garrison = _player->GetGarrison(GARRISON_TYPE_GARRISON))
         garrison->ToWodGarrison()->SendBuildingLandmarks(_player);
 }
+
 void WorldSession::HandleGarrisonOpenMissionNpc(WorldPackets::Garrison::GarrisonOpenMissionNpcClient& garrisonOpenMissionNpcClient)
 {
     if (!_player->GetNPCIfCanInteractWith(garrisonOpenMissionNpcClient.NpcGUID, UNIT_NPC_FLAG_GARRISON_MISSION_NPC))

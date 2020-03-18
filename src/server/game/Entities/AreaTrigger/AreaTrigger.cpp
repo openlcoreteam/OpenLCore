@@ -82,7 +82,8 @@ void AreaTrigger::RemoveFromWorld()
         // Handle removal of all units, calling OnUnitExit & deleting auras if needed
         HandleUnitEnterExit({});
 
-        _ai->OnRemove();
+        if(_ai)
+            _ai->OnRemove();
 
         WorldObject::RemoveFromWorld();
         GetMap()->GetObjectsStore().Remove<AreaTrigger>(GetGUID());

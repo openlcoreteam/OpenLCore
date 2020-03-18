@@ -912,6 +912,7 @@ class TC_GAME_API Guild
             return itr != m_members.end() ? itr->second : nullptr;
         }*/
 
+
         inline Member* GetMember(std::string const& name)
         {
             for (auto itr = m_members.begin(); itr != m_members.end(); ++itr)

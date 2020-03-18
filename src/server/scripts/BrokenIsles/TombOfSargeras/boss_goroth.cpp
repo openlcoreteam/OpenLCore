@@ -1,3 +1,20 @@
+/*
+* Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "AreaTrigger.h"
 #include "AreaTriggerAI.h"
 #include "AreaTriggerTemplate.h"
@@ -11,51 +28,51 @@
 enum Spells
 {
     // Goroth
-    SPELL_BURNING_ARMOR                 = 231363,
-    SPELL_BURNING_ERUPTION              = 231395, // Casted at SPELL_BURNING_ARMOR end
+    SPELL_BURNING_ARMOR                     = 231363,
+    SPELL_BURNING_ERUPTION                  = 231395, // Casted at SPELL_BURNING_ARMOR end
 
-    SPELL_CRASHING_COMET                = 232249,
-    SPELL_CRASHING_COMET_DAMAGE         = 230345,
+    SPELL_CRASHING_COMET                    = 232249,
+    SPELL_CRASHING_COMET_DAMAGE             = 230345,
 
-    SPELL_INFERNAL_SPIKE_SUMMON         = 233055,
-    SPELL_INFERNAL_SPIKE                = 233019,
-    SPELL_INFERNAL_SPIKE_PROTECTION     = 234475,
+    SPELL_INFERNAL_SPIKE_SUMMON             = 233055,
+    SPELL_INFERNAL_SPIKE                    = 233019,
+    SPELL_INFERNAL_SPIKE_PROTECTION         = 234475,
 
-    SPELL_SHATTERING_STAR               = 233272,
-    SPELL_SHATTERING_STAR_AT            = 233279,
-    SPELL_SHATTERING_STAR_DAMAGE        = 233281,
-    SPELL_SHATTERING_STAR_FINAL_DAMAGE  = 233283,
+    SPELL_SHATTERING_STAR                   = 233272,
+    SPELL_SHATTERING_STAR_AT                = 233279,
+    SPELL_SHATTERING_STAR_DAMAGE            = 233281,
+    SPELL_SHATTERING_STAR_FINAL_DAMAGE      = 233283,
 
-    SPELL_INFERNAL_BURNING              = 233062,
-    SPELL_INFERNAL_BURNING_REMOVE_SPIKES = 233078,
+    SPELL_INFERNAL_BURNING                  = 233062,
+    SPELL_INFERNAL_BURNING_REMOVE_SPIKES    = 233078,
 
     // Infernal chaosbringer
-    SPELL_MASSIVE_ERUPTION = 242909,
+    SPELL_MASSIVE_ERUPTION                  = 242909
 };
 
 enum Misc
 {
-    NPC_INFERNAL_SPIKE                  = 116976,
+    NPC_INFERNAL_SPIKE                      = 116976,
 
-    SPELLVISUAL_INFERNAL_SPIKE_DESTROY  = 66119,
+    SPELLVISUAL_INFERNAL_SPIKE_DESTROY      = 66119,
 
-    AT_SHATTERING_STAR                  = 13412,
+    AT_SHATTERING_STAR                      = 13412
 };
 
 enum Texts
 {
-    SAY_AGGRO = 1,
-    SAY_KILL = 2,
-    SAY_WIPE = 3,
-    SAY_DEATH = 4,
-    SAY_INFERNAL_BURNING = 5,
-    SAY_SHATTERING_STAR = 6,
-    SAY_INFERNAL_SPIKE = 7,
+    SAY_AGGRO                               = 1,
+    SAY_KILL                                = 2,
+    SAY_WIPE                                = 3,
+    SAY_DEATH                               = 4,
+    SAY_INFERNAL_BURNING                    = 5,
+    SAY_SHATTERING_STAR                     = 6,
+    SAY_INFERNAL_SPIKE                      = 7
 };
 
 enum Events
 {
-    EVENT_MASSIVE_ERUPTION = 1,
+    EVENT_MASSIVE_ERUPTION                  = 1
 };
 
 struct boss_goroth : public BossAI
@@ -68,6 +85,7 @@ struct boss_goroth : public BossAI
 
         Talk(SAY_AGGRO);
         instance->SetBossState(DATA_GOROTH, IN_PROGRESS);
+
         events.ScheduleEvent(SPELL_BURNING_ARMOR, 16s);
         events.ScheduleEvent(SPELL_CRASHING_COMET, 10s, 20s);
         events.ScheduleEvent(SPELL_INFERNAL_SPIKE_SUMMON, 12s);
@@ -167,6 +185,52 @@ struct boss_goroth : public BossAI
 
 private:
     ObjectGuid _shatteringStarTargetGUID;
+};
+
+struct infernal_chaosbringer : public ScriptedAI
+{
+    infernal_chaosbringer(Creature* creature) : ScriptedAI(creature), Summons(me) { }
+
+    void Reset() override
+    {
+        _events.Reset();
+        me->CombatStop(true);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        _events.ScheduleEvent(EVENT_MASSIVE_ERUPTION, 15s);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_MASSIVE_ERUPTION:
+
+                    DoCastAOE(SPELL_MASSIVE_ERUPTION);
+                    _events.Repeat(15s);
+                    break;
+
+                default:
+
+                    break;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }       
+
+private:
+    EventMap _events;
+    SummonList Summons;
 };
 
 // 231363
@@ -348,70 +412,10 @@ struct at_goroth_shattering_star : AreaTriggerAI
     uint8 _infernalSpikeTouched = 0;
 };
 
-class infernal_chaosbringer : public CreatureScript
-{
-public:
-    infernal_chaosbringer() : CreatureScript("infernal_chaosbringer") { }
-
-    struct infernal_chaosbringerAI : public ScriptedAI
-    {
-        infernal_chaosbringerAI(Creature* creature) : ScriptedAI(creature), Summons(me) { }
-
-        void Reset() override
-        {
-            _events.Reset();
-            me->CombatStop(true);
-        }
-
-        void EnterCombat(Unit* /*who*/) override
-
-        {
-            _events.ScheduleEvent(EVENT_MASSIVE_ERUPTION, 15s);
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            if (!UpdateVictim())
-                return;
-
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_MASSIVE_ERUPTION:
-
-                    DoCastAOE(SPELL_MASSIVE_ERUPTION);
-                    _events.Repeat(15s);
-
-                    break;
-
-                default:
-
-                    break;
-                }
-            }
-
-            DoMeleeAttackIfReady();
-
-        }       
-
-    private:
-        EventMap _events;
-        SummonList Summons;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new infernal_chaosbringerAI(creature);
-    }
-};
-
 void AddSC_boss_goroth()
 {
     RegisterCreatureAI(boss_goroth);
-    new infernal_chaosbringer();
+    RegisterCreatureAI(infernal_chaosbringer);
 
     RegisterAuraScript(spell_burning_armor);
     RegisterAuraScript(aura_crashing_comet);

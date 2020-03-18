@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
+ * Copyright (C) 2019 MagicStorm.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,12 +27,12 @@ class playerscript_darkmoon_carousel : public PlayerScript
     public:
         playerscript_darkmoon_carousel() : PlayerScript("playerscript_darkmoon_carousel") {}
 
-        /*virtual void OnEnterTransport(Player* p_Player, GameObject* transport) override
+        virtual void OnEnterTransport(Player* p_Player, GameObject* transport) 
         {
             if (transport->GetEntry() == GOB_DARKMOON_CAROUSEL)
                 if (!p_Player->HasAura(SPELL_WHEE))
                     p_Player->CastSpell(p_Player, SPELL_WHEE, false);
-        }*/
+        }
 };
 
 // Whee! - 46668

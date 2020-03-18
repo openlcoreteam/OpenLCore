@@ -97,6 +97,8 @@ enum DoorType
 enum ChallengeMode
 {
     GOB_CHALLENGER_DOOR     = 239408,
+	GOB_CHALLENGER_DOOR_LINE235 = 239323,
+    GO_FONT_OF_POWER        = 246779,
 
     SPELL_CHALLENGER_MIGHT  = 206150,
     SPELL_CHALLENGER_BURDEN = 206151
@@ -223,6 +225,26 @@ class TC_GAME_API InstanceScript : public ZoneScript
         // * use HandleGameObject(0, boolen, GO); in OnObjectCreate in instance scripts
         // * use HandleGameObject(GUID, boolen, NULL); in any other script
         void HandleGameObject(ObjectGuid guid, bool open, GameObject* go = nullptr);
+		
+		//DoAddItemOnPlayers
+		void DoAddItemOnPlayers (uint32 entry, uint32 count);
+		
+		// Create Conversation for all players in instance
+        void DoConversation(uint32 conversationId);
+
+        void DoDelayedConversation(uint32 delay, uint32 conversationId);
+		
+		// Resurrect all players in instance
+        void DoResurrectPlayers(float restore_percent);
+		
+		// Remove item on all players in instance
+        void DoDestroyItemCountOnPlayers(uint32 item, uint32 count);
+		
+		// Add item by class on all players in instance
+        void DoAddItemByClassOnPlayers(uint8 classId, uint32 itemId, uint32 count);
+
+        // Remove item by class on all players in instance
+        void DoDestroyItemCountByClassOnPlayers(uint8 classId, uint32 item, uint32 count);
 
         // Change active state of doors or buttons
         void DoUseDoorOrButton(ObjectGuid guid, uint32 withRestoreTime = 0, bool useAlternativeState = false);
@@ -240,9 +262,6 @@ class TC_GAME_API InstanceScript : public ZoneScript
         // Update Achievement Criteria for all players in instance
         void DoUpdateCriteria(CriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
 
-        // Complete Achievement for all players in instance
-        void DoCompletedAchievement(AchievementEntry const* entry);
-
         // Start/Stop Timed Achievement Criteria for all players in instance
         void DoStartCriteriaTimer(CriteriaTimedTypes type, uint32 entry);
         void DoStopCriteriaTimer(CriteriaTimedTypes type, uint32 entry);
@@ -256,6 +275,9 @@ class TC_GAME_API InstanceScript : public ZoneScript
         // Cast spell on all players in instance
         void DoCastSpellOnPlayers(uint32 spell, Unit* caster = nullptr, bool triggered = true);
 
+        // Play scene by Id on all players in instance
+        void DoPlaySceneOnPlayers(uint32 sceneId);
+
         // Play scene by packageId on all players in instance
         void DoPlayScenePackageIdOnPlayers(uint32 scenePackageId);
 
@@ -267,6 +289,8 @@ class TC_GAME_API InstanceScript : public ZoneScript
         void DoModifyPlayerCurrencies(uint32 id, int32 value);
 
         void DoNearTeleportPlayers(const Position pos, bool casting = false);
+		
+		void DoTeleportPlayers(uint32 mapId, const Position pos);
 
         void DoKilledMonsterKredit(uint32 questId, uint32 entry, ObjectGuid guid = ObjectGuid::Empty);
 
@@ -276,13 +300,22 @@ class TC_GAME_API InstanceScript : public ZoneScript
         // Update Achievement Criteria for all players in instance
         void DoUpdateAchievementCriteria(CriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = nullptr);
 
-        // Add aura on all players in instance
+        // Complete Achievement for all players in instance
+        void DoCompletedAchievement(AchievementEntry const* entry);
+		
+	    // Send Event For Scenario
+        void DoSendEventScenario(uint32 eventId /*= 0*/);
+		
+		// Add aura on all players in instance
         void DoAddAuraOnPlayers(uint32 spell);
+
+        /// Do combat stop on all players in instance
+        void DoCombatStopOnPlayers();
 
         // Start movie for all players in instance
         void DoStartMovie(uint32 movieId);
-
-	// Add phase on all players in instance
+		
+		// Add phase on all players in instance
         void DoAddPhaseOnPlayers(uint32 phase);
 
         // Remove phase on all players in instance
@@ -318,8 +351,8 @@ class TC_GAME_API InstanceScript : public ZoneScript
 
         // Sets a temporary entrance that does not get saved to db
         void SetTemporaryEntranceLocation(uint32 worldSafeLocationId) { _temporaryEntranceId = worldSafeLocationId; }
-
-        // Get's the current entrance id
+		
+		// Get's the current entrance id
         uint32 GetEntranceLocation() const { uint32 locationId = _temporaryEntranceId ? _temporaryEntranceId : _entranceId; OnGetEntranceLocation(locationId); return locationId; }
 
         virtual void OnGetEntranceLocation(uint32& /*worldSafeLocationId*/) const { }
@@ -345,8 +378,163 @@ class TC_GAME_API InstanceScript : public ZoneScript
         void SendEncounterEnd();
 
         void SendBossKillCredit(uint32 encounterId);
+		void SendCompleteDungeonEncounter(uint32 encounterId);
 
         virtual void FillInitialWorldStates(WorldPackets::WorldState::InitWorldStates& /*packet*/) { }
+		
+		bool IsScenarioComplete()  { return m_IsScenarioComplete; }
+        bool m_IsScenarioComplete;
+        void CompleteScenario();
+        void CompleteCurrStep();
+        void RespawnCreature(uint64 p_Guid);
+
+        struct CriteriaProgressData
+        {
+            CriteriaProgressData(uint32 p_ID, uint64 p_Quantity, uint64 p_Guid, uint32 p_Date, uint32 p_StartTime, uint8 p_Flags)
+            {
+                m_ID = p_ID;
+                m_Quantity = p_Quantity;
+                m_Guid = p_Guid;
+                m_Date = p_Date;
+                m_TimeFromStart = p_StartTime;
+                m_TimeFromCreate = p_StartTime;
+                m_Flags = p_Flags;
+            }
+
+            CriteriaProgressData()
+            {
+                m_ID = 0;
+                m_Quantity = 0;
+                m_Guid = 0;
+                m_Date = 0;
+                m_TimeFromStart = 0;
+                m_TimeFromCreate = 0;
+                m_Flags = 0;
+            }
+
+            uint32 m_ID;
+            uint64 m_Quantity;
+            uint64 m_Guid;
+            uint32 m_Date;
+            uint32 m_TimeFromStart;
+            uint32 m_TimeFromCreate;
+            uint8  m_Flags;
+        };
+
+        struct BonusObjectiveData
+        {
+            BonusObjectiveData(uint32 p_ID, bool p_Complete)
+            {
+                m_ObjectiveID = p_ID;
+                m_ObjectiveComplete = p_Complete;
+            }
+
+            BonusObjectiveData()
+            {
+                m_ObjectiveID = 0;
+                m_ObjectiveComplete = false;
+            }
+
+            uint32 m_ObjectiveID;
+            bool m_ObjectiveComplete;
+        };
+
+        struct ScenarioData
+        {
+            ScenarioData(uint32 p_ScenarioID, uint32 p_StepID, uint32 p_CurrWave, uint32 p_MaxWave, uint32 p_Timer, uint32 p_CriteriaCount,
+                uint32 p_BonusCount, bool p_Complete)
+            {
+                m_ScenarioID = p_ScenarioID;
+                m_StepID = p_StepID;
+                m_WaveCurrent = p_CurrWave;
+                m_WaveMax = p_MaxWave;
+                m_TimerDuration = p_Timer;
+                m_CriteriaCount = p_CriteriaCount;
+                m_BonusCount = p_BonusCount;
+                m_ScenarioComplete = p_Complete;
+
+                m_CriteriaProgress.resize(m_CriteriaCount);
+                m_BonusObjectives.resize(m_BonusCount);
+            }
+
+            ScenarioData(uint32 p_ScenarioID, uint32 p_StepID)
+            {
+                m_ScenarioID = p_ScenarioID;
+                m_StepID = p_StepID;
+                m_WaveCurrent = 0;
+                m_WaveMax = 0;
+                m_TimerDuration = 0;
+                m_CriteriaCount = 0;
+                m_BonusCount = 0;
+                m_ScenarioComplete = false;
+
+                m_CriteriaProgress.clear();
+                m_BonusObjectives.clear();
+            }
+
+            ScenarioData()
+            {
+                m_ScenarioID = 0;
+                m_StepID = 0;
+                m_WaveCurrent = 0;
+                m_WaveMax = 0;
+                m_TimerDuration = 0;
+                m_CriteriaCount = 0;
+                m_BonusCount = 0;
+                m_ScenarioComplete = false;
+
+                m_CriteriaProgress.clear();
+                m_BonusObjectives.clear();
+            }
+
+            void AddBonusObjective(BonusObjectiveData p_Data)
+            {
+                m_BonusObjectives.push_back(p_Data);
+            }
+
+            void AddCriteriaProgress(CriteriaProgressData p_Data)
+            {
+                m_CriteriaProgress.push_back(p_Data);
+            }
+
+            uint32 m_ScenarioID;
+            uint32 m_StepID;
+            uint32 m_WaveCurrent;
+            uint32 m_WaveMax;
+            uint32 m_TimerDuration;
+            uint32 m_CriteriaCount;
+            uint32 m_BonusCount;
+            bool m_ScenarioComplete;
+
+            std::vector<CriteriaProgressData> m_CriteriaProgress;
+            std::vector<BonusObjectiveData> m_BonusObjectives;
+        };
+
+
+
+
+		void GetScenarioData(Player* p_Player = nullptr);
+        void SendScenarioState(ScenarioData p_Data, Player* p_Player = nullptr);
+        void SendScenarioProgressUpdate(CriteriaProgressData p_Data, Player* p_Player = nullptr);
+        void BuildCriteriaProgressPacket(WorldPacket* p_Data, CriteriaProgressData p_CriteriaProgress);
+
+
+		///
+		bool   m_ChallengeStarted;
+        bool   m_ConditionCompleted;
+        uint32 m_CreatureKilled;
+        uint32 m_StartChallengeTime;
+        std::vector<ObjectGuid> m_ChallengeDoorGuids;
+        uint64 m_ChallengeOrbGuid;
+        uint32 m_ChallengeTime;
+        uint8  m_MedalType;
+        uint64 m_InstanceGuid;
+        uint32 m_BeginningTime;
+        uint32 m_ScenarioID;
+        uint8  m_ScenarioStep;
+        uint32 m_LastResetTime;
+        uint8  m_ChallengeLevel;
+        uint8  m_DeathCount;
 
         // Check if all players are dead (except gamemasters)
         bool IsWipe() const;
@@ -364,11 +552,15 @@ class TC_GAME_API InstanceScript : public ZoneScript
         uint32 GetCombatResurrectionChargeInterval() const;
 
         // Challenge Modes
-        void StartChallengeMode(uint8 level);
+        void StartChallengeMode(uint8 modeid, uint8 level, uint8 affix1, uint8 affix2, uint8 affix3);
         void CompleteChallengeMode();
 
         bool IsChallengeModeStarted() const { return _challengeModeStarted; }
+        uint8 GetChallengeModeId() const { return _challengeModeId; }
         uint8 GetChallengeModeLevel() const { return _challengeModeLevel; }
+        uint8 GetChallengeModeAffix1() const { return _challengeModeAffix1; }
+        uint8 GetChallengeModeAffix2() const { return _challengeModeAffix2; }
+        uint8 GetChallengeModeAffix3() const { return _challengeModeAffix3; }
         uint32 GetChallengeModeCurrentDuration() const;
 
         void SendChallengeModeStart(Player* player = nullptr) const;
@@ -380,6 +572,13 @@ class TC_GAME_API InstanceScript : public ZoneScript
 
         void SetChallengeDoorPos(Position pos) { _challengeModeDoorPosition = pos; }
         virtual void SpawnChallengeModeRewardChest() { }
+		
+		void SetFontOfPowerPos(Position pos) { _challengeModeFontOfPowerPosition = pos; }
+        void SetFontOfPowerPos2(Position pos) { _challengeModeFontOfPowerPosition2 = pos; }
+        void SpawnFontOfPower();
+		
+		virtual void ShowChallengeDoor() { }
+        virtual void HideChallengeDoor() { }
 
     protected:
         void SetHeaders(std::string const& dataHeaders);
@@ -432,10 +631,16 @@ class TC_GAME_API InstanceScript : public ZoneScript
         bool _combatResurrectionTimerStarted;
 
         bool _challengeModeStarted;
+        uint8 _challengeModeId;
         uint8 _challengeModeLevel;
+        uint8 _challengeModeAffix1;
+        uint8 _challengeModeAffix2;
+        uint8 _challengeModeAffix3;
         uint32 _challengeModeStartTime;
         uint32 _challengeModeDeathCount;
         Optional<Position> _challengeModeDoorPosition;
+        Optional<Position> _challengeModeFontOfPowerPosition;
+        Optional<Position> _challengeModeFontOfPowerPosition2;
 
     #ifdef TRINITY_API_USE_DYNAMIC_LINKING
         // Strong reference to the associated script module

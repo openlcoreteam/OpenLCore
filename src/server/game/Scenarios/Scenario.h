@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -72,6 +72,8 @@ class TC_GAME_API Scenario : public CriteriaHandler
         void SendBootPlayer(Player* player);
 
         void SendScenarioEvent(Player* player, uint32 eventId);
+
+        void CompleteCurrStep();
 
     protected:
         GuidUnorderedSet _players;

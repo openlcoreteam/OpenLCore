@@ -169,7 +169,6 @@ struct TC_GAME_API LootItem
     uint8   context;
     ConditionContainer conditions;                               // additional loot condition
     GuidSet allowedGUIDs;
-    ObjectGuid rollWinnerGUID;                                   // Stores the guid of person who won loot, if his bags are full only he can see the item in loot list!
     uint32  count;
     bool    currency          : 1;
     bool    is_looted         : 1;
@@ -285,8 +284,8 @@ struct TC_GAME_API Loot
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT, bool specOnly = false);
-
-    // Inserts the item into the loot (called by LootTemplate processors)
+    
+	// Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const & item, Player const* player = nullptr, bool specOnly = false);
 
     LootItem const* GetItemInSlot(uint32 lootSlot) const;
@@ -321,6 +320,8 @@ private:
     // Loot GUID
     ObjectGuid _GUID;
     uint8 _itemContext;
+	uint8 _DifficultyOwner;
+    uint32 _ChallengeLevel;
 };
 
 class TC_GAME_API AELootResult

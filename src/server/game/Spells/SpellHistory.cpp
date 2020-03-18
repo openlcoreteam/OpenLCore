@@ -243,6 +243,9 @@ void SpellHistory::HandleCooldowns(SpellInfo const* spellInfo, Item const* item,
 
 void SpellHistory::HandleCooldowns(SpellInfo const* spellInfo, uint32 itemID, Spell* spell /*= nullptr*/)
 {
+    if (spell && spell->IsIgnoringCooldowns())
+        return;
+
     if (ConsumeCharge(spellInfo->ChargeCategoryId))
         return;
 
@@ -259,7 +262,7 @@ void SpellHistory::HandleCooldowns(SpellInfo const* spellInfo, uint32 itemID, Sp
         }
     }
 
-    if (spellInfo->IsCooldownStartedOnEvent() || spellInfo->IsPassive() || (spell && spell->IsIgnoringCooldowns()))
+    if (spellInfo->IsCooldownStartedOnEvent() || spellInfo->IsPassive())
         return;
 
     StartCooldown(spellInfo, itemID, spell);

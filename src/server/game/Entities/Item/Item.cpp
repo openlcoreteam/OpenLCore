@@ -40,6 +40,7 @@
 #include "UpdateData.h"
 #include "World.h"
 #include "WorldSession.h"
+#include "Containers.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {
@@ -2236,10 +2237,16 @@ uint32 Item::GetItemLevel(Player const* owner) const
 {
     uint32 minItemLevel = owner ? owner->GetUInt32Value(UNIT_FIELD_MIN_ITEM_LEVEL) : 0;
     uint32 minItemLevelCutoff = owner ? owner->GetUInt32Value(UNIT_FIELD_MIN_ITEM_LEVEL_CUTOFF) : 0;
-    uint32 maxItemLevel = GetTemplate()->GetFlags3() & ITEM_FLAG3_IGNORE_ITEM_LEVEL_CAP_IN_PVP ? 0 : owner ? owner->GetUInt32Value(UNIT_FIELD_MAXITEMLEVEL) : 0;
-    bool pvpBonus = owner ? owner->IsUsingPvpItemLevels() : false;
-    return Item::GetItemLevel(GetTemplate(), _bonusData, owner ? owner->getLevel(): GetTemplate()->GetBaseItemLevel(), GetModifier(ITEM_MODIFIER_SCALING_STAT_DISTRIBUTION_FIXED_LEVEL), GetModifier(ITEM_MODIFIER_UPGRADE_ID),
-        minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
+    if (GetTemplate())
+
+    {
+        uint32 maxItemLevel = GetTemplate()->GetFlags3() & ITEM_FLAG3_IGNORE_ITEM_LEVEL_CAP_IN_PVP ? 0 : owner ? owner->GetUInt32Value(UNIT_FIELD_MAXITEMLEVEL) : 0;
+        bool pvpBonus = owner ? owner->IsUsingPvpItemLevels() : false;
+        return Item::GetItemLevel(GetTemplate(), _bonusData, owner ? owner->getLevel() : GetTemplate()->GetBaseItemLevel(), GetModifier(ITEM_MODIFIER_SCALING_STAT_DISTRIBUTION_FIXED_LEVEL), GetModifier(ITEM_MODIFIER_UPGRADE_ID),
+            minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
+    }
+    else
+        return 0;
 }
 
 uint32 Item::GetItemLevel(ItemTemplate const* itemTemplate, BonusData const& bonusData, uint32 level, uint32 fixedLevel, uint32 upgradeId,
@@ -2811,4 +2818,184 @@ void Item::InitializeBonus()
         return;
 
     _bonusData.Initialize(proto);
+}
+
+void Item::GenerateItemBonus(uint32 itemId, uint32 bonusTreeMod, std::vector<int32>& itemBonus, bool onlyHeroicOrMithic /*= false*/, uint8 Difficulty /*=0*/, uint32 ChallengeLevel /*=0*/, bool IsOplote /* = false*/)
+{
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
+    if (!proto)
+        return;
+
+    uint32 BaseItemLevel = proto->GetBaseItemLevel(); // base item level
+    if (BaseItemLevel == 0)
+        return;
+
+    if (proto->GetQuality() > ITEM_QUALITY_EPIC) // only green / blue / epic for BaseItem
+        return;
+
+    bool BonusItemDb = false;
+    if (!itemBonus.empty() && itemBonus.size() >= 2) /// only for bonus from DB
+        BonusItemDb = true;
+
+    uint32 BonusItemLevel = 0;
+    std::set<uint32> bonusListIDs;
+    if (BonusItemDb)
+    {
+        //bool mythicorheroic = _DifficultyOwner == DIFFICULTY_HEROIC_RAID || _DifficultyOwner == DIFFICULTY_MYTHIC ? true : false;
+        if (BaseItemLevel < 800) // prevent memory leak
+            return;
+
+        if (!itemBonus.empty())
+        {
+            if (DB2Manager::ItemBonusList const* bonuses = sDB2Manager.GetItemBonusList(itemBonus.front()))
+            {
+                for (ItemBonusEntry const* itemBonuses : *bonuses)
+                {
+                    if (itemBonuses->Type != ITEM_BONUS_OVERRIDE_REQUIRED_LEVEL && itemBonuses->Type != ITEM_BONUS_ITEM_LEVEL)
+                        continue;
+
+                    BonusItemLevel = itemBonuses->Value[0]; // Get Bonus Item Level
+                    if (itemBonuses->Type == ITEM_BONUS_ITEM_LEVEL)
+                    {
+                        BonusItemLevel = BaseItemLevel;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        if (onlyHeroicOrMithic)
+        {
+            if (BaseItemLevel < 800) // prevent memory leak
+                return;
+
+            bonusListIDs = sDB2Manager.GetItemBonusTree(itemId, bonusTreeMod);
+            if (bonusListIDs.empty())
+                return;
+
+            for (std::set<uint32>::const_iterator it = bonusListIDs.begin(); it != bonusListIDs.end(); ++it)
+            {
+                if (DB2Manager::ItemBonusList const* bonuses = sDB2Manager.GetItemBonusList(*it))
+                {
+                    for (ItemBonusEntry const* itemBonuses : *bonuses)
+                    {
+                        if (itemBonuses->Type != ITEM_BONUS_OVERRIDE_REQUIRED_LEVEL)
+                            continue;
+
+                        BonusItemLevel = itemBonuses->Value[0]; // Get Bonus Item Level
+                        break;
+                    }
+                }
+            }
+        }
+        else if (Difficulty == DIFFICULTY_NORMAL || Difficulty == DIFFICULTY_NORMAL_RAID || Difficulty == DIFFICULTY_LFR_NEW) /// for only normal dungeon/raid/lfr
+        {
+            if (BaseItemLevel < 800) // prevent memory leak
+                return;
+
+            bool HasItemBonus = sDB2Manager.HasItemBonusTree(itemId);
+            if (!HasItemBonus)
+                return;
+
+            BonusItemLevel = (Difficulty == DIFFICULTY_NORMAL_RAID ? 850 : (Difficulty == DIFFICULTY_LFR_NEW ? 835 : 805)); /// hack need search itemlvl in GetItemBonusList, but prevent memory leak
+        }
+    }
+
+    if (BonusItemLevel == 0)
+        BonusItemLevel = BaseItemLevel;
+
+    int32 diff = GenerateForgedBonus(BonusItemLevel, itemBonus);
+
+    int32 firstBonusId = 0;
+    int32 secondBonusId = 0;
+    if (BonusItemDb)
+    {
+        secondBonusId = itemBonus[0]; // 2 element vector
+        int32 differenceLvl = (BaseItemLevel > BonusItemLevel ? diff : BonusItemLevel - BaseItemLevel);
+        firstBonusId = secondBonusId + differenceLvl; /// get bonus by difference itemlevel.
+    }
+    else
+    {
+        if (onlyHeroicOrMithic)
+            firstBonusId = sDB2Manager.GetItemBonusListForItemLevelDelta(int16(BonusItemLevel - BaseItemLevel)); // get first bonus Id from itemlevel delta
+    }
+
+    /// firstBonusId:BonusListId:ForgedItem
+    /// sniff with 7.2.0 |cffa335ee|Hitem:137537::::::::110:577::35:3:3416:1522:3336:::|h[????????????? ????????]|h|r BonusListId:firstBonusId:ForgedItem
+    if (BonusItemDb)
+    {
+        // Delete old 2 element vector
+        for (uint32 j = 0; j < itemBonus.size(); ++j)
+        {
+            if (itemBonus[j] == secondBonusId)
+            {
+                itemBonus.erase(itemBonus.begin() + j);
+                break;
+            }
+        }
+        // add new element 2 vector with bonus
+        itemBonus.insert(itemBonus.begin() + 1, firstBonusId);
+    }
+    else
+    {
+        itemBonus.push_back(firstBonusId);
+        if (onlyHeroicOrMithic)
+            itemBonus.insert(itemBonus.end(), bonusListIDs.begin(), bonusListIDs.end()); // convert to vector
+        else if (Difficulty == DIFFICULTY_NORMAL || Difficulty == DIFFICULTY_NORMAL_RAID || Difficulty == DIFFICULTY_LFR_NEW) /// Hack for normal dungeon/raid bonus. Prevent Hight item level
+            itemBonus.push_back((Difficulty == DIFFICULTY_NORMAL_RAID ? 1807 : (Difficulty == DIFFICULTY_LFR_NEW ? 3379 : 1826))); /// static value give bonus 805/850 item level and above
+    }
+}
+
+int32 Item::GenerateForgedBonus(uint32& itemLevel, std::vector<int32>& bonusLists, bool t19)
+{
+    if (itemLevel >= ITEM_LEVEL_LEGION_MAX_LEVEL || itemLevel < ITEM_LEVEL_LEGION_MIN_LEVEL)
+        return 0;
+
+    uint32 savedItemLevel = itemLevel;
+
+    uint8 upgradeRolls = (ITEM_LEVEL_LEGION_MAX_LEVEL - itemLevel) / ITEM_LEVEL_BONUS_FORGED;
+    if (upgradeRolls > ITEM_LEVEL_BONUS_MAX_ROLLS)
+        upgradeRolls = ITEM_LEVEL_BONUS_MAX_ROLLS;
+
+    float upgradeChance = ITEM_LEVEL_BONUS_SUCCESS_CHANCE;
+    uint8 bonusItemLevel = 0;
+
+    while (roll_chance_f(upgradeChance))
+    {
+        // Add bonus item levels
+        bonusItemLevel += ITEM_LEVEL_BONUS_FORGED;
+        // 80% of previous chance
+        //upgradeChance = CalculatePct(upgradeChance, ITEM_LEVEL_BONUS_AFTER_SUCCES_PCT);
+    }
+
+    itemLevel += bonusItemLevel;
+    if (itemLevel > ITEM_LEVEL_LEGION_MAX_LEVEL)
+        itemLevel = ITEM_LEVEL_LEGION_MAX_LEVEL;
+
+    if (!t19)
+    {
+        if (bonusItemLevel >= ITEM_LEVEL_BONUS_TITANFORGED)
+            bonusLists.push_back(itemLevel >= ITEM_LEVEL_LEGION_EPIC ? BONUS_ITEM_EPIC_TITANFORGED : BONUS_ITEM_TITANFORGED);
+        else if (bonusItemLevel >= ITEM_LEVEL_BONUS_FORGED)
+            bonusLists.push_back(itemLevel >= ITEM_LEVEL_LEGION_EPIC ? BONUS_ITEM_EPIC_WARFORGED : BONUS_ITEM_WARFORGED);
+    }
+
+    // Secondary bonuses
+    if (roll_chance_i(10))
+    {
+        std::array<int32, 5> secondaryBonuses
+        { {
+                BONUS_ITEM_SOCKET_PRISMASTIC,
+                BONUS_ITEM_LEECH,
+                BONUS_ITEM_AVOIDANCE,
+                BONUS_ITEM_INDESTRUCTIBLE,
+                BONUS_ITEM_SPEED
+            } };
+
+        bonusLists.push_back(Trinity::Containers::SelectRandomContainerElement(secondaryBonuses));
+    }
+
+    return itemLevel - savedItemLevel;
 }

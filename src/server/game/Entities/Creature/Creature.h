@@ -280,6 +280,8 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         float GetRespawnRadius() const { return m_respawnradius; }
         void SetRespawnRadius(float dist) { m_respawnradius = dist; }
 
+        float GetMovementMode() const { return m_movementmode; }
+
         void DoImmediateBoundaryCheck() { m_boundaryCheckTime = 0; }
         uint32 GetCombatPulseDelay() const { return m_combatPulseDelay; }
         void SetCombatPulseDelay(uint32 delay) // (secs) interval at which the creature pulses the entire zone into combat (only works in dungeons)
@@ -394,6 +396,7 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         uint32 m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
         uint32 m_combatPulseTime;                           // (msecs) remaining time for next zone-in-combat pulse
         uint32 m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
+        float m_movementmode;
 
         ReactStates m_reactState;                           // for AI, not charmInfo
         void RegenerateMana();

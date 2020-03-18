@@ -26,13 +26,30 @@
 
 enum StableResultCode
 {
-    STABLE_ERR_MONEY        = 0x01,                         // "you don't have enough money"
-    STABLE_ERR_INVALID_SLOT = 0x03,                         // "That slot is locked"
-    STABLE_SUCCESS_STABLE   = 0x08,                         // stable success
-    STABLE_SUCCESS_UNSTABLE = 0x09,                         // unstable/swap success
-    STABLE_SUCCESS_BUY_SLOT = 0x0A,                         // buy slot success
-    STABLE_ERR_EXOTIC       = 0x0B,                         // "you are unable to control exotic creatures"
-    STABLE_ERR_STABLE       = 0x0C                          // "Internal pet error"
+    STABLE_ERR_MONEY                  = 0x01,                         // "you don't have enough money"
+    STABLE_ERR_INVALID_SLOT           = 0x03,                         // "That slot is locked"
+    STABLE_SUCCESS_STABLE             = 0x08,                         // stable success
+    STABLE_SUCCESS_UNSTABLE           = 0x09,                         // unstable/swap success
+    STABLE_SUCCESS_BUY_SLOT           = 0x0A,                         // buy slot success
+    STABLE_ERR_EXOTIC                 = 0x0B,                         // "you are unable to control exotic creatures"
+    STABLE_ERR_STABLE                 = 0x0C                          // "Internal pet error"
+};
+
+enum PetEntryCreatures
+{
+    NPC_ENTRY_WATER_ELEMENTAL_01      = 510,
+    NPC_ENTRY_WATER_ELEMENTAL_02      = 78116,
+    NPC_ENTRY_TREANT                  = 1964,
+    NPC_ENTRY_GREATER_EARTH_ELEMENTAL = 15352,
+    NPC_ENTRY_GREATER_FIRE_ELEMENTAL  = 15438,
+    NPC_ENTRY_SHADOWFIEND             = 19668,
+    NPC_ENTRY_VENOMOUS_SNAKE          = 19833,
+    NPC_ENTRY_VIPER                   = 19921,
+    NPC_ENTRY_SPIRIT_WOLF             = 29264,
+    NPC_ENTRY_MIRROR_IMAGE            = 31216,
+    NPC_ENTRY_EBON_GARGOYLE           = 27829,
+    NPC_ENTRY_BLOODWORM               = 28017,
+    NPC_ENTRY_DREADSTALKER            = 98035
 };
 
 struct PetSpell
@@ -44,8 +61,8 @@ struct PetSpell
 
 enum PetStableinfo
 {
-    PET_STABLE_ACTIVE = 1,
-    PET_STABLE_INACTIVE = 2
+    PET_STABLE_ACTIVE                 = 1,
+    PET_STABLE_INACTIVE               = 2
 };
 
 typedef std::unordered_map<uint32, PetSpell> PetSpellMap;

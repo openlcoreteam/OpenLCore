@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -15,146 +15,139 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "emerald_nightmare.h"
-#include "CreatureGroups.h"
-#include "LFGMgr.h"
-#include "LFGQueue.h"
-#include "LFGPackets.h"
-#include "DynamicObject.h"
-#include "ScriptedEscortAI.h"
-#include "CreatureTextMgr.h"
-#include "MiscPackets.h"
-#include "GameObjectAI.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "Player.h"
-#include "ObjectMgr.h"
+#include "Chat.h"
+#include "CombatAI.h"
+#include "Conversation.h"
 #include "Creature.h"
+#include "CreatureGroups.h"
+#include "CreatureTextMgr.h"
+#include "DBCEnums.h"
+#include "DynamicObject.h"
+#include "emerald_nightmare.h"
+#include "GameObject.h"
+#include "GameObjectAI.h"
+#include "LFGMgr.h"
+#include "LFGPackets.h"
+#include "LFGQueue.h"
+#include "InstanceScript.h"
+#include "Map.h"
+#include "MiscPackets.h"
+#include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
-#include "ScriptedGossip.h"
-#include "Vehicle.h"
-#include "MotionMaster.h"
-#include "TemporarySummon.h"
-#include "GameObject.h"
-#include "CombatAI.h"
-#include "SpellInfo.h"
-#include "Conversation.h"
+#include "Player.h"
 #include "PhasingHandler.h"
-#include "SpellScript.h"
-#include "Chat.h"
-#include "GameObjectAI.h"
-#include "Map.h"
-#include "Transport.h"
-#include "InstanceScript.h"
-#include "DBCEnums.h"
 #include "SceneMgr.h"
-#include "MotionMaster.h"
-#include "InstanceScript.h"
-#include "GameObject.h"
-#include "Creature.h"
-#include "Unit.h"
+#include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
+#include "ScriptedGossip.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
+#include "SpellScript.h"
+#include "SpellInfo.h"
+#include "TemporarySummon.h"
+#include "Transport.h"
+#include "Unit.h"
+#include "Vehicle.h"
 
 enum Says
 {
-    SAY_AGGRO = 0,
-    SAY_NIGHTMARE_BLADES = 1,
-    SAY_MANIFEST_CORRUPTION = 2,
-    SAY_DARKENING_SOUL = 3,
-    SAY_PEREPHASE = 4,
-    SAY_DEATH = 5,
+    SAY_AGGRO 					= 0,
+    SAY_NIGHTMARE_BLADES 		= 1,
+    SAY_MANIFEST_CORRUPTION 	= 2,
+    SAY_DARKENING_SOUL 			= 3,
+    SAY_PEREPHASE 				= 4,
+    SAY_DEATH 					= 5,
 };
 
 enum Spells
 {
-    SPELL_XAVIUS_ENERGIZE = 226192,
-    SPELL_XAVIUS_ENERGIZE_PHASE_1 = 226184,
-    SPELL_XAVIUS_ENERGIZE_PHASE_2 = 226193,
-    SPELL_XAVIUS_ENERGIZE_PHASE_3 = 226185,
-    SPELL_UNFATHOMABLE_REALITY = 207160,
+    SPELL_XAVIUS_ENERGIZE 				= 226192,
+    SPELL_XAVIUS_ENERGIZE_PHASE_1 		= 226184,
+    SPELL_XAVIUS_ENERGIZE_PHASE_2 		= 226193,
+    SPELL_XAVIUS_ENERGIZE_PHASE_3 		= 226185,
+    SPELL_UNFATHOMABLE_REALITY 			= 207160,
 
     //Phase 1
-    SPELL_LURKING_ERUPTION = 208322,
-    SPELL_MANIFEST_CORRUPTION = 210264,
-    SPELL_DARKENING_SOUL = 206651,
-    SPELL_DARKENING_SOUL_AOE = 207859,
-    SPELL_DARKENING_SOUL_ENERGY = 206652,
-    SPELL_NIGHTMARE_BLADES_FILTER = 209000, //Check target
-    SPELL_NIGHTMARE_BLADES_FILTER_2 = 211579, //Sum trigger
-    SPELL_NIGHTMARE_BLADES_SUM = 206653,
-    SPELL_NIGHTMARE_BLADES_MARK = 209001,
-    SPELL_NIGHTMARE_BLADES_MARK_2 = 211802,
-    SPELL_NIGHTMARE_BLADES_DMG = 206656,
+    SPELL_LURKING_ERUPTION 				= 208322,
+    SPELL_MANIFEST_CORRUPTION 			= 210264,
+    SPELL_DARKENING_SOUL 				= 206651,
+    SPELL_DARKENING_SOUL_AOE 			= 207859,
+    SPELL_DARKENING_SOUL_ENERGY 		= 206652,
+    SPELL_NIGHTMARE_BLADES_FILTER 		= 209000, //Check target
+    SPELL_NIGHTMARE_BLADES_FILTER_2 	= 211579, //Sum trigger
+    SPELL_NIGHTMARE_BLADES_SUM 			= 206653,
+    SPELL_NIGHTMARE_BLADES_MARK 		= 209001,
+    SPELL_NIGHTMARE_BLADES_MARK_2 		= 211802,
+    SPELL_NIGHTMARE_BLADES_DMG 			= 206656,
 
     //Phase 2
-    SPELL_BLACKENING_SOUL = 209158,
-    SPELL_BLACKENED = 205612,
-    SPELL_BLACKENED_TAINTING_ENERGY = 207853,
-    SPELL_NIGHTMARE_INFUSION = 209443,
-    SPELL_CALL_OF_NIGHTMARES = 205588, //Energy cost
-    SPELL_SPAWN_INCONCEIVABLE = 205739, //Summon Inconceivable Horror
-    SPELL_TAINTED_DISCHARGE_TRIG_AT = 208362,
-    SPELL_TAINTED_DISCHARGE_AT = 208363,
-    SPELL_CORRUPTION_METEOR = 206308,
+    SPELL_BLACKENING_SOUL				= 209158,
+    SPELL_BLACKENED 					= 205612,
+    SPELL_BLACKENED_TAINTING_ENERGY 	= 207853,
+    SPELL_NIGHTMARE_INFUSION 			= 209443,
+    SPELL_CALL_OF_NIGHTMARES 			= 205588, //Energy cost
+    SPELL_SPAWN_INCONCEIVABLE 			= 205739, //Summon Inconceivable Horror
+    SPELL_TAINTED_DISCHARGE_TRIG_AT 	= 208362,
+    SPELL_TAINTED_DISCHARGE_AT 			= 208363,
+    SPELL_CORRUPTION_METEOR 			= 206308,
 
     //Phase 3
-    SPELL_WRITHING_DEEP = 226194, //Energy cost
+    SPELL_WRITHING_DEEP 				= 226194, //Energy cost
 
-                                  //Phase 2: Heroic
-                                  SPELL_BONDS_OF_TERROR = 209032,
-                                  SPELL_BONDS_OF_TERROR_AURA = 209034,
-                                  SPELL_BONDS_OF_TERROR_AURA_2 = 210451,
+    //Phase 2: Heroic
+    SPELL_BONDS_OF_TERROR 				= 209032,
+    SPELL_BONDS_OF_TERROR_AURA 			= 209034,
+    SPELL_BONDS_OF_TERROR_AURA_2 		= 210451,
 
-                                  //Player spells
-                                  SPELL_NIGHTMARE_TORMENT_ALT_POWER = 189960,
-                                  SPELL_NIGHTMARE_TORMENT_TICK = 226227,
-                                  SPELL_THE_DREAMING_SUM_CLONE = 206000,
-                                  SPELL_THE_DREAMING_CLONE_IMAGE = 206002,
-                                  SPELL_DREAM_SIMULACRUM = 206005,
-                                  SPELL_AWAKENING_DREAM = 207634,
-                                  SPELL_INSANITY_LEVEL_1 = 210203,
-                                  SPELL_INSANITY_LEVEL_2 = 210204,
-                                  SPELL_DESCENT_INTO_MADNESS = 208431,
-                                  SPELL_CORRUPTION_MADNESS = 207409,
+    //Player spells
+    SPELL_NIGHTMARE_TORMENT_ALT_POWER 	= 189960,
+    SPELL_NIGHTMARE_TORMENT_TICK 		= 226227,
+    SPELL_THE_DREAMING_SUM_CLONE 		= 206000,
+    SPELL_THE_DREAMING_CLONE_IMAGE 		= 206002,
+    SPELL_DREAM_SIMULACRUM 				= 206005,
+    SPELL_AWAKENING_DREAM 				= 207634,
+    SPELL_INSANITY_LEVEL_1 				= 210203,
+    SPELL_INSANITY_LEVEL_2 				= 210204,
+    SPELL_DESCENT_INTO_MADNESS 			= 208431,
+    SPELL_CORRUPTION_MADNESS 			= 207409,
 
-                                  //Player clone spells
-                                  SPELL_DREAMING_CLONE_ABORB = 189449,
+    //Player clone spells
+    SPELL_DREAMING_CLONE_ABORB 			= 189449,
 
-                                  //Dread Abomination
-                                  SPELL_CORRUPTION_CRUSHING_SHADOWS = 208748,
+    //Dread Abomination
+    SPELL_CORRUPTION_CRUSHING_SHADOWS 	= 208748,
 
-                                  //Lurking Terror
-                                  SPELL_TORMENTING_FIXATION_FILTER = 205770,
-                                  SPELL_TORMENTING_FIXATION = 205771,
-                                  SPELL_TORMENTING_INFECTION_AT = 217989, //Normal
-                                  SPELL_TORMENTING_INFECTION_DMG = 217990,
-                                  SPELL_TORMENTING_DETONATION_AT = 205780, //Heroic
-                                  SPELL_TORMENTING_DETONATION_DMG = 205782,
+    //Lurking Terror
+    SPELL_TORMENTING_FIXATION_FILTER 	= 205770,
+    SPELL_TORMENTING_FIXATION 			= 205771,
+    SPELL_TORMENTING_INFECTION_AT 		= 217989, //Normal
+    SPELL_TORMENTING_INFECTION_DMG 		= 217990,
+    SPELL_TORMENTING_DETONATION_AT 		= 205780, //Heroic
+    SPELL_TORMENTING_DETONATION_DMG 	= 205782,
 
-                                  //Corruption Horror
-                                  SPELL_CORRUPTION_HORROR_BIRTH = 213345,
-                                  SPELL_TORMENTING_SWIPE = 224649,
-                                  SPELL_CORRUPTING_NOVA = 207830,
+    //Corruption Horror
+    SPELL_CORRUPTION_HORROR_BIRTH 		= 213345,
+    SPELL_TORMENTING_SWIPE 				= 224649,
+    SPELL_CORRUPTING_NOVA 				= 207830,
 
-                                  //Inconceivable Horror
-                                  SPELL_DARK_RUINATION = 209288,
-                                  SPELL_TAINTED_DISCHARGE_SUM = 212124, //Summon Inconceivable Horror
+    //Inconceivable Horror
+    SPELL_DARK_RUINATION 				= 209288,
+    SPELL_TAINTED_DISCHARGE_SUM 		= 212124, //Summon Inconceivable Horror
 
-                                                                        //Nightmare Tentacle
-                                                                        SPELL_NIGHTMARE_BOLT = 206920,
+    //Nightmare Tentacle
+    SPELL_NIGHTMARE_BOLT				= 206920,
 };
 
 enum eEvents
 {
-    EVENT_ABOMINATION_CRUSHING = 1,
-    EVENT_DARKENING_SOUL = 2,
-    EVENT_NIGHTMARE_BLADES = 3,
-    EVENT_BLACKENING_SOUL = 4,
-    EVENT_NIGHTMARE_INFUSION = 5,
-    EVENT_CORRUPTION_METEOR = 6,
-    EVENT_CHECK_ALT_POWER = 7,
+    EVENT_ABOMINATION_CRUSHING 	= 1,
+    EVENT_DARKENING_SOUL 		= 2,
+    EVENT_NIGHTMARE_BLADES 		= 3,
+    EVENT_BLACKENING_SOUL 		= 4,
+    EVENT_NIGHTMARE_INFUSION 	= 5,
+    EVENT_CORRUPTION_METEOR 	= 6,
+    EVENT_CHECK_ALT_POWER 		= 7,
 
     //Heroic
     EVENT_BONDS_OF_TERROR,
@@ -198,7 +191,7 @@ Position const eventPos[10] =
 
 };
 
-//103769
+// 103769 - Xavius
 class boss_xavius : public CreatureScript
 {
 public:
@@ -233,7 +226,9 @@ public:
                     me->SetHomePosition(-3019.56f, -5060.41f, 147.70f, me->GetHomePosition().GetOrientation());
                     me->GetMotionMaster()->MovePoint(0, -3019.56f, -5060.41f, 147.70f);
                 }
+
                 me->SetReactState(REACT_AGGRESSIVE);
+
                 for (uint8 i = 0; i < 8; i++)
                     me->SummonCreature(NPC_DREAD_ABOMINATION, dreadPos[i]);
             }
@@ -245,7 +240,6 @@ public:
         }
 
         void EnterCombat(Unit* /*who*/) override
-            //51:49
         {
             Talk(SAY_AGGRO);
             _EnterCombat();
@@ -255,6 +249,7 @@ public:
             instance->DoCastSpellOnPlayers(SPELL_NIGHTMARE_TORMENT_ALT_POWER);
 
             StartEvents(PHASE_1);
+
             if (Creature* yzera = me->SummonCreature(NPC_YZERA, -2988.90f, -5028.98f, 182.07f))
             {
                 AddTimedDelayedOperation(5000, [yzera]() -> void
@@ -284,24 +279,24 @@ public:
 
             switch (phase)
             {
-            case PHASE_1:
-                events.ScheduleEvent(EVENT_ABOMINATION_CRUSHING, 12000);
-                events.ScheduleEvent(EVENT_DARKENING_SOUL, 7000);
-                events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 18000);
-                break;
-            case PHASE_2:
-                events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
-                events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 21000);
-                events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 32000);
-                if (GetDifficulty() == DIFFICULTY_HEROIC_RAID || GetDifficulty() == DIFFICULTY_MYTHIC_RAID)
-                    events.ScheduleEvent(EVENT_BONDS_OF_TERROR, 12000);
-                break;
-            case PHASE_3:
-                events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
-                events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 18000);
-                events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 21000);
-                events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 32000);
-                break;
+                case PHASE_1:
+                    events.ScheduleEvent(EVENT_ABOMINATION_CRUSHING, 12000);
+                    events.ScheduleEvent(EVENT_DARKENING_SOUL, 7000);
+                    events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 18000);
+                    break;
+                case PHASE_2:
+                    events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
+                    events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 21000);
+                    events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 32000);
+                    if (GetDifficulty() == DIFFICULTY_HEROIC_RAID || GetDifficulty() == DIFFICULTY_MYTHIC_RAID)
+                        events.ScheduleEvent(EVENT_BONDS_OF_TERROR, 12000);
+                    break;
+                case PHASE_3:
+                    events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
+                    events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 18000);
+                    events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 21000);
+                    events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 32000);
+                    break;
             }
             events.ScheduleEvent(EVENT_CHECK_ALT_POWER, 2000);
         }
@@ -323,6 +318,7 @@ public:
 
                 std::list<Player*> playerList;
                 GetPlayerListInGrid(playerList, me, 100.0f);
+
                 if (!playerList.empty())
                 {
                     Trinity::Containers::RandomResize(playerList, playerList.size() > 1 ? playerList.size() / 2 : 1);
@@ -334,6 +330,7 @@ public:
 
                         player->CastSpell(player, SPELL_THE_DREAMING_SUM_CLONE, true);
                     }
+
                     if (Creature* yzera = me->FindNearestCreature(NPC_YZERA, 100.0f, true))
                     {
                         AddTimedDelayedOperation(5000, [yzera]() -> void
@@ -343,6 +340,7 @@ public:
                     }
                 }
             }
+
             //Regulates events phases
             if (me->HealthBelowPct(healthPhasePct))
             {
@@ -438,70 +436,72 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_ABOMINATION_CRUSHING:
-                {
-                    EntryCheckPredicate pred(NPC_DREAD_ABOMINATION);
-                    summons.DoAction(1, pred, 1);
-                    events.ScheduleEvent(EVENT_ABOMINATION_CRUSHING, 10000);
-                    break;
-                }
-                case EVENT_DARKENING_SOUL:
-                    DoCastVictim(SPELL_DARKENING_SOUL);
-                    events.ScheduleEvent(EVENT_DARKENING_SOUL, 8000);
-                    if (urand(0, 3) == 3)
-                        Talk(SAY_DARKENING_SOUL);
-                    break;
-                case EVENT_NIGHTMARE_BLADES:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, checkPlayers(), 150.0f, true, -SPELL_NIGHTMARE_BLADES_MARK_2))
+                    case EVENT_ABOMINATION_CRUSHING:
                     {
-                        DoCast(target, SPELL_NIGHTMARE_BLADES_MARK, true);
-                        DoCast(target, SPELL_NIGHTMARE_BLADES_MARK_2, true);
+                        EntryCheckPredicate pred(NPC_DREAD_ABOMINATION);
+                        summons.DoAction(1, pred, 1);
+                        events.ScheduleEvent(EVENT_ABOMINATION_CRUSHING, 10000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 16000);
-                    break;
-                case EVENT_BLACKENING_SOUL:
-                    DoCastVictim(SPELL_BLACKENING_SOUL);
-                    events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
-                    break;
-                case EVENT_NIGHTMARE_INFUSION:
-                    DoCast(me, SPELL_NIGHTMARE_INFUSION, true);
-                    events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 62000);
-                    break;
-                case EVENT_CORRUPTION_METEOR:
-                    DoCast(me, SPELL_CORRUPTION_METEOR, true);
-                    events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 29000);
-                    break;
-                case EVENT_CHECK_ALT_POWER:
-                {
-                    Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    case EVENT_DARKENING_SOUL:
+                        DoCastVictim(SPELL_DARKENING_SOUL);
+                        events.ScheduleEvent(EVENT_DARKENING_SOUL, 8000);
+                        if (urand(0, 3) == 3)
+                            Talk(SAY_DARKENING_SOUL);
+                        break;
+                    case EVENT_NIGHTMARE_BLADES:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, checkPlayers(), 150.0f, true, -SPELL_NIGHTMARE_BLADES_MARK_2))
+                        {
+                            DoCast(target, SPELL_NIGHTMARE_BLADES_MARK, true);
+                            DoCast(target, SPELL_NIGHTMARE_BLADES_MARK_2, true);
+                        }
+                        events.ScheduleEvent(EVENT_NIGHTMARE_BLADES, 16000);
+                        break;
+                    case EVENT_BLACKENING_SOUL:
+                        DoCastVictim(SPELL_BLACKENING_SOUL);
+                        events.ScheduleEvent(EVENT_BLACKENING_SOUL, 7000);
+                        break;
+                    case EVENT_NIGHTMARE_INFUSION:
+                        DoCast(me, SPELL_NIGHTMARE_INFUSION, true);
+                        events.ScheduleEvent(EVENT_NIGHTMARE_INFUSION, 62000);
+                        break;
+                    case EVENT_CORRUPTION_METEOR:
+                        DoCast(me, SPELL_CORRUPTION_METEOR, true);
+                        events.ScheduleEvent(EVENT_CORRUPTION_METEOR, 29000);
+                        break;
+                    case EVENT_CHECK_ALT_POWER:
                     {
-                        if (Player* player = itr->GetSource())
-                            if (player->IsAlive() && !player->IsGameMaster() && !player->HasAura(SPELL_NIGHTMARE_TORMENT_ALT_POWER))
-                                player->CastSpell(player, SPELL_NIGHTMARE_TORMENT_ALT_POWER, true);
+                        Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        {
+                            if (Player* player = itr->GetSource())
+                                if (player->IsAlive() && !player->IsGameMaster() && !player->HasAura(SPELL_NIGHTMARE_TORMENT_ALT_POWER))
+                                    player->CastSpell(player, SPELL_NIGHTMARE_TORMENT_ALT_POWER, true);
+                        }
+                        events.ScheduleEvent(EVENT_CHECK_ALT_POWER, 2000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_CHECK_ALT_POWER, 2000);
-                    break;
-                }
-                case EVENT_BONDS_OF_TERROR:
-                {
-                    uint8 freePlayerCount = 0;
-                    std::list<HostileReference*> threatlist = me->getThreatManager().getThreatList();
-                    if (!threatlist.empty())
+                    case EVENT_BONDS_OF_TERROR:
                     {
-                        for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, (*itr)->getUnitGuid()))
-                                if (!player->HasAura(SPELL_BONDS_OF_TERROR_AURA) && !player->HasAura(SPELL_BONDS_OF_TERROR_AURA_2) &&
-                                    (me->GetVictim() && me->GetVictim()->GetGUID() != player->GetGUID()))
-                                {
-                                    freePlayerCount++;
-                                }
+                        uint8 freePlayerCount = 0;
+                        std::list<HostileReference*> threatlist = me->getThreatManager().getThreatList();
+
+                        if (!threatlist.empty())
+                        {
+                            for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                                if (Player* player = ObjectAccessor::GetPlayer(*me, (*itr)->getUnitGuid()))
+                                    if (!player->HasAura(SPELL_BONDS_OF_TERROR_AURA) && !player->HasAura(SPELL_BONDS_OF_TERROR_AURA_2) &&
+                                        (me->GetVictim() && me->GetVictim()->GetGUID() != player->GetGUID()))
+                                    {
+                                        freePlayerCount++;
+                                    }
+                        }
+
+                        if (freePlayerCount > 1)
+                            DoCast(me, SPELL_BONDS_OF_TERROR, true);
+                        events.ScheduleEvent(EVENT_BONDS_OF_TERROR, 12000);
+                        break;
                     }
-                    if (freePlayerCount > 1)
-                        DoCast(me, SPELL_BONDS_OF_TERROR, true);
-                    events.ScheduleEvent(EVENT_BONDS_OF_TERROR, 12000);
-                    break;
-                }
                 }
             }
             DoMeleeAttackIfReady();
@@ -514,7 +514,7 @@ public:
     }
 };
 
-//104096
+// 104096 - Sleeping Version
 class npc_xavius_sleeping_version : public CreatureScript
 {
 public:
@@ -564,7 +564,7 @@ public:
     }
 };
 
-//105343
+// 105343 - Dread Abomination
 class npc_xavius_dread_abomination : public CreatureScript
 {
 public:
@@ -598,7 +598,9 @@ public:
                     for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
                         if (Player* player = ObjectAccessor::GetPlayer(*me, (*itr)->getUnitGuid()))
                         {
-                            if (player->HasAura(SPELL_INSANITY_LEVEL_1));
+                            if (player->HasAura(SPELL_INSANITY_LEVEL_1)) // anon_me enemy cannot determine friend from foe ignore player if aura activated
+                            return false;
+
                         }
                                 //if (!me->IsInPersonnalVisibilityList(player->GetGUID()))
                                    // me->AddPlayerInPersonnalVisibilityList(player->GetGUID());
@@ -646,7 +648,7 @@ public:
     }
 };
 
-//103694
+// 103694 - Lurking Terror
 class npc_xavius_lurking_terror : public CreatureScript
 {
 public:
@@ -726,7 +728,7 @@ public:
     }
 };
 
-//103695
+// 103695 - Corruption Horror
 class npc_xavius_corruption_horror : public CreatureScript
 {
 public:
@@ -786,7 +788,7 @@ public:
     }
 };
 
-//104422
+// 104422 - Nightmare Blades
 class npc_xavius_nightmare_blades : public CreatureScript
 {
 public:
@@ -813,14 +815,11 @@ public:
         /*bool LoadObjectData(ObjectGuid const& guid) override
         {
             bool find = false;
-
             for (auto targetGuid : listGuid)
                 if (targetGuid == guid)
                     find = true;
-
             if (!find)
                 listGuid.push_back(guid);
-
             return find;
         }*/
 
@@ -832,26 +831,26 @@ public:
             {
                 switch (eventId)
                 {
-                case 1:
-                {
-                    if (Unit* owner = me->GetOwner())
-                        if (Unit* target = owner->GetAI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true, SPELL_NIGHTMARE_BLADES_MARK))
-                        {
-                            Position pos;
-                            float angle = target->GetRelativeAngle(me);
-                            float dist = me->GetDistance(target) + 20.0f;
-                            target->GetNearPosition(dist, angle);
-
-                            float angle2 = pos.GetRelativeAngle(target);
-                            float dist2 = 8.0f;
-                            for (uint8 i = 0; i < 18; i++)
+                    case 1:
+                    {
+                        if (Unit* owner = me->GetOwner())
+                            if (Unit* target = owner->GetAI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true, SPELL_NIGHTMARE_BLADES_MARK))
                             {
-                               // pos.SimplePosXYRelocationByAngle(pos, dist2, angle2);
-                                me->m_Events.AddEvent(new DelayDestCastEvent(*me, pos, SPELL_NIGHTMARE_BLADES_DMG, true), me->m_Events.CalculateTime(i * 150));
+                                Position pos;
+                                float angle = target->GetRelativeAngle(me);
+                                float dist = me->GetDistance(target) + 20.0f;
+                                target->GetNearPosition(dist, angle);
+
+                                float angle2 = pos.GetRelativeAngle(target);
+                                float dist2 = 8.0f;
+                                for (uint8 i = 0; i < 18; i++)
+                                {
+                                   // pos.SimplePosXYRelocationByAngle(pos, dist2, angle2);
+                                    me->m_Events.AddEvent(new DelayDestCastEvent(*me, pos, SPELL_NIGHTMARE_BLADES_DMG, true), me->m_Events.CalculateTime(i * 150));
+                                }
                             }
-                        }
                     break;
-                }
+                    }
                 }
             }
         }
@@ -863,7 +862,7 @@ public:
     }
 };
 
-//105611
+// 105611 - Inconceivable Horror
 class npc_xavius_inconceivable_horror : public CreatureScript
 {
 public:
@@ -935,7 +934,7 @@ public:
     }
 };
 
-//104592
+// 104592 - Nightmare Tentacle
 class npc_xavius_nightmare_tentacle : public CreatureScript
 {
 public:
@@ -985,7 +984,7 @@ public:
     }
 };
 
-// 109847
+// 109847 - Rift of Aln
 class npc_xavius_event_conroller : public CreatureScript
 {
 public:
@@ -1107,40 +1106,40 @@ public:
             {
                 switch (eventId)
                 {
-                case 1:
-                    for (uint8 i = 0; i < 3; i++)
-                        me->SummonCreature(NPC_IN_THE_SHADOW, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                    events.ScheduleEvent(6, 5000);
-                    break;
-                case 2:
-                    for (uint8 i = 0; i < 3; i++)
-                        me->SummonCreature(NPC_NIGHTMARE_AMALGAMATION, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                    events.ScheduleEvent(6, 5000);
-                    break;
-                case 3:
-                    for (uint8 i = 0; i < 2; i++)
-                        me->SummonCreature(NPC_NIGHTMARE_AMALGAMATION, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                    me->SummonCreature(NPC_IN_THE_SHADOW, eventPos[2], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                    events.ScheduleEvent(4, 7000);
-                    events.ScheduleEvent(6, 5000);
-                    break;
-                case 4:
-                    for (uint8 i = 3; i < 6; i++)
-                        me->SummonCreature(NPC_SHADOW_POUNDER, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                    break;
-                case 5:
-                {
-                    instance->SetBossState(DATA_PRE_EVENT_XAVIUS, DONE);
-                    if (Creature* boss = me->FindNearestCreature(NPC_XAVIUS, 100.0f, true))
-                        boss->AI()->Reset();
-                    events.Reset();
-                    summons.DespawnAll();
-                    break;
-                }
-                case 6:
-                    for (uint8 i = 0; i < 6; i++)
-                        me->SummonCreature(NPC_DARK_DEVOURERS, me->GetPositionX() + irand(-25, 25), me->GetPositionY() + irand(-25, 25), me->GetPositionZ());
-                    break;
+                    case 1:
+                        for (uint8 i = 0; i < 3; i++)
+                            me->SummonCreature(NPC_IN_THE_SHADOW, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                        events.ScheduleEvent(6, 5000);
+                        break;
+                    case 2:
+                        for (uint8 i = 0; i < 3; i++)
+                            me->SummonCreature(NPC_NIGHTMARE_AMALGAMATION, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                        events.ScheduleEvent(6, 5000);
+                        break;
+                    case 3:
+                        for (uint8 i = 0; i < 2; i++)
+                            me->SummonCreature(NPC_NIGHTMARE_AMALGAMATION, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                        me->SummonCreature(NPC_IN_THE_SHADOW, eventPos[2], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                        events.ScheduleEvent(4, 7000);
+                        events.ScheduleEvent(6, 5000);
+                        break;
+                    case 4:
+                        for (uint8 i = 3; i < 6; i++)
+                            me->SummonCreature(NPC_SHADOW_POUNDER, eventPos[i], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                        break;
+                    case 5:
+                    {
+                        instance->SetBossState(DATA_PRE_EVENT_XAVIUS, DONE);
+                        if (Creature* boss = me->FindNearestCreature(NPC_XAVIUS, 100.0f, true))
+                            boss->AI()->Reset();
+                        events.Reset();
+                        summons.DespawnAll();
+                        break;
+                    }
+                    case 6:
+                        for (uint8 i = 0; i < 6; i++)
+                            me->SummonCreature(NPC_DARK_DEVOURERS, me->GetPositionX() + irand(-25, 25), me->GetPositionY() + irand(-25, 25), me->GetPositionZ());
+                        break;
                 }
             }
         }
@@ -1152,8 +1151,7 @@ public:
     }
 };
 
-
-//226184
+// 226184 - Xavius Energize Phase 1
 class spell_xavius_periodic_energize : public SpellScriptLoader
 {
 public:
@@ -1232,7 +1230,7 @@ public:
     }
 };
 
-//206005
+// 206005 - Dream Simulacrum
 class spell_xavius_dream_simulacrum : public SpellScriptLoader
 {
 public:
@@ -1249,7 +1247,6 @@ public:
                 if (InstanceScript* instance = player->GetInstanceScript())
                     if (instance->GetBossState(DATA_XAVIUS) != IN_PROGRESS)
                         return;
-
                 CreatureList infernales;
                 GuidList* summonList = GetCreatureListWithEntryInGrid(infernales, NPC_SLEEPING_VERSION, 250.0f);
                 for (GuidList::const_iterator iter = summonList->begin(); iter != summonList->end(); ++iter)
@@ -1289,7 +1286,7 @@ public:
     }
 };
 
-//189960
+// 189960 - Nightmare Torment
 class spell_xavius_nightmare_torment_alt_power : public SpellScriptLoader
 {
 public:
@@ -1355,7 +1352,7 @@ public:
     }
 };
 
-//208860
+// 208860 - Corruption: Crushing Shadows
 class spell_xavius_crushing_shadows : public SpellScriptLoader
 {
 public:
@@ -1390,7 +1387,7 @@ public:
     }
 };
 
-//207160
+// 207160 - Corruption: Unfathomable Reality
 class spell_xavius_unfathomable_reality : public SpellScriptLoader
 {
 public:
@@ -1422,7 +1419,7 @@ public:
     }
 };
 
-//208431
+// 208431 - Corruption: Descent into Madness
 class spell_xavius_descent_into_madness : public SpellScriptLoader
 {
 public:
@@ -1463,7 +1460,8 @@ public:
     }
 };
 
-//206651, 209158
+// 206651 - Darkening Soul
+// 209158 - Blackening Soul
 class spell_xavius_darkening_soul : public SpellScriptLoader
 {
 public:
@@ -1521,7 +1519,7 @@ public:
     }
 };
 
-//211802
+// 211802 - Nightmare Blades
 class spell_xavius_nightmare_blades : public SpellScriptLoader
 {
 public:
@@ -1552,7 +1550,7 @@ public:
     }
 };
 
-//206656
+// 206656 - Nightmare Blades
 class spell_xavius_nightmare_blades_dmg_filter : public SpellScriptLoader
 {
 public:
@@ -1585,7 +1583,7 @@ public:
     }
 };
 
-//210451
+// 210451 - Bonds of Terror
 class spell_xavius_bonds_of_terror : public SpellScriptLoader
 {
 public:
@@ -1613,7 +1611,7 @@ public:
     }
 };
 
-//226194
+// 226194 - Writhing Deep
 class spell_xavius_writhing_deep : public SpellScriptLoader
 {
 public:
@@ -1652,7 +1650,7 @@ public:
     }
 };
 
-//207830
+// 207830 - Corrupting Nova
 class spell_xavius_corrupting_nova : public SpellScriptLoader
 {
 public:
@@ -1686,7 +1684,8 @@ public:
     }
 };
 
-//206369, 207849
+// 206369 - Corruption Meteor
+// 207849 - Corruption Meteor
 class spell_xavius_corruption_meteor : public SpellScriptLoader
 {
 public:
@@ -1734,7 +1733,7 @@ public:
     }
 };
 
-// portal to Xavius
+// 208593 - Teleport: Xavius Boss
 class teleport_xavius : public CreatureScript
 {
 public:
@@ -1771,7 +1770,7 @@ public:
     }
 };
 
-// 223216
+// 223216 - Teleport to Rift
 class spell_teleport_to_rift : public SpellScriptLoader
 {
 public:
@@ -1842,8 +1841,6 @@ void AddSC_xavius()
     new spell_xavius_corrupting_nova();
     new spell_xavius_corruption_meteor();
 
-    //Создать нпс под скриптовку
     new teleport_xavius();
     new npc_xavius_event_conroller();
-
 }

@@ -1,6 +1,6 @@
 # OpenLCore 
 
-[![Build Status](https://travis-ci.org/wow7x/OpenLCore-1.svg?branch=master)](https://travis-ci.org/wow7x/OpenLCore-1)
+[![Build Status](https://travis-ci.org/coolzoom/OpenLCore-1.svg?branch=master)](https://travis-ci.org/coolzoom/OpenLCore-1)
 
 OpenLCore 开源网游框架（支持版本  7.3.5.26972）基于MagicStorm/AshamaneCore/TrinityCore
 

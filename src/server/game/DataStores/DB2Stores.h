@@ -368,6 +368,7 @@ public:
     void Zone2MapCoordinates(uint32 areaId, float& x, float& y) const;
     void Map2ZoneCoordinates(uint32 areaId, float& x, float& y) const;
     static void DeterminaAlternateMapPosition(uint32 mapId, float x, float y, float z, uint32* newMapId = nullptr, DBCPosition2D* newPos = nullptr);
+	bool HasItemBonusTree(uint32 itemId) const;
 
 private:
     friend class DB2HotfixGeneratorBase;

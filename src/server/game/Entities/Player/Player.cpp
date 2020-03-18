@@ -127,6 +127,7 @@
 #include "WorldSession.h"
 #include "WorldStatePackets.h"
 #include <G3D/g3dmath.h>
+#include "ChallengeModeMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 #define SHOP_UPDATE_INTERVAL (30*IN_MILLISECONDS)
@@ -4373,8 +4374,12 @@ void Player::BuildPlayerRepop()
     packet.PlayerGUID = GetGUID();
     GetSession()->SendPacket(packet.Write());
 
-    if (getRace() == RACE_NIGHTELF)
+    // if (getRace() == RACE_NIGHTELF)
+    // If the player has the Wisp racial then cast the Wisp aura on them
+    if (HasSpell(20585)) 
+    {
         CastSpell(this, 20584, true);
+    }  
     CastSpell(this, 8326, true);
 
     // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_SET_WATER_WALK
@@ -15699,6 +15704,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
     sScriptMgr->OnQuestStatusChange(this, quest_id);
     sScriptMgr->OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
+    sScriptMgr->OnQuestAccept(this, quest);  
 }
 
 void Player::ForceCompleteQuest(uint32 quest_id)
@@ -18915,8 +18921,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         switch (sWorld->getIntConfig(CONFIG_GM_LOGIN_STATE))
         {
             default:
-            case 0:                      break;             // disable
-            case 1: SetGameMaster(true); break;             // enable
+            case 0:                                         // disable
+                break;
+            case 1: SetGameMaster(true);                    // enable
+                break;
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_GM_ON)
                     SetGameMaster(true);
@@ -18926,8 +18934,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         switch (sWorld->getIntConfig(CONFIG_GM_VISIBLE_STATE))
         {
             default:
-            case 0: SetGMVisible(false); break;             // invisible
-            case 1:                      break;             // visible
+            case 0: SetGMVisible(false);                    // invisible
+                break;
+            case 1:                                         // visible
+                break;
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_GM_INVISIBLE)
                     SetGMVisible(false);
@@ -18937,8 +18947,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         switch (sWorld->getIntConfig(CONFIG_GM_CHAT))
         {
             default:
-            case 0:                  break;                 // disable
-            case 1: SetGMChat(true); break;                 // enable
+            case 0:                                         // disable
+                break;
+            case 1: SetGMChat(true);                        // enable
+                break;
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_GM_CHAT)
                     SetGMChat(true);
@@ -18948,13 +18960,17 @@ bool Player::LoadFromDB(ObjectGuid guid, SQLQueryHolder *holder)
         switch (sWorld->getIntConfig(CONFIG_GM_WHISPERING_TO))
         {
             default:
-            case 0:                          break;         // disable
-            case 1: SetAcceptWhispers(true); break;         // enable
+            case 0:                                         // disable
+                break;
+            case 1: SetAcceptWhispers(true);                // enable
+                break;
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_ACCEPT_WHISPERS)
                     SetAcceptWhispers(true);
                 break;
         }
+
+        SetCommandStatusOn(CHEAT_GOD);
     }
 
     // RaF stuff.
@@ -19090,6 +19106,13 @@ bool Player::isAllowedToLoot(const Creature* creature)
     }
 
     return false;
+}
+
+void Player::_LoadChallengesAffix()
+{
+    m_ChallengeAffix.affix_1 = sChallengeModeMgr->GetRandomChallengeAffixId(1, 4);
+	m_ChallengeAffix.affix_2 = sChallengeModeMgr->GetRandomChallengeAffixId(2, 7);
+    m_ChallengeAffix.affix_3 = sChallengeModeMgr->GetRandomChallengeAffixId(3, 10);
 }
 
 void Player::_LoadActions(PreparedQueryResult result)
@@ -23863,7 +23886,12 @@ void Player::UpdatePotionCooldown(Spell* spell)
     }
     // from spell cases (m_lastPotionId set in Spell::SendSpellCooldown)
     else
-        GetSpellHistory()->SendCooldownEvent(spell->m_spellInfo, m_lastPotionId, spell);
+    {
+        if (spell->IsIgnoringCooldowns())
+            return;
+        else
+            GetSpellHistory()->SendCooldownEvent(spell->m_spellInfo, m_lastPotionId, spell);
+    }
 
     m_lastPotionId = 0;
 }
@@ -24667,6 +24695,16 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendDirectMessage(initialSetup.Write());
 
     SetMover(this);
+}
+
+void Player::SendNewDiff(Difficulty difficulty)
+{
+    WorldPackets::Misc::WorldServerInfo worldServerInfo;
+    worldServerInfo.InstanceGroupSize = GetMap()->GetMapDifficulty() ? GetMap()->GetMapDifficulty()->MaxPlayers : 0;
+    worldServerInfo.IsTournamentRealm = 0;
+    worldServerInfo.DifficultyID = difficulty;
+
+    SendDirectMessage(worldServerInfo.Write());
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -26706,11 +26744,11 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
     }
 
     // dont allow protected item to be looted by someone else
-    if (!item->rollWinnerGUID.IsEmpty() && item->rollWinnerGUID != GetGUID())
-    {
-        SendLootRelease(GetLootGUID());
-        return;
-    }
+    //if (!item->rollWinnerGUID.IsEmpty() && item->rollWinnerGUID != GetGUID())
+    //{
+       // SendLootRelease(GetLootGUID());
+       // return;
+   // }
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
@@ -28271,6 +28309,12 @@ bool Player::AddChallengeKey(uint32 challengeId, uint32 challengeLevel/* = 2*/)
     {
         item->SetModifier(ITEM_MODIFIER_CHALLENGE_MAP_CHALLENGE_MODE_ID, challengeId);
         item->SetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_LEVEL, challengeLevel);
+        if (challengeLevel >= 4)
+            item->SetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_1, m_ChallengeAffix.affix_1);
+        if (challengeLevel >= 7)
+            item->SetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_2, m_ChallengeAffix.affix_2);
+        if (challengeLevel >= 10)
+            item->SetModifier(ITEM_MODIFIER_CHALLENGE_KEYSTONE_AFFIX_ID_3, m_ChallengeAffix.affix_3);
 
         SendNewItem(item, count, true, false);
     }

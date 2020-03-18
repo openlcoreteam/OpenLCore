@@ -2043,30 +2043,39 @@ void Unit::AttackerStateUpdate(Unit* victim, WeaponAttackType attType, bool extr
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
     else
     {
-        // attack can be redirected to another target
-        victim = GetMeleeHitRedirectTarget(victim);
+        std::list<AuraEffect*> meleeAttackOverrides = GetAuraEffectsByType(SPELL_AURA_OVERRIDE_AUTOATTACK_WITH_MELEE_SPELL);
+        if (!meleeAttackOverrides.empty())
+        {
+            for (AuraEffect* effect : meleeAttackOverrides)
+                CastSpell(victim, effect->GetSpellEffectInfo()->TriggerSpell, true, nullptr, effect);
+        }
+        else
+        {
+            // attack can be redirected to another target
+            victim = GetMeleeHitRedirectTarget(victim);
 
-        CalcDamageInfo damageInfo;
-        CalculateMeleeDamage(victim, 0, &damageInfo, attType);
-        // Send log damage message to client
-        DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
+            CalcDamageInfo damageInfo;
+            CalculateMeleeDamage(victim, 0, &damageInfo, attType);
+            // Send log damage message to client
+            DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
 
-        // Sparring Checks
-        if (Creature* me = ToCreature())
-            if (Creature* target = victim->ToCreature())
+          // Sparring Checks
+          if (Creature* me = ToCreature())
+             if (Creature* target = victim->ToCreature())
                 if (me->CanSparWith(target))
                     if (target->GetHealthPct() <= me->GetSparringHealthLimitPctFor(target))
                         damageInfo.HitInfo |= HITINFO_FAKE_DAMAGE;
 
-        SendAttackStateUpdate(&damageInfo);
+          SendAttackStateUpdate(&damageInfo);
 
-        DealMeleeDamage(&damageInfo, true);
+          DealMeleeDamage(&damageInfo, true);
 
-        DamageInfo dmgInfo(damageInfo);
-        ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, PROC_SPELL_TYPE_NONE, PROC_SPELL_PHASE_NONE, dmgInfo.GetHitMask(), nullptr, &dmgInfo, nullptr);
+          DamageInfo dmgInfo(damageInfo);
+          ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, PROC_SPELL_TYPE_NONE, PROC_SPELL_PHASE_NONE, dmgInfo.GetHitMask(), nullptr, &dmgInfo, nullptr);
 
-        TC_LOG_DEBUG("entities.unit", "AttackerStateUpdate: %s attacked %s for %u dmg, absorbed %u, blocked %u, resisted %u.",
-            GetGUID().ToString().c_str(), victim->GetGUID().ToString().c_str(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+          TC_LOG_DEBUG("entities.unit", "AttackerStateUpdate: %s attacked %s for %u dmg, absorbed %u, blocked %u, resisted %u.",
+              GetGUID().ToString().c_str(), victim->GetGUID().ToString().c_str(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+        }
     }
 }
 
@@ -5845,6 +5854,10 @@ void Unit::CombatStop(bool includingCast)
     if (GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
     ClearInCombat();
+
+	// just in case
+    if (IsPetInCombat() && GetTypeId() != TYPEID_PLAYER)
+        ClearInPetCombat();
 }
 
 void Unit::CombatStopWithPets(bool includingCast)
@@ -8099,10 +8112,12 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             Dismount();
     }
 
-    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
     {
-        (*itr)->SetInCombatState(PvP, enemy);
-        (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+        Unit* controlled = *itr;
+        ++itr;
+
+        controlled->SetInCombatState(PvP, enemy);
     }
 
     ProcSkillsAndAuras(enemy, PROC_FLAG_ENTER_COMBAT, PROC_FLAG_NONE, PROC_SPELL_TYPE_MASK_ALL, PROC_SPELL_PHASE_NONE, PROC_HIT_NONE, nullptr, nullptr, nullptr);
@@ -8135,6 +8150,13 @@ void Unit::ClearInCombat()
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LEAVE_COMBAT);
+}
+
+void Unit::ClearInPetCombat()
+{
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+    if (Unit* owner = GetOwner())
+        owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
 bool Unit::isTargetableForAttack(bool checkFakeDeath) const
@@ -9440,6 +9462,9 @@ bool Unit::IsDisallowedMountForm(uint32 spellId, ShapeshiftForm form, uint32 dis
 
     if (form)
     {
+        if (form == FORM_MOONKIN_FORM || form == FORM_MOONKIN_FORM_RESTORATION)
+            return false;
+
         SpellShapeshiftFormEntry const* shapeshift = sSpellShapeshiftFormStore.LookupEntry(form);
         if (!shapeshift)
             return true;
@@ -13007,6 +13032,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 37730;
                 return 21244;
             case FORM_MOONKIN_FORM:
+            case FORM_MOONKIN_FORM_RESTORATION:
             {
                 // Glyph of Stars
                 if (HasAura(114301))

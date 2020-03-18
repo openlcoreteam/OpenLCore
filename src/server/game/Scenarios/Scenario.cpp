@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -68,13 +68,14 @@ void Scenario::CompleteStep(ScenarioStepEntry const* step)
         if (_step.second->IsBonusObjective())
             continue;
 
+        //TC_LOG_ERROR("scenario", "Scenario::CompleteStep: Scenario (id: %u, step: %u, stat: %u) ================.", _step.second->ScenarioID, _step.second->ID, GetStepState(_step.second));
         if (GetStepState(_step.second) == SCENARIO_STEP_DONE)
             continue;
-
+        
         if (!newStep || _step.second->OrderIndex < newStep->OrderIndex)
             newStep = _step.second;
     }
-
+   
     SetStep(newStep);
     if (IsComplete())
         CompleteScenario();
@@ -315,4 +316,38 @@ void Scenario::SendBootPlayer(Player* player)
 void Scenario::SendScenarioEvent(Player* player, uint32 eventId)
 {
     UpdateCriteria(CRITERIA_TYPE_SEND_EVENT_SCENARIO, eventId, 0, 0, nullptr, player);
+}
+
+void Scenario::CompleteCurrStep()
+{
+    ScenarioStepEntry const* step = GetStep();
+    if (step)
+        SetStepState(step, SCENARIO_STEP_DONE);
+    else
+        return;
+
+    if (Quest const* quest = sObjectMgr->GetQuestTemplate(step->RewardQuestID))
+        for (ObjectGuid guid : _players)
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
+                player->RewardQuest(quest, 0, nullptr, false);
+
+    if (step->IsBonusObjective())
+        return;
+
+    ScenarioStepEntry const* newStep = nullptr;
+    for (auto const& _step : _data->Steps)
+    {
+        if (_step.second->IsBonusObjective())
+            continue;
+
+        if (GetStepState(_step.second) == SCENARIO_STEP_DONE)
+            continue;
+
+        if (!newStep || _step.second->OrderIndex < newStep->OrderIndex)
+            newStep = _step.second;
+    }
+
+    SetStep(newStep);
+    if (IsComplete())
+        CompleteScenario();
 }

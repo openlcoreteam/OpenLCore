@@ -1570,7 +1570,7 @@ void WorldObject::setActive(bool on)
 
     m_isActive = on;
 
-    if (!IsInWorld())
+    if (on && !IsInWorld())
         return;
 
     Map* map = FindMap();
@@ -2750,6 +2750,15 @@ GameObject* WorldObject::FindNearestGameObjectOfType(GameobjectTypes type, float
     Trinity::GameObjectLastSearcher<Trinity::NearestGameObjectTypeInObjectRangeCheck> searcher(this, go, checker);
     Cell::VisitGridObjects(this, searcher, range);
     return go;
+}
+
+Player* WorldObject::FindNearestPlayer(float range, bool alive)
+{
+    Player* player = NULL;
+    Trinity::AnyPlayerInObjectRangeCheck check(this, range, alive);
+    Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, player, check);
+    Cell::VisitWorldObjects(this, searcher, range);
+    return player;
 }
 
 Player* WorldObject::SelectNearestPlayer(float distance) const

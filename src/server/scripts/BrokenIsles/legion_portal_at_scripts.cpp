@@ -56,6 +56,7 @@ void AddSC_legion_portal_at_scripts()
 {
     new at_legion_instance_portal("at_legion_portal_dal_chamber_entrance", 1220,-784.447f, 4418.802f, 602.47973f, 2.443143f);
     new at_legion_instance_portal("at_legion_portal_dal_chamber_exit", 1220, -849.907959f, 4461.175f, 735.66101f, 4.045355f);
+    new at_legion_instance_portal("at_legion_portal_helheim_entrance", 1463, 366.2969f, 365.1458f, 28.08436f, 13.97537f);
     new at_legion_instance_portal("at_legion_portal_helheim_exit",     1220, 3641.396973f, 774.1938f, -3.139639f, 2.321205f);
     new at_legion_instance_portal("at_legion_portal_warl_oh_exit",     1220, -796.369568f, 4577.488f, 700.57702f, 4.626544f);
     new at_legion_instance_portal("at_legion_portal_archerus_to_upper",1220, -1469.25f,     1116.78f, 313.74f,    4.165537f);
@@ -88,7 +89,6 @@ void AddSC_legion_portal_at_scripts()
     new at_legion_instance_portal("at_legion_portal_tov_exit",         1220,     2370.78f,  895.832f,   252.924f,  314.302f);
     new at_legion_instance_portal("at_legion_portal_tnh_entrance",     1530,   -149.1892f, 3531.717f,  -253.876f,  314.775f);
     new at_legion_instance_portal("at_legion_portal_tnh_exit",         1220,     1226.82f,   4210.8f,  -66.9462f,   328.54f);
-    new at_legion_instance_portal("at_legion_portal_helheim_entrance", 1463,    366.2969f, 365.1458f,  28.08436f, 13.97537f);
     new at_legion_instance_portal("at_legion_portal_tos_entrance",     1676,     5859.02f, -795.786f,   2953.09f,  358.337f);
     new at_legion_instance_portal("at_legion_portal_tos_exit",         1220,    -557.716f,  2459.14f,    103.04f,  125.284f);
     new at_legion_instance_portal("at_legion_portal_eoa_entrance",     1456,   -3913.497f, 4535.343f,  85.98352f, 329.6533f);
@@ -97,5 +97,6 @@ void AddSC_legion_portal_at_scripts()
     new at_legion_instance_portal("at_legion_portal_brh_exit",         1220,    3105.248f, 7543.426f,  31.97511f, 221.8234f);
     new at_legion_instance_portal("at_legion_portal_dht_entrance",     1466,     3247.98f,   1828.7f,   236.767f,  181.846f);
     new at_legion_instance_portal("at_legion_portal_dht_exit",         1220,    3812.909f, 6347.589f,  185.2995f,  218.575f);
-
+    new at_legion_instance_portal("at_portal_violet_hold_dh_havoc",    1494, 1293.18579f, -262.7205f, 44.364666f, 0.0f);
+    new at_legion_instance_portal("at_portal_violet_hold_dh_havoc_exit", 1220, -953.287f, 4334.03f, 740.184f, 230.541f);
 }

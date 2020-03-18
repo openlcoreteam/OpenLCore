@@ -34,6 +34,7 @@
 #include "MotionMaster.h"
 #include "WorldSession.h"
 #include "PhasingHandler.h"
+#include "CombatAI.h"
 
 enum eQuests
 {
@@ -42,7 +43,7 @@ enum eQuests
     QUEST_FEL_INFUSION          = 38689,
     QUEST_VAULT_OF_THE_WARDENS  = 39742, // optional bonus objective
     QUEST_STOP_GULDAN_H         = 38723,
-    QUEST_STOP_GULDAN_V         = 40253,
+    QUEST_STOP_GULDAN_A         = 40253,
     QUEST_GRAND_THEFT_FELBAT    = 39682,
     QUEST_FROZEN_IN_TIME        = 39685,
     QUEST_BEAM_ME_UP            = 39684,
@@ -81,10 +82,19 @@ public:
 
    bool OnGossipHello(Player* player, Creature* creature) override
    {
-       player->CastSpell(creature, SPELL_UNLOCKING_KAYN, true);
+       /*player->CastSpell(creature, SPELL_UNLOCKING_KAYN, true);
        creature->DespawnOrUnsummon(25);
        player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_KAYN, ObjectGuid::Empty);
-       player->KilledMonsterCredit(KILL_CREDIT_KAYN_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+       player->KilledMonsterCredit(KILL_CREDIT_KAYN_PICKED_UP_WEAPONS, ObjectGuid::Empty);*/
+       if (player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_INCOMPLETE)
+       {
+           if (creature == nullptr)
+               return false;
+
+            player->CastSpell(creature, SPELL_UNLOCKING_KAYN, true);
+           creature->DespawnOrUnsummon(25);
+           player->SummonCreature(99631, 4343.16f, -589.57f, -281.40f, 3.38f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+       }
        return true;
    }
 };
@@ -97,11 +107,20 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        player->CastSpell(creature, SPELL_UNLOCKING_ALTRUIS, true);
-        creature->DespawnOrUnsummon(25);
-        player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
-        player->KilledMonsterCredit(KILL_CREDIT_ALTRUIS_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+        //player->CastSpell(creature, SPELL_UNLOCKING_ALTRUIS, true);
+        //creature->DespawnOrUnsummon(25);
+        //player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
+        //player->KilledMonsterCredit(KILL_CREDIT_ALTRUIS_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+        if (player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (creature == nullptr)
+                return false;
 
+
+             player->CastSpell(creature, SPELL_UNLOCKING_ALTRUIS, true);
+            creature->DespawnOrUnsummon(25);
+            player->SummonCreature(99632, 4309.94f, -589.618f, -281.407f, 6.13126f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+        }
         return true;
     }
 };
@@ -432,7 +451,7 @@ public:
                     for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_COMPLETE ||
-                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_COMPLETE)
+                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_COMPLETE)
                         {
                             PhasingHandler::AddPhase(*itr, DB_PHASE_AFTER_FIGHT, true);
                             PhasingHandler::RemovePhase(*itr, DB_PHASE_FIGHT, true);
@@ -532,7 +551,7 @@ public:
                 for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                     if (Player* target = (*itr)->getTarget()->ToPlayer())
                         if (target->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                            target->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_INCOMPLETE)
+                            target->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE)
                         {
                             target->KilledMonsterCredit(QUEST_KILL_CREDIT);
                         }
@@ -761,7 +780,7 @@ public:
                     for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_COMPLETE ||
-                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_COMPLETE)
+                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_COMPLETE)
                         {
                             PhasingHandler::AddPhase(*itr, DB_PHASE_AFTER_FIGHT, true);
                             PhasingHandler::RemovePhase(*itr, DB_PHASE_FIGHT, true);
@@ -860,7 +879,7 @@ public:
                 for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                     if (Player* target = (*itr)->getTarget()->ToPlayer())
                         if (target->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                            target->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_INCOMPLETE)
+                            target->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE)
                                 target->KilledMonsterCredit(TAKING_POWER_KILL_CREDIT);
             }
         }
@@ -1488,10 +1507,8 @@ public:
     };
     bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) override
     {
-        if (quest->GetQuestId() == QUEST_STOP_GULDAN_H || QUEST_STOP_GULDAN_V)
-        {
+        if (quest->GetQuestId() == QUEST_STOP_GULDAN_H || QUEST_STOP_GULDAN_A)
             player->GetSceneMgr().PlayScene(SCENE_GULDAN_STEAL_ILLIDAN_ID);
-        }
         return true;
     }
  };
@@ -1596,7 +1613,7 @@ public:
             if (player->getClass() == CLASS_DEMON_HUNTER &&
                 player->GetAreaId() == 7819 && player->GetPositionX() < 4080 &&
                 (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                 player->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_INCOMPLETE) &&
+                 player->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE) &&
                 !player->GetPhaseShift().HasPhase(543))
             {
                 PhasingHandler::AddPhase(player, 543, true);
@@ -1616,7 +1633,7 @@ public:
             if (player->getClass() == CLASS_DEMON_HUNTER &&
                 player->GetAreaId() == 7819 &&
                 (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_REWARDED ||
-                    player->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_REWARDED) &&
+                    player->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_REWARDED) &&
                 !player->GetPhaseShift().HasPhase(993))
             {
                 PhasingHandler::AddPhase(player, 993, true);
@@ -1810,49 +1827,454 @@ public:
     }
 };
 
-class npc_vault_of_the_wardens_vampiric_felbat : public npc_escortAI
+/* Attempt to script Kayn and Altruis for quest 'Breaking Out' */
+class npc_altruis_sufferer_freed_99632 : public CreatureScript {
+public:
+    npc_altruis_sufferer_freed_99632() : CreatureScript("npc_altruis_sufferer_freed_99632") { }
+
+     enum eAltruisFreed {
+        PHASE_NONE = 0,
+        PHASE_CONTINUE = -1,
+        DATA_EVENT_STARTER_GUID = 0,
+        QUEST_BREAKING_OUT = 38672,
+        PHASE_PEEK_WEAPONS_1 = 1,
+        PHASE_PEEK_WEAPONS_2 = 2,
+        PHASE_PEEK_WEAPONS_3 = 3,
+        PHASE_PEEK_WEAPONS_4 = 4,
+        PHASE_DESPAWN = 5,
+        WP_START = 1,
+        WP_AT_WEAPON_CRATE = 6,
+        WP_AT_HOME = 10,
+    };
+
+     struct npc_altruis_sufferer_freed_99632_AI : public npc_escortAI
+    {
+        npc_altruis_sufferer_freed_99632_AI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+         void Initialize()
+        {
+            _phase = PHASE_NONE;
+            _moveTimer = 0;
+        }
+
+         ObjectGuid GetGUID(int32 type) const override
+        {
+            if (type == DATA_EVENT_STARTER_GUID)
+                return _eventStarterGuid;
+
+             return ObjectGuid::Empty;
+        }
+
+         void SetGUID(ObjectGuid guid, int32 type) override
+        {
+            switch (type)
+            {
+            case DATA_EVENT_STARTER_GUID:
+                _eventStarterGuid = guid;
+                break;
+            default:
+                break;
+            }
+        }
+
+         void Reset() override
+        {
+            Initialize();
+            _events.Reset();
+        }
+
+         void IsSummonedBy(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+            {
+                _eventStarterGuid = who->GetGUID();
+                me->SetWalk(true);
+                me->LoadEquipment(2);
+                Start(false, false, _eventStarterGuid);
+            }
+        }
+
+         void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+             if (UpdateVictim())
+            {
+                DoMeleeAttackIfReady();
+            }
+
+             if (HasEscortState(STATE_ESCORT_NONE))
+                return;
+
+             npc_escortAI::UpdateAI(diff);
+
+             if (_phase)
+            {
+                if (_moveTimer <= diff)
+                {
+                    switch (_phase)
+                    {
+                    case PHASE_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_PEEK_WEAPONS_1:
+                        // me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                        me->LoadEquipment(3);
+                        _moveTimer = 2 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_2;
+                        break;
+                    case PHASE_PEEK_WEAPONS_2:
+                        me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                        me->LoadEquipment(1);
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            player->KilledMonsterCredit(KILL_CREDIT_ALTRUIS_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+                            player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
+                        }   
+                        _moveTimer = 2 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_3;
+                        break;
+                    /*case PHASE_PEEK_WEAPONS_3:
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        _moveTimer = 0.5 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_4;
+                        break;*/
+                    case PHASE_PEEK_WEAPONS_3:
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_DESPAWN:
+                        me->DespawnOrUnsummon();
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else if (!me->IsInCombat())
+                    _moveTimer -= diff;
+            }
+        }
+
+         void WaypointReached(uint32 waypointId) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+             switch (waypointId)
+            {
+            case WP_START:
+                _moveTimer = 0 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                Talk(0);
+                break;
+            case WP_AT_WEAPON_CRATE:
+                SetEscortPaused(true);
+                me->SetOrientation(2.81188f);
+                me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_PEEK_WEAPONS_1;
+                break;
+            case WP_AT_HOME:
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_DESPAWN;
+                break;
+            default:
+                break;
+            }
+        }
+
+     private:
+        int8 _phase;
+        uint32 _moveTimer;
+        ObjectGuid _eventStarterGuid;
+        EventMap _events;
+    };
+
+     CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_altruis_sufferer_freed_99632_AI(creature);
+    }
+};
+
+ class npc_kayn_sunfury_freed_99631 : public CreatureScript {
+public:
+    npc_kayn_sunfury_freed_99631() : CreatureScript("npc_kayn_sunfury_freed_99631") { }
+
+     enum eKaynFreed {
+        PHASE_NONE = 0,
+        PHASE_CONTINUE = -1,
+        DATA_EVENT_STARTER_GUID = 0,
+        QUEST_BREAKING_OUT = 38672,
+        PHASE_PEEK_WEAPONS_1 = 1,
+        PHASE_PEEK_WEAPONS_2 = 2,
+        PHASE_PEEK_WEAPONS_3 = 3,
+        PHASE_PEEK_WEAPONS_4 = 4,
+        PHASE_DESPAWN = 5,
+        WP_START = 1,
+        WP_AT_WEAPON_CRATE = 6,
+        WP_AT_HOME = 13,
+    };
+
+     struct npc_kayn_sunfury_freed_99631_AI : public npc_escortAI
+    {
+        npc_kayn_sunfury_freed_99631_AI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+         void Initialize()
+        {
+            _phase = PHASE_NONE;
+            _moveTimer = 0;
+        }
+
+         ObjectGuid GetGUID(int32 type) const override
+        {
+            if (type == DATA_EVENT_STARTER_GUID)
+                return _eventStarterGuid;
+
+             return ObjectGuid::Empty;
+        }
+
+         void SetGUID(ObjectGuid guid, int32 type) override
+        {
+            switch (type)
+            {
+            case DATA_EVENT_STARTER_GUID:
+                _eventStarterGuid = guid;
+                break;
+            default:
+                break;
+            }
+        }
+
+         void Reset() override
+        {
+            Initialize();
+            _events.Reset();
+        }
+
+         void IsSummonedBy(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+            {
+                _eventStarterGuid = who->GetGUID();
+                me->SetWalk(true);
+                me->LoadEquipment(2);
+                Start(false, false, _eventStarterGuid);
+            }
+        }
+
+         void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+             if (UpdateVictim())
+            {
+                DoMeleeAttackIfReady();
+            }
+
+             if (HasEscortState(STATE_ESCORT_NONE))
+                return;
+
+             npc_escortAI::UpdateAI(diff);
+
+             if (_phase)
+            {
+                if (_moveTimer <= diff)
+                {
+                    switch (_phase)
+                    {
+                    case PHASE_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_PEEK_WEAPONS_1:
+                        // me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                        me->LoadEquipment(3);
+                        _moveTimer = 2 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_2;
+                        break;
+                    case PHASE_PEEK_WEAPONS_2:
+                        me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                        me->LoadEquipment(1);
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            player->KilledMonsterCredit(KILL_CREDIT_KAYN_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+                            player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_KAYN, ObjectGuid::Empty);
+                        }   
+                        _moveTimer = 2 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_3;
+                        break;
+                    /*case PHASE_PEEK_WEAPONS_3:
+                        
+                        _moveTimer = 0.5 * IN_MILLISECONDS;
+                        _phase = PHASE_PEEK_WEAPONS_4;
+                        break;*/
+                    case PHASE_PEEK_WEAPONS_3:
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_DESPAWN:
+                        me->DespawnOrUnsummon();
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else if (!me->IsInCombat())
+                    _moveTimer -= diff;
+            }
+        }
+
+         void WaypointReached(uint32 waypointId) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+             switch (waypointId)
+            {
+            case WP_START:
+                _moveTimer = 0 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                Talk(0);
+                break;
+            case WP_AT_WEAPON_CRATE:
+                SetEscortPaused(true);
+                me->SetOrientation(0.10776f);
+                me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_PEEK_WEAPONS_1;
+                break;
+            case WP_AT_HOME:
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_DESPAWN;
+                break;
+            default:
+                break;
+            }
+        }
+
+     private:
+        int8 _phase;
+        uint32 _moveTimer;
+        ObjectGuid _eventStarterGuid;
+        EventMap _events;
+    };
+
+     CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_kayn_sunfury_freed_99631_AI(creature);
+    }
+};
+
+ Position const secondStagePath[] =
+{
+    { 4438.449f, -290.577f, -244.036f },
+    { 4444.083f, -301.119f, -239.666f },
+    { 4450.647f, -320.770f, -235.952f },
+    { 4450.647f, -320.770f, -197.235f },
+    { 4450.647f, -320.770f, -158.749f },
+    { 4450.647f, -320.770f, -107.313f },
+    { 4450.647f, -320.770f, -47.358f },
+    { 4450.647f, -320.770f, -5.029f },
+    { 4450.647f, -320.770f, 37.068f },
+    { 4450.647f, -320.770f, 97.366f },
+    { 4450.647f, -320.770f, 127.221f },
+    { 4450.647f, -320.770f, 130.252f },
+    { 4450.646f, -344.573f, 128.044f }
+};
+size_t const pathSize = std::extent<decltype(secondStagePath)>::value;
+
+ class npc_vault_of_the_wardens_vampiric_felbat : public CreatureScript
 {
 public:
-    npc_vault_of_the_wardens_vampiric_felbat(Creature* creature) : npc_escortAI(creature)
-    {
-        me->SetCanFly(true);
-        me->SetSpeed(MOVE_FLIGHT, 26);
-        me->SetReactState(REACT_PASSIVE);
-        me->SetMovementAnimKitId(3);
-        me->SetSpeed(MOVE_FLIGHT, 75);
-    }
+    npc_vault_of_the_wardens_vampiric_felbat() : CreatureScript("npc_vault_of_the_wardens_vampiric_felbat") { }
 
-    void OnCharmed(bool /*apply*/) override
-    {
-        // Make sure the basic cleanup of OnCharmed is done to avoid looping problems
-        if (me->NeedChangeAI)
-            me->NeedChangeAI = false;
-    }
+     enum eFelBal {
+        EVENT_START_PATH = 1,
+        EVENT_DESPAWN = 2,
+    };
 
-    void LastWaypointReached()
+     struct npc_vault_of_the_wardens_vampiric_felbat_AI : public VehicleAI
     {
-        if (Player* rider = me->GetOwner()->ToPlayer())
+        npc_vault_of_the_wardens_vampiric_felbat_AI(Creature* creature) : VehicleAI(creature) { }
+
+         void Initialize()
         {
-            rider->KilledMonsterCredit(96659);
+            me->SetCanFly(true);
+            me->SetSpeed(MOVE_FLIGHT, 26);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetMovementAnimKitId(3);
+            me->SetSpeed(MOVE_FLIGHT, 75);
         }
-    }
 
-    void EnterEvadeMode(EvadeReason /*why*/) override { }
-
-    void IsSummonedBy(Unit* summoner) override
-    {
-        if (summoner)
+         void Reset() override
         {
-            //me->GetScheduler().Schedule(1s, [this, summoner](TaskContext /*context*/));
-            summoner->CastSpell(me, 46598);
+            _events.Reset();
+            Initialize();
+            _playerGUID = ObjectGuid::Empty;
         }
-    }
 
+         void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER) {
+                _playerGUID = passenger->ToPlayer()->GetGUID();
+                _events.ScheduleEvent(EVENT_START_PATH, Seconds(1));
+            }
+        }
 
+         void MovementInform(uint32 type, uint32 pointId) override
+        {
+            if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
+                _events.ScheduleEvent(EVENT_DESPAWN, 200);
+        }
 
-    void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+         void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+             if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+             while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START_PATH:
+                    me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), secondStagePath, pathSize, false, true);
+                    break;
+                case EVENT_DESPAWN:
+                    me->RemoveAllAuras();
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        player->KilledMonsterCredit(96659, ObjectGuid::Empty);
+                    me->DespawnOrUnsummon();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+    };
+
+     CreatureAI* GetAI(Creature* creature) const override
     {
-        Start(false, true, who->GetGUID());
+        return new npc_vault_of_the_wardens_vampiric_felbat_AI(creature);
     }
 };
 
@@ -1891,5 +2313,7 @@ void AddSC_zone_vault_of_wardens()
     new PlayerScript_bonus_objective();
     new PlayerScript_switch_phases();
     RegisterCreatureAI(npc_vault_of_the_wardens_sledge_or_crusher);
-    RegisterCreatureAI(npc_vault_of_the_wardens_vampiric_felbat);
+    new npc_altruis_sufferer_freed_99632();
+    new npc_kayn_sunfury_freed_99631();
+    new npc_vault_of_the_wardens_vampiric_felbat();
 }

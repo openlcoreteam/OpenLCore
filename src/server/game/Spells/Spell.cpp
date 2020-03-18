@@ -3373,8 +3373,8 @@ void Spell::cast(bool skipCheck)
     {
         // now that we've done the basic check, now run the scripts
         // should be done before the spell is actually executed
-        bool SkipOtherCode = false;
-        sScriptMgr->OnPlayerSpellCast(playerCaster, this, skipCheck, SkipOtherCode);
+        sScriptMgr->OnPlayerSpellCast(playerCaster, this, skipCheck);
+
         // As of 3.0.2 pets begin attacking their owner's target immediately
         // Let any pets know we've attacked something. Check DmgClass for harmful spells only
         // This prevents spells such as Hunter's Mark from triggering pet attack
@@ -5061,7 +5061,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                 return SPELL_FAILED_SPELL_IN_PROGRESS;
 
             // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
-            if (m_caster->ToPlayer()->GetLastPotionId() && m_CastItem && (m_CastItem->IsPotion() || m_spellInfo->IsCooldownStartedOnEvent()))
+            if (!IsIgnoringCooldowns() && m_caster->ToPlayer()->GetLastPotionId() && m_CastItem && (m_CastItem->IsPotion() || m_spellInfo->IsCooldownStartedOnEvent()))
                 return SPELL_FAILED_NOT_READY;
         }
 
@@ -6903,7 +6903,10 @@ SpellCastResult Spell::CheckItems(uint32* param1 /*= nullptr*/, uint32* param2 /
                         }
                     }
 
-                    if (!HaveBonus)
+			if (Bonusfields.empty()) 
+			HaveBonus = true;
+
+		        if (!HaveBonus)
                         return SPELL_FAILED_NO_VALID_TARGETS;
                 }
                 else if (m_spellInfo->Id == 225158 || m_spellInfo->Id == 225160 || m_spellInfo->Id == 225161) // Upgrade Armor Class Halls
@@ -6968,7 +6971,7 @@ SpellCastResult Spell::CheckItems(uint32* param1 /*= nullptr*/, uint32* param2 /
                         151649, 151821, 151642, 151808, 151809, 151810, 151646, 151787, 151786, 151814, 151640, 151795, 151796,
                         151644, 151782, 151812, 151813, 151650, 151822, 151823, 151824, 151647, 151785, 151819, 151641, 151803,
                         151805, 151807, 144259, 150936, 151817, 151815, 151818, 151639, 151798, 151799, 151643, 151784, 151788,
-                        151811, 151636, 151783, 151800, 151801, 151802, 146666, 146667, 146668, 146669
+                        151811, 151636, 151783, 151800, 151801, 151802, 146666, 146667, 146668, 146669, 152626
                     };
 
                     bool ItemFound = false;

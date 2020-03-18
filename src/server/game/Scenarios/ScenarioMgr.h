@@ -46,6 +46,7 @@ struct ScenarioDBData
 {
     uint32 MapID;
     uint8 DifficultyID;
+    uint32 ZoneID;
     uint32 Scenario_A;
     uint32 Scenario_H;
 };
@@ -106,7 +107,8 @@ private:
 public:
     static ScenarioMgr* Instance();
 
-    InstanceScenario* CreateInstanceScenario(Map const* map, TeamId team) const;
+    InstanceScenario* CreateInstanceScenario(Map const* map, TeamId team, uint32 zoneId) const;
+    InstanceScenario* CreateInstanceScenarioByID(Map const * map, uint32 zoneId) ;
 
     void LoadDBData();
     void LoadDB2Data();

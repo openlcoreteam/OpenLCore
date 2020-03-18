@@ -156,6 +156,36 @@ enum DHSpells
     SPELL_DH_VENGEFUL_RETREAT               = 198793,
     SPELL_DH_VENGEFUL_RETREAT_FURY          = 203650,
     SPELL_DH_VENGEFUL_RETREAT_TRIGGER       = 198813,
+	SPELL_DH_SHATTER_SOUL_1                 = 209980,
+    SPELL_DH_SHATTER_SOUL_2                 = 209981,
+    SPELL_DH_SHATTER_SOUL_3                 = 209651,
+    SPELL_DH_VENGEANCE_DEMON_HUNTER         = 212613,
+    SPELL_DH_SHATTERED_SOULS_1              = 226258,
+    SPELL_DH_SHATTERED_SOULS_2              = 226263,
+    SPELL_DH_SHATTERED_SOULS_3              = 226370,
+    SPELL_DH_SHATTERED_SOULS_4              = 226264,
+    SPELL_DH_SHATTERED_SOULS_5              = 226259,
+};
+
+enum ShatteredSoulsSpells
+{
+    // SPELL_DH_SHATTERED_SOULS = 204255,
+    SPELL_DH_SHATTERED_SOULS_DEMON = 204256,
+    SPELL_DH_LESSER_SOUL_SHARD = 203795,
+    // SPELL_DH_SHATTERED_SOULS_MISSILE = 209651,
+    SPELL_DH_SOUL_FRAGMENT_HEAL_25_HAVOC = 178963,
+    SPELL_DH_SOUL_FRAGMENT_DEMON_BONUS = 163073,
+    SPELL_DH_SOUL_FRAGMENT_HEAL_VENGEANCE = 210042,
+    SPELL_DH_LESSER_SOUL_SHARD_HEAL = 203794,
+    // SPELL_DH_CONSUME_SOUL_MISSILE = 210047,
+    SPELL_DH_LESSER_SOUL_FRAGMENT_HAVOC = 228532,
+    SPELL_DH_PAINBRINGER = 207387,
+    SPELL_DH_PAINBRINGER_BUFF = 212988,
+    SPELL_DH_DEVOUR_SOULS = 212821,
+    SPELL_DH_CHARRED_WARBLADES_HEAL = 213011,
+    SPELL_DH_SHATTER_THE_SOULS = 212827,
+    SPELL_DH_FIERY_DEMISE_DEBUFF = 212818,
+    SPELL_DH_COVER_OF_DARKNESS = 227635,
 };
 
 enum NemesisTargets
@@ -476,30 +506,29 @@ class spell_dh_spirit_bomb_damage : public SpellScript
     }
 };
 
-// Blade Turning - 203753
+// 203753 - Blade Turning
 class spell_dh_blade_turning : public SpellScriptLoader
 {
-public:
-    spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") {}
+   public:
+        spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") { }
 
-    class spell_dh_blade_turning_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dh_blade_turning_AuraScript);
-
-        bool CheckProc(ProcEventInfo& eventInfo)
+        class spell_dh_blade_turning_AuraScript : public AuraScript
         {
-            if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
-                return true;
-            return false;
-        }
+            PrepareAuraScript(spell_dh_blade_turning_AuraScript);
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
+                    return true;
+                return false;
+            }
 
-        void Register() override
-        {
-            DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
-        }
-    };
+            void Register() override
+            {
+                DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
+            }
+        };
 
-    AuraScript* GetAuraScript() const override
+    AuraScript* GetAuraScript() const
     {
         return new spell_dh_blade_turning_AuraScript();
     }
@@ -2579,7 +2608,7 @@ public:
         void Register() override
         {
             OnCheckCast += SpellCheckCastFn(spell_dh_glide_SpellScript::CheckCast);
-            OnEffectHitTarget += SpellEffectFn(spell_dh_glide_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffectHitTarget += SpellEffectFn(spell_dh_glide_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_KNOCK_BACK);
         }
     };
 
@@ -2921,6 +2950,56 @@ struct at_dh_shattered_souls : AreaTriggerAI
         }
 
         at->SetDuration(0);
+    }
+};
+
+// Shatter Soul - 209980, 209981, 209651
+class spell_dh_shatter_soul : public SpellScriptLoader
+{
+    public:
+    spell_dh_shatter_soul() : SpellScriptLoader("spell_dh_shatter_soul") {}
+
+    class spell_dh_shatter_soul_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dh_shatter_soul_SpellScript);
+
+        void HandleHitTarget(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (WorldLocation const* dest = GetExplTargetDest())
+                {
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case SPELL_DH_SHATTER_SOUL_1:
+                        {
+                            caster->CastSpell(dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ(), caster->HasAura(SPELL_DH_VENGEANCE_DEMON_HUNTER) ? SPELL_DH_SHATTERED_SOULS_2 : SPELL_DH_SHATTERED_SOULS_3, true);
+                            return;
+                        }
+                        case SPELL_DH_SHATTER_SOUL_2:
+                        {
+                            caster->CastSpell(dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ(), SPELL_DH_SHATTERED_SOULS_1, true);
+                            return;
+                        }
+                        case SPELL_DH_SHATTER_SOUL_3:
+                        {
+                            caster->CastSpell(dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ(), caster->HasAura(SPELL_DH_VENGEANCE_DEMON_HUNTER) ? SPELL_DH_SHATTERED_SOULS_4 : SPELL_DH_SHATTERED_SOULS_5, true);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHit += SpellEffectFn(spell_dh_shatter_soul_SpellScript::HandleHitTarget, EFFECT_1, SPELL_EFFECT_TRIGGER_MISSILE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dh_shatter_soul_SpellScript();
     }
 };
 
@@ -3324,6 +3403,7 @@ void AddSC_demon_hunter_spell_scripts()
     new spell_dh_vengeful_retreat();
     new spell_dh_vengeful_retreat_fury_refiller();
     new spell_dh_vengeful_retreat_trigger();
+	new spell_dh_shatter_soul();
     RegisterSpellScript(spell_dh_felblade);
     RegisterAuraScript(aura_dh_chaos_cleave);
 
@@ -3337,8 +3417,8 @@ void AddSC_demon_hunter_spell_scripts()
 
     /// Custom NPC scripts
     new npc_dh_spell_trainer();
-
-    new spell_dh_throw_glaive();
+	
+	new spell_dh_throw_glaive();
     RegisterAuraScript(spell_dh_infernal_strike_timer);
     RegisterAuraScript(spell_dh_momentum);
     new spell_dh_chaos_nova();

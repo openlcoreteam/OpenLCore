@@ -16,19 +16,19 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
- /* ScriptData
- SDName: Item_Scripts
- SD%Complete: 100
- SDComment: Items for a range of different items. See content below (in script)
- SDCategory: Items
- EndScriptData */
+/* ScriptData
+SDName: Item_Scripts
+SD%Complete: 100
+SDComment: Items for a range of different items. See content below (in script)
+SDCategory: Items
+EndScriptData */
 
- /* ContentData
- item_nether_wraith_beacon(i31742)   Summons creatures for quest Becoming a Spellfire Tailor (q10832)
- item_flying_machine(i34060, i34061)  Engineering crafted flying machines
- item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
- item_only_for_flight                Items which should only useable while flying
- EndContentData */
+/* ContentData
+item_nether_wraith_beacon(i31742)   Summons creatures for quest Becoming a Spellfire Tailor (q10832)
+item_flying_machine(i34060, i34061)  Engineering crafted flying machines
+item_gor_dreks_ointment(i30175)     Protecting Our Own(q10488)
+item_only_for_flight                Items which should only useable while flying
+EndContentData */
 
 #include "ScriptMgr.h"
 #include "GameObject.h"
@@ -43,13 +43,13 @@
 #include "Formulas.h"
 #include "SharedDefines.h"
 
- /*#####
- # item_only_for_flight
- #####*/
+/*#####
+# item_only_for_flight
+#####*/
 
 enum OnlyForFlight
 {
-    SPELL_ARCANE_CHARGES = 45072
+    SPELL_ARCANE_CHARGES    = 45072
 };
 
 class item_only_for_flight : public ItemScript
@@ -65,18 +65,18 @@ public:
         //for special scripts
         switch (itemId)
         {
-        case 24538:
-            if (player->GetAreaId() != 3628)
-                disabled = true;
-            break;
-        case 34489:
-            if (player->GetZoneId() != 4080)
-                disabled = true;
-            break;
-        case 34475:
-            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_ARCANE_CHARGES))
-                Spell::SendCastResult(player, spellInfo, 0, castId, SPELL_FAILED_NOT_ON_GROUND);
-            break;
+            case 24538:
+                if (player->GetAreaId() != 3628)
+                    disabled = true;
+                break;
+            case 34489:
+                if (player->GetZoneId() != 4080)
+                    disabled = true;
+                break;
+            case 34475:
+                if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_ARCANE_CHARGES))
+                    Spell::SendCastResult(player, spellInfo, 0, castId, SPELL_FAILED_NOT_ON_GROUND);
+                break;
         }
 
         // allow use in flight only
@@ -102,10 +102,10 @@ public:
     {
         if (player->GetQuestStatus(10832) == QUEST_STATUS_INCOMPLETE)
         {
-            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY() + 20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
+            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY()+20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
                 nether->AI()->AttackStart(player);
 
-            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY() - 20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
+            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY()-20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
                 nether->AI()->AttackStart(player);
         }
         return false;
@@ -199,23 +199,23 @@ public:
 
 enum PileFakeFur
 {
-    GO_CARIBOU_TRAP_1 = 187982,
-    GO_CARIBOU_TRAP_2 = 187995,
-    GO_CARIBOU_TRAP_3 = 187996,
-    GO_CARIBOU_TRAP_4 = 187997,
-    GO_CARIBOU_TRAP_5 = 187998,
-    GO_CARIBOU_TRAP_6 = 187999,
-    GO_CARIBOU_TRAP_7 = 188000,
-    GO_CARIBOU_TRAP_8 = 188001,
-    GO_CARIBOU_TRAP_9 = 188002,
-    GO_CARIBOU_TRAP_10 = 188003,
-    GO_CARIBOU_TRAP_11 = 188004,
-    GO_CARIBOU_TRAP_12 = 188005,
-    GO_CARIBOU_TRAP_13 = 188006,
-    GO_CARIBOU_TRAP_14 = 188007,
-    GO_CARIBOU_TRAP_15 = 188008,
-    GO_HIGH_QUALITY_FUR = 187983,
-    NPC_NESINGWARY_TRAPPER = 25835
+    GO_CARIBOU_TRAP_1                                      = 187982,
+    GO_CARIBOU_TRAP_2                                      = 187995,
+    GO_CARIBOU_TRAP_3                                      = 187996,
+    GO_CARIBOU_TRAP_4                                      = 187997,
+    GO_CARIBOU_TRAP_5                                      = 187998,
+    GO_CARIBOU_TRAP_6                                      = 187999,
+    GO_CARIBOU_TRAP_7                                      = 188000,
+    GO_CARIBOU_TRAP_8                                      = 188001,
+    GO_CARIBOU_TRAP_9                                      = 188002,
+    GO_CARIBOU_TRAP_10                                     = 188003,
+    GO_CARIBOU_TRAP_11                                     = 188004,
+    GO_CARIBOU_TRAP_12                                     = 188005,
+    GO_CARIBOU_TRAP_13                                     = 188006,
+    GO_CARIBOU_TRAP_14                                     = 188007,
+    GO_CARIBOU_TRAP_15                                     = 188008,
+    GO_HIGH_QUALITY_FUR                                    = 187983,
+    NPC_NESINGWARY_TRAPPER                                 = 25835
 };
 
 #define CaribouTrapsNum 15
@@ -249,7 +249,7 @@ public:
 
         float x, y, z;
         go->GetClosePoint(x, y, z, go->GetObjectSize() / 3, 7.0f);
-        go->SummonGameObject(GO_HIGH_QUALITY_FUR, *go, QuaternionData(), 1);
+        go->SummonGameObject(GO_HIGH_QUALITY_FUR, *go, QuaternionData::fromEulerAnglesZYX(go->GetOrientation(), 0.0f, 0.0f), 1);
         if (TempSummon* summon = player->SummonCreature(NPC_NESINGWARY_TRAPPER, x, y, z, go->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 1000))
         {
             summon->SetVisible(false);
@@ -266,9 +266,9 @@ public:
 
 enum PetrovClusterBombs
 {
-    SPELL_PETROV_BOMB = 42406,
-    AREA_ID_SHATTERED_STRAITS = 4064,
-    ZONE_ID_HOWLING = 495
+    SPELL_PETROV_BOMB           = 42406,
+    AREA_ID_SHATTERED_STRAITS   = 4064,
+    ZONE_ID_HOWLING             = 495
 };
 
 class item_petrov_cluster_bombs : public ItemScript
@@ -299,30 +299,30 @@ public:
 ######*/
 enum HelpThemselves
 {
-    QUEST_CANNOT_HELP_THEMSELVES = 11876,
-    NPC_TRAPPED_MAMMOTH_CALF = 25850,
-    GO_MAMMOTH_TRAP_1 = 188022,
-    GO_MAMMOTH_TRAP_2 = 188024,
-    GO_MAMMOTH_TRAP_3 = 188025,
-    GO_MAMMOTH_TRAP_4 = 188026,
-    GO_MAMMOTH_TRAP_5 = 188027,
-    GO_MAMMOTH_TRAP_6 = 188028,
-    GO_MAMMOTH_TRAP_7 = 188029,
-    GO_MAMMOTH_TRAP_8 = 188030,
-    GO_MAMMOTH_TRAP_9 = 188031,
-    GO_MAMMOTH_TRAP_10 = 188032,
-    GO_MAMMOTH_TRAP_11 = 188033,
-    GO_MAMMOTH_TRAP_12 = 188034,
-    GO_MAMMOTH_TRAP_13 = 188035,
-    GO_MAMMOTH_TRAP_14 = 188036,
-    GO_MAMMOTH_TRAP_15 = 188037,
-    GO_MAMMOTH_TRAP_16 = 188038,
-    GO_MAMMOTH_TRAP_17 = 188039,
-    GO_MAMMOTH_TRAP_18 = 188040,
-    GO_MAMMOTH_TRAP_19 = 188041,
-    GO_MAMMOTH_TRAP_20 = 188042,
-    GO_MAMMOTH_TRAP_21 = 188043,
-    GO_MAMMOTH_TRAP_22 = 188044,
+    QUEST_CANNOT_HELP_THEMSELVES                  =  11876,
+    NPC_TRAPPED_MAMMOTH_CALF                      =  25850,
+    GO_MAMMOTH_TRAP_1                             = 188022,
+    GO_MAMMOTH_TRAP_2                             = 188024,
+    GO_MAMMOTH_TRAP_3                             = 188025,
+    GO_MAMMOTH_TRAP_4                             = 188026,
+    GO_MAMMOTH_TRAP_5                             = 188027,
+    GO_MAMMOTH_TRAP_6                             = 188028,
+    GO_MAMMOTH_TRAP_7                             = 188029,
+    GO_MAMMOTH_TRAP_8                             = 188030,
+    GO_MAMMOTH_TRAP_9                             = 188031,
+    GO_MAMMOTH_TRAP_10                            = 188032,
+    GO_MAMMOTH_TRAP_11                            = 188033,
+    GO_MAMMOTH_TRAP_12                            = 188034,
+    GO_MAMMOTH_TRAP_13                            = 188035,
+    GO_MAMMOTH_TRAP_14                            = 188036,
+    GO_MAMMOTH_TRAP_15                            = 188037,
+    GO_MAMMOTH_TRAP_16                            = 188038,
+    GO_MAMMOTH_TRAP_17                            = 188039,
+    GO_MAMMOTH_TRAP_18                            = 188040,
+    GO_MAMMOTH_TRAP_19                            = 188041,
+    GO_MAMMOTH_TRAP_20                            = 188042,
+    GO_MAMMOTH_TRAP_21                            = 188043,
+    GO_MAMMOTH_TRAP_22                            = 188044,
 };
 
 #define MammothTrapsNum 22
@@ -367,8 +367,8 @@ public:
 
 enum TheEmissary
 {
-    QUEST_THE_EMISSARY = 11626,
-    NPC_LEVIROTH = 26452
+    QUEST_THE_EMISSARY      =   11626,
+    NPC_LEVIROTH            =   26452
 };
 
 class item_trident_of_nazjan : public ItemScript
@@ -384,11 +384,9 @@ public:
             {
                 pLeviroth->AI()->AttackStart(player);
                 return false;
-            }
-            else
+            } else
                 player->SendEquipError(EQUIP_ERR_OUT_OF_RANGE, item, NULL);
-        }
-        else
+        } else
             player->SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, item, NULL);
         return true;
     }
@@ -396,8 +394,8 @@ public:
 
 enum CapturedFrog
 {
-    QUEST_THE_PERFECT_SPIES = 25444,
-    NPC_VANIRAS_SENTRY_TOTEM = 40187
+    QUEST_THE_PERFECT_SPIES      = 25444,
+    NPC_VANIRAS_SENTRY_TOTEM     = 40187
 };
 
 class item_captured_frog : public ItemScript
@@ -701,7 +699,7 @@ public:
         if (msg != EQUIP_ERR_OK)
         {
             player->SendItemRetrievalMail(itemID, 1, GenerateItemRandomPropertyId(itemID), bonuses);
-            player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
+			player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
             player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
             return true;
         }
@@ -710,13 +708,13 @@ public:
         if (!newItem)
         {
             player->SendItemRetrievalMail(itemID, 1, GenerateItemRandomPropertyId(itemID), bonuses);
-            player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
+			player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
             player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
             return true;
         }
 
         player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
-        player->SendNewItem(newItem, 1, true, false);
+		player->SendNewItem(newItem, 1, true, false);
         player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
         return true;
@@ -1040,6 +1038,304 @@ public:
     }
 };
 
+namespace ProfessionBookSpells
+{
+    enum
+    {
+        Alchemy         = 156614,
+        Blacksmithing   = 169923,
+        Enchanting      = 161788,
+        Engineering     = 161787,
+        Inscription     = 161789,
+        JewelCrafting   = 169926,
+        LeatherWorking  = 169925,
+        Tailoring       = 169924
+    };
+}
+namespace ProfessionBookSpellLearnSpells
+{
+    uint32 AlchemyLearnedRecipes[] =
+    {
+        156587, ///< Alchemical Catalyst
+        156585, ///< Crescent Oil
+        175865, ///< Draenic Invisibility Potion
+        175867, ///< Draenic Living Action Potion
+        156582, ///< Draenic Mana Potion
+        175853, ///< Draenic Swiftness Potion
+        175866, ///< Draenic Water Breathing Elixir
+        175869, ///< Draenic Water Walking Elixir
+        175868, ///< Pure Rage Potion
+        175880, ///< Secrets of Draenor Alchemy
+    };
+
+    uint32 BlacksmithingLearnedRecipes[] =
+    {
+        171692, ///< Smoldering Breastplate
+        171693, ///< Smoldering Greaves
+        171691, ///< Smoldering Helm
+        171690, ///< Truesteel Ingot
+        176090  ///< Secrets of Draenor Blacksmithing
+    };
+
+    uint32 EnchantingLearnedRecipes[] =
+    {
+        158907, ///< Breath of Critical Strike
+        158908, ///< Breath of Haste
+        158909, ///< Breath of Mastery
+        158910, ///< Breath of Multistrike
+        158911, ///< Breath of Versatility
+        158896, ///< Breath of Versatility
+        159236, ///< Mark of the Shattered Hand
+        169092, ///< Temporal Crystal
+        169091, ///< Luminous Shard
+        162948, ///< Enchanted Dust
+        177043  ///< Secrets of Draenor Enchanting
+    };
+
+    uint32 EngineeringLearnedRecipes[] =
+    {
+        169080, ///< Gearspring Parts
+        162208, ///< Ultimate Gnomish Army Knife
+        162204, ///< Goblin Glider Kit
+        173308, ///< Mecha-Blast Rocket
+        177054, ///< Secrets of Draenor Engineering
+        173309, ///< Shieldtronic Shield
+        162207  ///< Stealthman 54
+    };
+
+    uint32 InscriptionLearnedRecipes[] =
+    {
+        175390, ///< Laughing Tarot
+        175389, ///< Ocean Tarot
+        175392, ///< Savage Tarot
+        169081, ///< War Paints
+        166669, ///< Card of Omens
+        167950, ///< Research: Warbinder's Ink
+        177045, ///< Secrets of Draenor Inscription
+        178497  ///< Warbinder's Ink
+    };
+
+    uint32 JewelCraftingLearnedRecipes[] =
+    {
+        170710, ///< Glowing Blackrock Band
+        170704, ///< Glowing Iron Band
+        170707, ///< Glowing Iron Choker
+        170711, ///< Shifting Blackrock Band
+        170705, ///< Shifting Iron Band
+        170708, ///< Shifting Iron Choker
+        170712, ///< Whispering Blackrock Band
+        170706, ///< Whispering Iron Band
+        170709, ///< Whispering Iron Choker
+        170700, ///< Taladite Crystal
+        176087  ///< Secrets of Draenor Jewelcrafting
+    };
+
+    uint32 LeatherWorkingLearnedRecipes[] =
+    {
+        171260, ///< Journeying Helm
+        171261, ///< Journeying Robes
+        171262, ///< Journeying Slacks
+        171263, ///< Traveling Helm
+        171265, ///< Traveling Leggings
+        171264, ///< Traveling Tunic
+        171391, ///< Burnished Leather
+        176089  ///< Secrets of Draenor Leatherworking
+    };
+
+    uint32 TailoringLearnedRecipes[] =
+    {
+        168852, ///< Sumptuous Cowl
+        168854, ///< Sumptuous Leggings
+        168853, ///< Sumptuous Robes
+        168835, ///< Hexweave Cloth
+        176058  ///< Secrets of Draenor Tailoring
+    };
+
+}
+
+class spell_draenor_profession : public SpellScriptLoader
+{
+    public:
+        spell_draenor_profession()
+            : SpellScriptLoader("spell_draenor_profession")
+        {
+        }
+
+        class spell_draenor_profession_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_draenor_profession_SpellScript);
+
+            void HandleAfterHit()
+            {
+                std::vector<uint32> l_LinkedSpells;
+
+                if (GetCaster() && GetCaster()->ToPlayer())
+                {
+#define MakeVector(a) std::vector<uint32>(a, a + (sizeof(a) / sizeof(a[0])))
+                    switch (GetSpellInfo()->Id)
+                    {
+                        case ProfessionBookSpells::Alchemy:        l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::AlchemyLearnedRecipes);        break;
+                        case ProfessionBookSpells::Blacksmithing:  l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::BlacksmithingLearnedRecipes);  break;
+                        case ProfessionBookSpells::Enchanting:     l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::EnchantingLearnedRecipes);     break;
+                        case ProfessionBookSpells::Engineering:    l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::EngineeringLearnedRecipes);    break;
+                        case ProfessionBookSpells::Inscription:    l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::InscriptionLearnedRecipes);    break;
+                        case ProfessionBookSpells::JewelCrafting:  l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::JewelCraftingLearnedRecipes);  break;
+                        case ProfessionBookSpells::LeatherWorking: l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::LeatherWorkingLearnedRecipes); break;
+                        case ProfessionBookSpells::Tailoring:      l_LinkedSpells = MakeVector(ProfessionBookSpellLearnSpells::TailoringLearnedRecipes);      break;
+
+                        default:
+                            break;
+                    }
+#undef MakeVector
+                }
+
+                for (uint32 l_I = 0; l_I < l_LinkedSpells.size(); ++l_I)
+                {
+                    GetCaster()->ToPlayer()->LearnSpell(l_LinkedSpells[l_I], false);
+                }
+            }
+
+            void Register() override
+            {
+                AfterHit += SpellHitFn(spell_draenor_profession_SpellScript::HandleAfterHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_draenor_profession_SpellScript();
+        }
+
+};
+
+/// Challenger's Strongbox - 127831
+/*class item_script_challengers_strongbox : public ItemScript
+{
+    public:
+        item_script_challengers_strongbox() : ItemScript("item_script_challengers_strongbox") { }
+
+        bool OnOpen(Player* p_Player, Item* p_Item) override
+        {
+            ItemTemplate const* l_Proto = p_Item->GetTemplate();
+            LootTemplate const* l_LootTemplate = LootTemplates_Item.GetLootFor(l_Proto->ItemId);
+            if (!l_LootTemplate)
+                return false;
+
+            uint32 l_ItemID = 0;
+            std::list<ItemTemplate const*> l_LootTable;
+            std::vector<uint32> l_Items;
+            l_LootTemplate->FillAutoAssignationLoot(l_LootTable);
+            uint32 l_SpecID = p_Player->GetLootSpecId() ? p_Player->GetLootSpecId() : p_Player->GetSpecializationId(p_Player->GetActiveSpec());
+
+            for (ItemTemplate const* l_Template : l_LootTable)
+            {
+                if ((l_Template->AllowableClass && !(l_Template->AllowableClass & p_Player->getClassMask())) ||
+                    (l_Template->AllowableRace && !(l_Template->AllowableRace & p_Player->getRaceMask())))
+                    continue;
+
+                if (l_Template->HasSpec((SpecIndex)l_SpecID, p_Player->getLevel()))
+                    l_Items.push_back(l_Template->ItemId);
+            }
+
+            if (l_Items.empty())
+                return false;
+
+            l_ItemID = l_Items[urand(0, l_Items.size() - 1)];
+
+            if (!l_ItemID)
+                return false;
+
+            if (!p_Player->GetBagsFreeSlots())
+                return false;
+
+            p_Player->AddItem(l_ItemID, 1);
+            p_Player->SendDisplayToast(l_ItemID, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_NEW_ITEM, false, false);
+            p_Player->DestroyItem(p_Item->GetBagSlot(), p_Item->GetSlot(), true);
+            return true;
+        }
+};*/
+
+// item 147330 Shoulders-of-the-foregone-protector
+// item 147329
+// item 147328
+// 7.3.5
+class loot_item_shoulders_of_the_foregone_protector : public ItemScript
+{
+public:
+    loot_item_shoulders_of_the_foregone_protector() : ItemScript("loot_item_shoulders_of_the_foregone_protector") { }
+
+    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
+    {
+        uint32 itemId = item->GetEntry();
+
+        std::vector<uint32> items;
+
+        items.push_back(138347);
+        items.push_back(138337);
+        items.push_back(138363);
+        items.push_back(138348);
+        items.push_back(138323);
+        items.push_back(138362);
+        items.push_back(138322);
+        items.push_back(138380);
+        items.push_back(138321);
+        items.push_back(138361);
+        items.push_back(138336);
+        items.push_back(138338);
+
+        // Process items
+        Trinity::Containers::RandomShuffle(items);
+        for (auto itemId : items)
+        {
+            // Safe! Item rewards always have an item template
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
+
+            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
+            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
+            if (!allowRace || !allowSpec)
+                continue;
+
+            // Generate bonuses for selected item
+            uint32 itemLevel = ITEM_LEVEL_LEGION_T19;
+            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
+            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
+            {
+                if (bonusListID == BONUS_CACHE_HEROIC)
+                {
+                    itemLevel = 915;
+                    epicbonus = BONUS_ITEM_T19_HEROIC;
+                }
+                if (bonusListID == BONUS_CACHE_MYTHIC)
+                {
+                    itemLevel = 930;
+                    epicbonus = BONUS_ITEM_T19_MYTHIC;
+                }
+
+            }
+
+            std::vector<int32> bonusLists;
+
+            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T19;
+            bonusLists.push_back(epicbonus);
+
+            bonusLists.push_back(int32(BONUS_ITEM_T19_LEVEL_START + diff));
+
+            ItemPosCountVec dest;
+            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
+            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
+            if (mailed)
+                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
+            else
+                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
+
+            break;
+        }
+        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+
+        return true;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -1062,4 +1358,7 @@ void AddSC_item_scripts()
     new loot_item_shoulders_of_the_foreseen();
     new loot_item_chest_of_the_foregone();
     new loot_item_unsullied_plate_helmet();
+    new spell_draenor_profession();
+    //new item_script_challengers_strongbox();
+    new loot_item_shoulders_of_the_foregone_protector();
 }

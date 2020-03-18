@@ -3770,6 +3770,11 @@ bool Map::IsDungeon() const
     return i_mapEntry && i_mapEntry->IsDungeon();
 }
 
+bool Map::IsScenario() const
+{
+    return i_mapEntry && i_mapEntry->IsScenario();
+}
+
 bool Map::IsNonRaidDungeon() const
 {
     return i_mapEntry && i_mapEntry->IsNonRaidDungeon();
@@ -3806,6 +3811,11 @@ bool Map::Is25ManRaid() const
 bool Map::IsLFR() const
 {
     return IsRaid() && (i_spawnMode == DIFFICULTY_LFR || i_spawnMode == DIFFICULTY_LFR_NEW);
+}
+
+bool Map::IsChallengeMode() const
+{
+    return  (i_spawnMode == DIFFICULTY_MYTHIC_KEYSTONE);
 }
 
 bool Map::IsBattleground() const

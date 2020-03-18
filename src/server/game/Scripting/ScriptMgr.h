@@ -849,7 +849,7 @@ class TC_GAME_API PlayerScript : public UnitScript
         virtual void OnTextEmote(Player* /*player*/, uint32 /*textEmote*/, uint32 /*emoteNum*/, ObjectGuid /*guid*/) { }
 
         // Called in Spell::Cast.
-        virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/, bool SkipOtherCode) { }
+        virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/) { }
 
         // Called in Spell::Cast after spell is actually casted
         virtual void OnSuccessfulSpellCast(Player* /*player*/, Spell* /*spell*/) { }
@@ -883,6 +883,9 @@ class TC_GAME_API PlayerScript : public UnitScript
 
         // Called when a player switches to a new area
         virtual void OnUpdateArea(Player* /*player*/, Area* /*newArea*/, Area* /*oldArea*/) { }
+
+        // Called when a player switches to a new area
+        virtual void OnUpdateAreaAlternate(Player* /*player*/, uint32 /*newArea*/, uint32 /*oldArea*/) { }
 
         // Called when a player changes to a new map (after moving to new map)
         virtual void OnMapChanged(Player* /*player*/) { }
@@ -932,6 +935,9 @@ class TC_GAME_API PlayerScript : public UnitScript
         // Called when a player completes a movie
         virtual void OnMovieComplete(Player* /*player*/, uint32 /*movieId*/) { }
 
+        // Called when a player move
+        virtual void OnMovementUpdate(Player* /*player*/) { }
+
         // Called when a player choose a response from a PlayerChoice
         virtual void OnPlayerChoiceResponse(Player* /*player*/, uint32 /*choiceId*/, uint32 /*responseId*/) { }
 
@@ -947,15 +953,18 @@ class TC_GAME_API PlayerScript : public UnitScript
         // Called when a player released ghost
         virtual void OnPlayerReleasedGhost(Player* /*player*/){ }
 
+	    //Called when a player Start ChallengeMode
+        virtual void OnStartChallengeMode(Player* /*player*/, uint8 /*level*/) { }
+
         virtual void OnCompleteQuestChoice(Player* /*player*/, uint32 /*choiceId*/, uint32 /*responseId*/) { }
 
-	// Called when a player UnsummonPetTemporary
+	    // Called when a player UnsummonPetTemporary
         virtual void OnUnsummonPetTemporary(Player* /*player*/) { }
 
         // Called when a player ResummonPetTemporary
         virtual void OnResummonPetTemporary(Player* /*player*/) { }
 		
-	// Called when a player Itemlevel changed
+	    // Called when a player Itemlevel changed
         virtual void OnItemLevelChange(Player* /*player*/) { }
 };
 
@@ -1462,7 +1471,7 @@ class TC_GAME_API ScriptMgr
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel);
         void OnPlayerClearEmote(Player* player);
         void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emoteNum, ObjectGuid guid);
-        void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck, bool SkipOtherCode);
+        void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
         void OnPlayerSuccessfulSpellCast(Player* player, Spell* spell);
         void OnPlayerLogin(Player* player, bool firstLogin);
         void OnPlayerUpdate(Player* player, uint32 diff);
@@ -1476,6 +1485,7 @@ class TC_GAME_API ScriptMgr
         void OnGossipSelect(Player* player, uint32 menu_id, uint32 sender, uint32 action);
         void OnGossipSelectCode(Player* player, uint32 menu_id, uint32 sender, uint32 action, const char* code);
         void OnPlayerUpdateArea(Player* player, Area* newArea, Area* oldArea);
+        void OnPlayerUpdateAreaAlternate(Player* player, uint32 newArea, uint32 oldArea);
         void OnQuestAccept(Player* player, const Quest* quest);
         void OnQuestReward(Player* player, const Quest* quest);
         void OnObjectiveValidate(Player* player, uint32 questID, uint32 objectiveID);
@@ -1489,6 +1499,8 @@ class TC_GAME_API ScriptMgr
         void OnSceneCancel(Player* player, uint32 sceneInstanceId);
         void OnSceneComplete(Player* player, uint32 sceneInstanceId);
         void OnMovieComplete(Player* player, uint32 movieId);
+        void OnPlayerMovementUpdate(Player* player);
+        void OnPlayerStartChallengeMode(Player* player, uint8 level);
         void OnPlayerChoiceResponse(Player* player, uint32 choiceId, uint32 responseId);
         void OnCooldownStart(Player* player, SpellInfo const* spellInfo, uint32 itemId, int32& cooldown, uint32& categoryId, int32& categoryCooldown);
         void OnChargeRecoveryTimeStart(Player* player, uint32 chargeCategoryId, int32& chargeRecoveryTime);

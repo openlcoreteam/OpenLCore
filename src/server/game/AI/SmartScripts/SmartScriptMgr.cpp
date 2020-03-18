@@ -1470,6 +1470,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_ALLOW_COMBAT_MOVEMENT:
         case SMART_ACTION_CALL_FOR_HELP:
         case SMART_ACTION_SET_DATA:
+        case SMART_ACTION_MOVE_FORWARD:
         case SMART_ACTION_SET_VISIBILITY:
         case SMART_ACTION_WP_PAUSE:
         case SMART_ACTION_SET_FLY:
@@ -1531,6 +1532,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_ADD_FLYING_MOVEMENT_FLAG:
         case SMART_ACTION_REMOVE_FLYING_MOVEMENT_FLAG:
         case SMART_ACTION_CAST_SPELL_OFFSET:
+        case SMART_ACTION_RISE_UP:
             break;
         default:
             TC_LOG_ERROR("sql.sql", "SmartAIMgr: Not handled action_type(%u), event_type(%u), Entry " SI64FMTD " SourceType %u Event %u, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);

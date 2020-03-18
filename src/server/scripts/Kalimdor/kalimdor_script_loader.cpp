@@ -87,6 +87,7 @@ void AddSC_boss_zum_rah();                          //Zul'Farrak
 void AddSC_zulfarrak();
 void AddSC_instance_zulfarrak();
 
+
 // Cataclysm Dungeons/Raids
 void AddSC_instance_halls_of_origination();         //Halls of Origination
 void AddSC_boss_temple_guardian_anhuur();
@@ -171,6 +172,8 @@ void AddSC_mount_hyjal();
 void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
+void AddSC_silithus_legion();
+void AddSC_zone_echo_isles();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -331,4 +334,6 @@ void AddKalimdorScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+    AddSC_silithus_legion();
+    AddSC_zone_echo_isles();
 }

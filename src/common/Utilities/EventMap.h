@@ -329,7 +329,12 @@ public:
     * @brief Cancel events belonging to specified group.
     * @param group Group to cancel.
     */
+    void PauseEvent(uint32 eventId);
+
     void CancelEventGroup(uint16 group);
+
+    // Continues event with specified id that has been paused before.
+    void ContinueEvent(uint32 eventId);
 
     /**
     * @name GetNextEventTime
@@ -398,6 +403,8 @@ private:
     * details.
     */
     EventStore _eventMap;
+
+    std::map<uint32 /*eventId*/, uint32 /*timeLeft*/> _pausedEvents;
 
     /**
     * @name _lastEvent

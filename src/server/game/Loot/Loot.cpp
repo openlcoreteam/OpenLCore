@@ -20,6 +20,7 @@
 #include "DB2Stores.h"
 #include "Group.h"
 #include "ItemTemplate.h"
+#include "Item.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "LootMgr.h"
@@ -68,7 +69,6 @@ LootItem::LootItem(LootStoreItem const& li)
     is_blocked = 0;
     is_underthreshold = 0;
     is_counted = 0;
-    rollWinnerGUID = ObjectGuid::Empty;
     canSave = true;
 }
 
@@ -113,7 +113,7 @@ void LootItem::AddAllowedLooter(const Player* player)
 // --------- Loot ---------
 //
 
-Loot::Loot(uint32 _gold /*= 0*/) : gold(_gold), unlootedCount(0), roundRobinPlayer(), loot_type(LOOT_CORPSE), maxDuplicates(1), _itemContext(0)
+Loot::Loot(uint32 _gold /*= 0*/) : gold(_gold), unlootedCount(0), roundRobinPlayer(), loot_type(LOOT_CORPSE), maxDuplicates(1), _itemContext(0), _DifficultyOwner(0), _ChallengeLevel(0)
 {
 }
 
@@ -176,6 +176,7 @@ void Loot::clear()
     loot_type = LOOT_NONE;
     i_LootValidatorRefManager.clearReferences();
     _itemContext = 0;
+	_DifficultyOwner = 0;
 }
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)
@@ -263,8 +264,6 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     if (!lootOwner)
         return false;
 
-    _itemContext = lootOwner->GetMap()->GetDifficultyLootItemContext();
-
     if (LFGDungeonsEntry const* dungeonEntry = sLFGMgr->GetPlayerLFGDungeonEntry(lootOwner->GetGUID()))
         if (dungeonEntry->Flags & lfg::LfgFlags::LFG_FLAG_TIMEWALKER)
             _itemContext = ItemContext::TimeWalker;
@@ -277,6 +276,11 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
             TC_LOG_ERROR("sql.sql", "Table '%s' loot id #%u used but it doesn't have records.", store.GetName(), lootId);
         return false;
     }
+	
+	_itemContext = (lootOwner->GetMap() ? lootOwner->GetMap()->GetDifficultyLootItemContext() : 0);
+    _DifficultyOwner = (lootOwner->GetMap() ? uint8(lootOwner->GetMap()->GetDifficultyID()) : 0);
+
+    //_ChallengeLevel = 2;
 
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
@@ -339,10 +343,28 @@ void Loot::AddItem(LootStoreItem const& item, Player const* player /*= nullptr*/
         LootItem generatedLoot(item);
         generatedLoot.context = _itemContext;
         generatedLoot.count = std::min(count, proto->GetMaxStackSize());
-        if (_itemContext)
+        
+		if (!item.bonus.empty())
+        {
+            generatedLoot.BonusListIDs = item.bonus; // changed bonus
+            Item::GenerateItemBonus(generatedLoot.itemid, 0, generatedLoot.BonusListIDs);
+        }
+        else if (_DifficultyOwner == DIFFICULTY_NORMAL || _DifficultyOwner == DIFFICULTY_NORMAL_RAID || _DifficultyOwner == DIFFICULTY_LFR_NEW) /// hack release for dungeon normal and raid normal
+        {
+            Item::GenerateItemBonus(generatedLoot.itemid, 0, generatedLoot.BonusListIDs, false, _DifficultyOwner);
+            generatedLoot.context = 0;
+        }
+        /*else if (_ChallengeLevel)
+        {
+            bool IsOplote = false; // TODO
+            Item::GenerateItemBonus(generatedLoot.itemid, 0, generatedLoot.BonusListIDs, false, _DifficultyOwner, _ChallengeLevel, IsOplote);
+            generatedLoot.context = 0;
+        }*/
+        else if (_itemContext/*&& item.bonus*/)
         {
             std::set<uint32> bonusListIDs = sDB2Manager.GetItemBonusTree(generatedLoot.itemid, _itemContext);
             generatedLoot.BonusListIDs.insert(generatedLoot.BonusListIDs.end(), bonusListIDs.begin(), bonusListIDs.end());
+			Item::GenerateItemBonus(generatedLoot.itemid, 0, generatedLoot.BonusListIDs, false, _DifficultyOwner);
         }
 
         lootItems.push_back(generatedLoot);
@@ -574,13 +596,6 @@ void Loot::BuildLootResponse(WorldPackets::Loot::LootResponse& packet, Player* v
                         // or it IS the round robin group owner
                         // => item is lootable
                         slot_type = LOOT_SLOT_TYPE_ALLOW_LOOT;
-                    }
-                    else if (!items[i].rollWinnerGUID.IsEmpty())
-                    {
-                        if (items[i].rollWinnerGUID == viewer->GetGUID())
-                            slot_type = LOOT_SLOT_TYPE_OWNER;
-                        else
-                            continue;
                     }
                     else
                         // item shall not be displayed.

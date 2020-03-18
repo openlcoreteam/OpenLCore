@@ -550,6 +550,7 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         std::list<GameObject*>  FindNearestGameObjects(uint32 entry, float range) const;
         GameObject*             FindNearestGameObjectOfType(GameobjectTypes type, float range) const;
 
+        Player*                 FindNearestPlayer(float range, bool alive = true);
         Player*                 SelectNearestPlayer(float distance = 0.0f) const;
         std::list<Player*>      SelectNearestPlayers(float range, bool alive = true);
         Player*                 SelectRandomPlayerInRange(float range, bool alive);
