@@ -18,7 +18,10 @@ EndScriptData */
 #include "PhasingHandler.h"
 #include "Creature.h"
 #include "World.h"
+#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
 #include <Windows.h>
+#endif
+
 class CommadExportHelper
 {
     //friend class ObjectMgr;
