@@ -235,7 +235,7 @@ class TC_GAME_API InstanceScript : public ZoneScript
         void DoDelayedConversation(uint32 delay, uint32 conversationId);
 		
 		// Resurrect all players in instance
-        void InstanceScript::DoResurrectPlayers(float restore_percent);
+        void DoResurrectPlayers(float restore_percent);
 		
 		// Remove item on all players in instance
         void DoDestroyItemCountOnPlayers(uint32 item, uint32 count);
