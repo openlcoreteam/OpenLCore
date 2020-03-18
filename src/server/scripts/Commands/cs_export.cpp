@@ -88,7 +88,7 @@ public:
             }
         }
         else
-            return ( int )"ERROR";
+            return 0;
     }
 
     /// # GetIntemName by entry
