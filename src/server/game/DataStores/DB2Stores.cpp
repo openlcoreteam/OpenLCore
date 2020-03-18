@@ -557,7 +557,7 @@ void DB2Manager::LoadStores(std::string const& dataPath, uint32 defaultLocale)
     LOAD_DB2(sCinematicCameraStore);
     LOAD_DB2(sCinematicSequencesStore);
     LOAD_DB2(sConversationLineStore);
-    LOAD_DB2(sCreatureDisplayInfoStore);
+    LOAD_DB2(sCreatureDisplayInfoStoreRaw);
     LOAD_DB2(sCreatureDisplayInfoExtraStore);
     LOAD_DB2(sCreatureFamilyStore);
     LOAD_DB2(sCreatureModelDataStore);
