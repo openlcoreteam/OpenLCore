@@ -49,7 +49,7 @@
 #include "ScenarioMgr.h"
 
 #include "GridNotifiers.h"
-#include "Cellimpl.h"
+#include "CellImpl.h"
 #include "ScriptedCreature.h"
 
 inline uint32 secsToTimeBitFields(time_t secs)
