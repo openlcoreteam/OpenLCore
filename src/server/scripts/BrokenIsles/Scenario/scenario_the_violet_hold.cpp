@@ -72,7 +72,7 @@ struct scenario_the_violet_hold : public InstanceScript
     {
         instance->SetDifficultyID(DIFFICULTY_3_MAN_SCENARIO_N);//Difficulty p_Difficulty DIFFICULTY_MYTHIC_KEYSTONE
 
-        TC_LOG_ERROR("scripts", "DoSendDiffcultyOnPlayers SendDungeonDifficulty %s", player->GetName());
+        TC_LOG_ERROR("scripts", "DoSendDiffcultyOnPlayers SendDungeonDifficulty %s", player->GetName().c_str());
         player->SendDungeonDifficulty(DIFFICULTY_3_MAN_SCENARIO_N);
         player->SendNewDiff(DIFFICULTY_3_MAN_SCENARIO_N);
                     
